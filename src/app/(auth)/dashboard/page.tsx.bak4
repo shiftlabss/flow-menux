@@ -1,0 +1,872 @@
+"use client";
+
+import { useState, useEffect, useCallback } from "react";
+import {
+  TrendingUp,
+  TrendingDown,
+  DollarSign,
+  Target,
+  AlertTriangle,
+  CalendarCheck,
+  Phone,
+  Mail,
+  Video,
+  MessageSquare,
+  Kanban,
+  Heart,
+  AlertCircle,
+  ShieldAlert,
+  UserX,
+  Users,
+  BarChart3,
+  Check,
+} from "lucide-react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { useAuthStore } from "@/stores/auth-store";
+
+// ---------------------------------------------------------------------------
+// Types
+// ---------------------------------------------------------------------------
+
+type Role = "comercial" | "cs" | "admin";
+
+type ActivityType = "call" | "meeting" | "follow-up" | "email";
+
+interface Activity {
+  id: string;
+  title: string;
+  time: string;
+  type: ActivityType;
+  overdue: boolean;
+  done: boolean;
+}
+
+interface PipelineStage {
+  stage: string;
+  count: number;
+  value: number;
+}
+
+interface CriticalAlert {
+  id: string;
+  type: "sla" | "health" | "activity";
+  message: string;
+  severity: "danger" | "warning";
+}
+
+interface HealthCard {
+  label: string;
+  value: number;
+  color: string;
+  bgColor: string;
+  icon: React.ReactNode;
+}
+
+interface TeamMember {
+  name: string;
+  deals: number;
+  revenue: number;
+  conversion: number;
+}
+
+// ---------------------------------------------------------------------------
+// Mock Data (inline — would normally live in @/lib/mock-data)
+// ---------------------------------------------------------------------------
+
+const metrics = {
+  totalOpportunities: 47,
+  totalValue: 284500,
+  conversionRate: 32,
+  averageTicket: 6053,
+  activitiesDue: 12,
+  slaBreaches: 3,
+  newLeadsThisMonth: 18,
+  wonThisMonth: 8,
+};
+
+const criticalAlerts: CriticalAlert[] = [
+  {
+    id: "1",
+    type: "sla",
+    message: "3 oportunidades com SLA estourado",
+    severity: "danger",
+  },
+  {
+    id: "2",
+    type: "health",
+    message: "Cliente Acme Corp com Health Score Cr\u00edtico",
+    severity: "danger",
+  },
+  {
+    id: "3",
+    type: "activity",
+    message: "5 atividades atrasadas para hoje",
+    severity: "warning",
+  },
+];
+
+const pipelinePreview: PipelineStage[] = [
+  { stage: "Lead-In", count: 12, value: 72000 },
+  { stage: "Contato Feito", count: 8, value: 48000 },
+  { stage: "Reuni\u00e3o Agendada", count: 10, value: 65000 },
+  { stage: "Proposta Enviada", count: 7, value: 45500 },
+  { stage: "Negocia\u00e7\u00e3o", count: 6, value: 36000 },
+  { stage: "Fechamento", count: 4, value: 18000 },
+];
+
+const todayActivities: Activity[] = [
+  {
+    id: "1",
+    title: "Liga\u00e7\u00e3o com Jo\u00e3o - Restaurante Bela Vista",
+    time: "08:00",
+    type: "call",
+    overdue: true,
+    done: false,
+  },
+  {
+    id: "2",
+    title: "Follow-up proposta - Caf\u00e9 Central",
+    time: "08:30",
+    type: "follow-up",
+    overdue: true,
+    done: false,
+  },
+  {
+    id: "3",
+    title: "Reuni\u00e3o de apresenta\u00e7\u00e3o - Hotel Sunset",
+    time: "11:00",
+    type: "meeting",
+    overdue: false,
+    done: false,
+  },
+  {
+    id: "4",
+    title: "E-mail de acompanhamento - Pousada Mar",
+    time: "14:00",
+    type: "email",
+    overdue: false,
+    done: false,
+  },
+  {
+    id: "5",
+    title: "Liga\u00e7\u00e3o com Maria - Padaria Gourmet",
+    time: "16:00",
+    type: "call",
+    overdue: false,
+    done: false,
+  },
+];
+
+const csHealthCards: HealthCard[] = [
+  {
+    label: "Saud\u00e1veis",
+    value: 42,
+    color: "text-status-success",
+    bgColor: "bg-status-success-light",
+    icon: <Heart className="h-5 w-5" />,
+  },
+  {
+    label: "Aten\u00e7\u00e3o",
+    value: 15,
+    color: "text-status-warning",
+    bgColor: "bg-status-warning-light",
+    icon: <AlertCircle className="h-5 w-5" />,
+  },
+  {
+    label: "Cr\u00edticos",
+    value: 7,
+    color: "text-status-danger",
+    bgColor: "bg-status-danger-light",
+    icon: <ShieldAlert className="h-5 w-5" />,
+  },
+  {
+    label: "Churn",
+    value: 3,
+    color: "text-zinc-600",
+    bgColor: "bg-zinc-50",
+    icon: <UserX className="h-5 w-5" />,
+  },
+];
+
+const teamMembers: TeamMember[] = [
+  { name: "Ana Souza", deals: 14, revenue: 92000, conversion: 38 },
+  { name: "Carlos Lima", deals: 11, revenue: 78000, conversion: 31 },
+  { name: "Fernanda Reis", deals: 9, revenue: 64000, conversion: 28 },
+  { name: "Pedro Alves", deals: 13, revenue: 50500, conversion: 35 },
+];
+
+// ---------------------------------------------------------------------------
+// Helpers
+// ---------------------------------------------------------------------------
+
+function formatCurrency(value: number) {
+  return new Intl.NumberFormat("pt-BR", {
+    style: "currency",
+    currency: "BRL",
+    minimumFractionDigits: 0,
+  }).format(value);
+}
+
+const activityIcons: Record<ActivityType, React.ReactNode> = {
+  call: <Phone className="h-4 w-4" />,
+  meeting: <Video className="h-4 w-4" />,
+  "follow-up": <MessageSquare className="h-4 w-4" />,
+  email: <Mail className="h-4 w-4" />,
+};
+
+// ---------------------------------------------------------------------------
+// Skeleton Loader
+// ---------------------------------------------------------------------------
+
+function DashboardSkeleton() {
+  return (
+    <div className="space-y-8">
+      {/* Header skeleton */}
+      <div className="space-y-2">
+        <div className="h-8 w-48 animate-pulse rounded-[15px] bg-zinc-100" />
+        <div className="h-4 w-72 animate-pulse rounded-[15px] bg-zinc-100" />
+      </div>
+
+      {/* Role selector skeleton */}
+      <div className="flex gap-2">
+        <div className="h-9 w-24 animate-pulse rounded-full bg-zinc-100" />
+        <div className="h-9 w-16 animate-pulse rounded-full bg-zinc-100" />
+        <div className="h-9 w-20 animate-pulse rounded-full bg-zinc-100" />
+      </div>
+
+      {/* Metric cards skeleton */}
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        {Array.from({ length: 4 }).map((_, i) => (
+          <div
+            key={i}
+            className="animate-pulse rounded-[15px] border border-zinc-200 bg-white p-5"
+          >
+            <div className="flex items-center justify-between">
+              <div className="h-10 w-10 rounded-[10px] bg-zinc-100" />
+              <div className="h-4 w-12 rounded-[15px] bg-zinc-100" />
+            </div>
+            <div className="mt-3 space-y-2">
+              <div className="h-7 w-28 rounded-[15px] bg-zinc-100" />
+              <div className="h-3 w-36 rounded-[15px] bg-zinc-100" />
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {/* Alerts skeleton */}
+      <div className="space-y-3">
+        <div className="h-6 w-36 animate-pulse rounded-[15px] bg-zinc-100" />
+        {Array.from({ length: 2 }).map((_, i) => (
+          <div
+            key={i}
+            className="h-14 animate-pulse rounded-[15px] bg-zinc-100"
+          />
+        ))}
+      </div>
+
+      {/* Main content skeleton */}
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-12">
+        <div className="lg:col-span-8">
+          <div className="animate-pulse rounded-[15px] border border-zinc-200 bg-white p-6">
+            <div className="mb-4 h-6 w-40 rounded-[15px] bg-zinc-100" />
+            <div className="space-y-4">
+              {Array.from({ length: 6 }).map((_, i) => (
+                <div key={i} className="space-y-2">
+                  <div className="flex items-center justify-between">
+                    <div className="h-4 w-28 rounded-[15px] bg-zinc-100" />
+                    <div className="h-4 w-20 rounded-[15px] bg-zinc-100" />
+                  </div>
+                  <div className="h-3 w-full rounded-full bg-zinc-100" />
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+        <div className="lg:col-span-4">
+          <div className="animate-pulse rounded-[15px] border border-zinc-200 bg-white p-6">
+            <div className="mb-4 h-6 w-36 rounded-[15px] bg-zinc-100" />
+            <div className="space-y-3">
+              {Array.from({ length: 4 }).map((_, i) => (
+                <div
+                  key={i}
+                  className="h-16 rounded-[15px] bg-zinc-100"
+                />
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ---------------------------------------------------------------------------
+// MetricCard
+// ---------------------------------------------------------------------------
+
+function MetricCard({
+  title,
+  value,
+  subtitle,
+  icon,
+  trend,
+}: {
+  title: string;
+  value: string;
+  subtitle: string;
+  icon: React.ReactNode;
+  trend: number;
+}) {
+  const isPositive = trend > 0;
+
+  return (
+    <Card className="rounded-[15px] border-zinc-200 p-5">
+      <CardContent className="p-0">
+        <div className="flex items-center justify-between">
+          <div className="flex h-10 w-10 items-center justify-center rounded-[10px] bg-brand-light text-brand">
+            {icon}
+          </div>
+          <div
+            className={`flex items-center gap-1 rounded-[10px] px-2 py-0.5 font-body text-xs font-medium ${
+              isPositive
+                ? "bg-status-success-light text-status-success"
+                : "bg-status-danger-light text-status-danger"
+            }`}
+          >
+            {isPositive ? (
+              <TrendingUp className="h-3 w-3" />
+            ) : (
+              <TrendingDown className="h-3 w-3" />
+            )}
+            {Math.abs(trend)}%
+          </div>
+        </div>
+        <div className="mt-3">
+          <p className="font-heading text-2xl font-bold text-black">{value}</p>
+          <p className="mt-0.5 font-body text-xs text-zinc-500">{subtitle}</p>
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
+
+// ---------------------------------------------------------------------------
+// Pipeline Chart (pure CSS horizontal bars)
+// ---------------------------------------------------------------------------
+
+function PipelineChart({ stages }: { stages: PipelineStage[] }) {
+  const maxValue = Math.max(...stages.map((s) => s.value));
+
+  if (stages.length === 0) {
+    return <EmptyState icon={<Kanban className="h-10 w-10" />} text="Pipeline vazio" />;
+  }
+
+  return (
+    <Card className="rounded-[15px] border-zinc-200">
+      <CardHeader>
+        <CardTitle className="font-heading text-lg font-semibold text-black">
+          Pipeline de Vendas
+        </CardTitle>
+      </CardHeader>
+      <CardContent>
+        <div className="space-y-4">
+          {stages.map((stage) => {
+            const pct = maxValue > 0 ? (stage.value / maxValue) * 100 : 0;
+            return (
+              <div key={stage.stage} className="space-y-1.5">
+                <div className="flex items-center justify-between">
+                  <span className="font-body text-sm font-medium text-zinc-700">
+                    {stage.stage}
+                  </span>
+                  <div className="flex items-center gap-3">
+                    <Badge
+                      variant="secondary"
+                      className="rounded-[10px] font-body text-xs"
+                    >
+                      {stage.count}
+                    </Badge>
+                    <span className="w-24 text-right font-body text-sm font-medium text-black">
+                      {formatCurrency(stage.value)}
+                    </span>
+                  </div>
+                </div>
+                {/* Horizontal bar */}
+                <div className="relative h-3 w-full overflow-hidden rounded-full bg-zinc-100">
+                  <div
+                    className="absolute inset-y-0 left-0 rounded-full bg-brand transition-all duration-700 ease-out"
+                    style={{ width: `${pct}%` }}
+                  />
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
+
+// ---------------------------------------------------------------------------
+// CS Health Overview
+// ---------------------------------------------------------------------------
+
+function CSHealthOverview({ cards }: { cards: HealthCard[] }) {
+  return (
+    <Card className="rounded-[15px] border-zinc-200">
+      <CardHeader>
+        <CardTitle className="font-heading text-lg font-semibold text-black">
+          Sa\u00fade dos Clientes
+        </CardTitle>
+      </CardHeader>
+      <CardContent>
+        <div className="grid grid-cols-2 gap-4">
+          {cards.map((card) => (
+            <div
+              key={card.label}
+              className={`flex flex-col items-center gap-2 rounded-[15px] p-5 ${card.bgColor}`}
+            >
+              <div className={card.color}>{card.icon}</div>
+              <p className={`font-heading text-3xl font-bold ${card.color}`}>
+                {card.value}
+              </p>
+              <p className="font-body text-sm text-zinc-600">{card.label}</p>
+            </div>
+          ))}
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
+
+// ---------------------------------------------------------------------------
+// Team Performance (Admin view)
+// ---------------------------------------------------------------------------
+
+function TeamPerformance({ members }: { members: TeamMember[] }) {
+  return (
+    <Card className="rounded-[15px] border-zinc-200">
+      <CardHeader>
+        <CardTitle className="font-heading text-lg font-semibold text-black">
+          Desempenho da Equipe
+        </CardTitle>
+      </CardHeader>
+      <CardContent>
+        <div className="space-y-3">
+          {/* Table header */}
+          <div className="grid grid-cols-4 gap-2 border-b border-zinc-100 pb-2">
+            <span className="font-body text-xs font-medium text-zinc-500">
+              Nome
+            </span>
+            <span className="text-center font-body text-xs font-medium text-zinc-500">
+              Deals
+            </span>
+            <span className="text-center font-body text-xs font-medium text-zinc-500">
+              Receita
+            </span>
+            <span className="text-right font-body text-xs font-medium text-zinc-500">
+              Convers\u00e3o
+            </span>
+          </div>
+          {members.map((m) => (
+            <div
+              key={m.name}
+              className="grid grid-cols-4 items-center gap-2 rounded-[10px] p-2 transition-colors hover:bg-zinc-50"
+            >
+              <span className="truncate font-body text-sm font-medium text-black">
+                {m.name}
+              </span>
+              <span className="text-center font-body text-sm text-zinc-600">
+                {m.deals}
+              </span>
+              <span className="text-center font-body text-sm text-zinc-600">
+                {formatCurrency(m.revenue)}
+              </span>
+              <span className="text-right font-body text-sm font-semibold text-brand">
+                {m.conversion}%
+              </span>
+            </div>
+          ))}
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
+
+// ---------------------------------------------------------------------------
+// Today's Activities Panel
+// ---------------------------------------------------------------------------
+
+function TodayActivities({
+  activities,
+  onToggle,
+}: {
+  activities: Activity[];
+  onToggle: (id: string) => void;
+}) {
+  const overdue = activities.filter((a) => a.overdue && !a.done);
+  const today = activities.filter((a) => !a.overdue);
+
+  if (activities.length === 0) {
+    return (
+      <Card className="rounded-[15px] border-zinc-200">
+        <CardHeader>
+          <CardTitle className="font-heading text-lg font-semibold text-black">
+            Atividades de Hoje
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <EmptyState
+            icon={<CalendarCheck className="h-10 w-10" />}
+            text="Nenhuma atividade para hoje"
+          />
+        </CardContent>
+      </Card>
+    );
+  }
+
+  return (
+    <Card className="rounded-[15px] border-zinc-200">
+      <CardHeader>
+        <CardTitle className="font-heading text-lg font-semibold text-black">
+          Atividades de Hoje
+        </CardTitle>
+      </CardHeader>
+      <CardContent>
+        <div className="space-y-4">
+          {/* Overdue group */}
+          {overdue.length > 0 && (
+            <div className="space-y-2">
+              <p className="font-heading text-xs font-semibold uppercase tracking-wider text-status-danger">
+                Atrasadas
+              </p>
+              {overdue.map((activity) => (
+                <ActivityRow
+                  key={activity.id}
+                  activity={activity}
+                  onToggle={onToggle}
+                />
+              ))}
+            </div>
+          )}
+
+          {/* Today group */}
+          {today.length > 0 && (
+            <div className="space-y-2">
+              <p className="font-heading text-xs font-semibold uppercase tracking-wider text-black">
+                Hoje
+              </p>
+              {today.map((activity) => (
+                <ActivityRow
+                  key={activity.id}
+                  activity={activity}
+                  onToggle={onToggle}
+                />
+              ))}
+            </div>
+          )}
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
+
+function ActivityRow({
+  activity,
+  onToggle,
+}: {
+  activity: Activity;
+  onToggle: (id: string) => void;
+}) {
+  return (
+    <div
+      className={`flex items-center gap-3 rounded-[15px] border p-3 transition-colors ${
+        activity.done
+          ? "border-zinc-100 bg-zinc-50 opacity-60"
+          : activity.overdue
+            ? "border-status-danger/20 bg-status-danger-light"
+            : "border-zinc-100 bg-white hover:bg-zinc-50"
+      }`}
+    >
+      {/* Checkbox */}
+      <button
+        onClick={() => onToggle(activity.id)}
+        className={`flex h-5 w-5 shrink-0 items-center justify-center rounded-[4px] border transition-colors ${
+          activity.done
+            ? "border-brand bg-brand text-white"
+            : "border-zinc-300 bg-white hover:border-brand"
+        }`}
+        aria-label={activity.done ? "Desmarcar atividade" : "Marcar atividade como conclu\u00edda"}
+      >
+        {activity.done && <Check className="h-3 w-3" />}
+      </button>
+
+      {/* Type icon */}
+      <div
+        className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full ${
+          activity.overdue && !activity.done
+            ? "bg-status-danger/10 text-status-danger"
+            : "bg-zinc-100 text-zinc-500"
+        }`}
+      >
+        {activityIcons[activity.type]}
+      </div>
+
+      {/* Content */}
+      <div className="min-w-0 flex-1">
+        <p
+          className={`truncate font-body text-sm font-medium ${
+            activity.done ? "text-zinc-400 line-through" : "text-black"
+          }`}
+        >
+          {activity.title}
+        </p>
+        <p
+          className={`font-body text-xs ${
+            activity.overdue && !activity.done
+              ? "font-medium text-status-danger"
+              : "text-zinc-500"
+          }`}
+        >
+          {activity.time}
+        </p>
+      </div>
+    </div>
+  );
+}
+
+// ---------------------------------------------------------------------------
+// Critical Alerts
+// ---------------------------------------------------------------------------
+
+function CriticalAlerts({ alerts }: { alerts: CriticalAlert[] }) {
+  if (alerts.length === 0) return null;
+
+  const handleAlertClick = (alert: CriticalAlert) => {
+    console.log(`[Nav] Clicou no alerta: ${alert.type} — ${alert.message}`);
+  };
+
+  return (
+    <div className="space-y-3">
+      <h2 className="font-heading text-xl font-semibold text-black">
+        Alertas Cr\u00edticos
+      </h2>
+      <div className="space-y-2">
+        {alerts.map((alert) => (
+          <button
+            key={alert.id}
+            onClick={() => handleAlertClick(alert)}
+            className="w-full text-left transition-transform active:scale-[0.99]"
+          >
+            <Card
+              className={`rounded-[15px] border transition-shadow hover:shadow-md ${
+                alert.severity === "danger"
+                  ? "border-status-danger bg-status-danger-light"
+                  : "border-status-warning bg-status-warning-light"
+              }`}
+            >
+              <CardContent className="flex items-center gap-3 p-4">
+                <AlertTriangle
+                  className={`h-5 w-5 shrink-0 ${
+                    alert.severity === "danger"
+                      ? "text-status-danger"
+                      : "text-status-warning"
+                  }`}
+                />
+                <p className="font-body text-sm font-medium text-black">
+                  {alert.message}
+                </p>
+                <span className="ml-auto font-body text-xs text-zinc-400">
+                  Ver detalhes &rarr;
+                </span>
+              </CardContent>
+            </Card>
+          </button>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+// ---------------------------------------------------------------------------
+// Empty State
+// ---------------------------------------------------------------------------
+
+function EmptyState({ icon, text }: { icon: React.ReactNode; text: string }) {
+  return (
+    <div className="flex flex-col items-center justify-center gap-3 py-12 text-zinc-400">
+      {icon}
+      <p className="font-body text-sm">{text}</p>
+    </div>
+  );
+}
+
+// ---------------------------------------------------------------------------
+// Role Selector
+// ---------------------------------------------------------------------------
+
+function RoleSelector({
+  role,
+  onChange,
+}: {
+  role: Role;
+  onChange: (r: Role) => void;
+}) {
+  const roles: { key: Role; label: string; icon: React.ReactNode }[] = [
+    { key: "comercial", label: "Comercial", icon: <Target className="h-4 w-4" /> },
+    { key: "cs", label: "CS", icon: <Heart className="h-4 w-4" /> },
+    { key: "admin", label: "Admin", icon: <BarChart3 className="h-4 w-4" /> },
+  ];
+
+  return (
+    <div className="flex items-center gap-2">
+      {roles.map((r) => (
+        <button
+          key={r.key}
+          onClick={() => onChange(r.key)}
+          className={`flex items-center gap-2 rounded-full px-4 py-2 font-heading text-sm font-medium transition-colors ${
+            role === r.key
+              ? "bg-black text-white"
+              : "bg-zinc-100 text-zinc-600 hover:bg-zinc-200"
+          }`}
+        >
+          {r.icon}
+          {r.label}
+        </button>
+      ))}
+    </div>
+  );
+}
+
+// ---------------------------------------------------------------------------
+// Main Dashboard Page
+// ---------------------------------------------------------------------------
+
+export default function DashboardPage() {
+  const [loading, setLoading] = useState(true);
+  const [activities, setActivities] = useState<Activity[]>(todayActivities);
+  const { user, setUser } = useAuthStore();
+
+  useEffect(() => {
+    const timer = setTimeout(() => setLoading(false), 1000);
+    return () => clearTimeout(timer);
+  }, []);
+
+  // Initialize auth store with Master role on mount
+  useEffect(() => {
+    setUser(
+      {
+        id: "demo-user",
+        name: "Usuário Demo",
+        email: "demo@flow.com",
+        role: "master",
+        unitId: "unit-1",
+        unitName: "Unidade Principal",
+        isActive: true,
+      },
+      "demo-token"
+    );
+  }, [setUser]);
+
+  const handleToggleActivity = useCallback((id: string) => {
+    setActivities((prev) =>
+      prev.map((a) => (a.id === id ? { ...a, done: !a.done } : a))
+    );
+  }, []);
+
+  if (loading) {
+    return <DashboardSkeleton />;
+  }
+
+  // Get user role for conditional rendering (Master can see all views)
+  const userRole = user?.role || "master";
+
+  return (
+    <div className="space-y-8">
+      {/* Page Header */}
+      <div>
+        <h1 className="font-heading text-3xl font-bold text-black">
+          Dashboard
+        </h1>
+        <p className="mt-1 font-body text-sm text-zinc-500">
+          Vis\u00e3o geral do seu pipeline e atividades
+          </p>
+        </div>
+
+      {/* Metric Cards — 4 columns */}
+      {userRole === "cs" ? (
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          {csHealthCards.map((card) => (
+            <MetricCard
+              key={card.label}
+              title={card.label}
+              value={card.value.toString()}
+              subtitle="clientes nesta categoria"
+              icon={card.icon}
+              trend={card.label === "Saud\u00e1veis" ? 5 : card.label === "Churn" ? -2 : card.label === "Aten\u00e7\u00e3o" ? 3 : -8}
+            />
+          ))}
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          <MetricCard
+            title="Oportunidades Abertas"
+            value={metrics.totalOpportunities.toString()}
+            subtitle={`${metrics.newLeadsThisMonth} novos este m\u00eas`}
+            icon={<Target className="h-5 w-5" />}
+            trend={+12}
+          />
+          <MetricCard
+            title="Valor Total no Pipeline"
+            value={formatCurrency(metrics.totalValue)}
+            subtitle={`Ticket m\u00e9dio: ${formatCurrency(metrics.averageTicket)}`}
+            icon={<DollarSign className="h-5 w-5" />}
+            trend={+8}
+          />
+          <MetricCard
+            title="Taxa de Convers\u00e3o"
+            value={`${metrics.conversionRate}%`}
+            subtitle={`${metrics.wonThisMonth} ganhos este m\u00eas`}
+            icon={<Users className="h-5 w-5" />}
+            trend={+5}
+          />
+          <MetricCard
+            title="Atividades Pendentes"
+            value={metrics.activitiesDue.toString()}
+            subtitle={`${metrics.slaBreaches} SLAs estourados`}
+            icon={<CalendarCheck className="h-5 w-5" />}
+            trend={-3}
+          />
+        </div>
+      )}
+
+      {/* Critical Alerts */}
+      <CriticalAlerts alerts={criticalAlerts} />
+
+      {/* Main Content — role-based */}
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-12">
+        {/* Left panel — 8 cols */}
+        <div className="space-y-6 lg:col-span-8">
+          {/* Comercial: Pipeline */}
+          {(userRole === "comercial" || userRole === "admin" || userRole === "master") && (
+            <PipelineChart stages={pipelinePreview} />
+          )}
+
+          {/* CS: Health Overview */}
+          {role === "cs" && <CSHealthOverview cards={csHealthCards} />}
+
+          {/* Admin: Team Performance */}
+          {(userRole === "admin" || userRole === "master") && <TeamPerformance members={teamMembers} />}
+        </div>
+
+        {/* Right panel — 4 cols */}
+        <div className="lg:col-span-4">
+          <TodayActivities
+            activities={activities}
+            onToggle={handleToggleActivity}
+          />
+        </div>
+      </div>
+    </div>
+  );
+}

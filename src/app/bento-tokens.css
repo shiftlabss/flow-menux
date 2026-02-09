@@ -1,0 +1,155 @@
+/* ===== Bento Cards Design Tokens ===== */
+/* Tokens específicos para layout Bento premium */
+/* Derivados da paleta existente - SEM cores novas */
+
+:root {
+  /* === SURFACE LAYERS === */
+  /* Camadas de profundidade visual */
+  --color-surface-base: #ffffff;
+  --color-surface-raised: #fafafa;
+  --color-surface-overlay: #f4f4f5;
+
+  /* === BENTO SHADOWS === */
+  /* Hierarquia de elevação para cards Bento */
+  --shadow-bento-sm: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
+  --shadow-bento-md: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+  --shadow-bento-lg: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
+
+  /* Hover states */
+  --shadow-bento-sm-hover: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+  --shadow-bento-md-hover: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
+
+  /* === BENTO BORDERS === */
+  --border-bento-default: #e4e4e7;
+  --border-bento-subtle: #f4f4f5;
+  --border-bento-focus: #7A55FD;
+  --border-bento-error: #DC2626;
+  --border-bento-success: #16A34A;
+
+  /* === BENTO SPACING === */
+  --spacing-1-5: 6px;
+  --spacing-2-5: 10px;
+  --spacing-7: 28px;
+  --spacing-9: 36px;
+  --spacing-14: 56px;
+
+  /* === BENTO RADIUS === */
+  --radius-bento-card: 15px;
+  --radius-bento-inner: 10px;
+  --radius-bento-small: 4px;
+
+  /* === TYPOGRAPHY SCALES === */
+  --text-bento-value-lg: 2.25rem;
+  --text-bento-value: 1.875rem;
+  --text-bento-value-sm: 1.5rem;
+  --text-bento-label: 0.875rem;
+  --text-bento-helper: 0.75rem;
+  --text-bento-subheader: 0.75rem;
+
+  /* === TRANSITIONS === */
+  --transition-bento-fast: 150ms cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-bento: 200ms cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-bento-slow: 300ms cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-bento-chart: 700ms cubic-bezier(0.4, 0, 0.2, 1);
+
+  /* === INTERACTION SCALES === */
+  --scale-bento-active: 0.98;
+  --scale-bento-hover: 1.02;
+
+  /* === BENTO GRID === */
+  --gap-bento-sm: 16px;
+  --gap-bento-md: 20px;
+  --gap-bento-lg: 24px;
+
+  /* Container max-widths */
+  --container-bento-sm: 1240px;
+  --container-bento-md: 1400px;
+  --container-bento-lg: 1720px;
+
+  /* === FEEDBACK COLORS === */
+  --feedback-success-bg: #F0FDF4;
+  --feedback-success-border: #16A34A;
+  --feedback-success-text: #16A34A;
+
+  --feedback-error-bg: #FEF2F2;
+  --feedback-error-border: #DC2626;
+  --feedback-error-text: #DC2626;
+
+  --feedback-warning-bg: #FFFBEB;
+  --feedback-warning-border: #D97706;
+  --feedback-warning-text: #D97706;
+
+  --feedback-info-bg: #EFF6FF;
+  --feedback-info-border: #2563EB;
+  --feedback-info-text: #2563EB;
+
+  /* === Z-INDEX SCALE === */
+  --z-bento-base: 1;
+  --z-bento-raised: 10;
+  --z-bento-elevated: 20;
+  --z-bento-overlay: 30;
+}
+
+/* === UTILITY CLASSES === */
+.bento-card-base {
+  background: var(--color-surface-base);
+  border: 1px solid var(--border-bento-default);
+  border-radius: var(--radius-bento-card);
+  box-shadow: var(--shadow-bento-sm);
+  transition: box-shadow var(--transition-bento);
+}
+
+.bento-card-elevated {
+  box-shadow: var(--shadow-bento-md);
+}
+
+.bento-card-hover:hover {
+  box-shadow: var(--shadow-bento-sm-hover);
+}
+
+.bento-card-elevated-hover:hover {
+  box-shadow: var(--shadow-bento-md-hover);
+}
+
+.bento-divider {
+  border-bottom: 1px solid var(--border-bento-subtle);
+}
+
+/* === RESPONSIVE CONTAINER === */
+.bento-container {
+  margin-left: auto;
+  margin-right: auto;
+  padding-left: 20px;
+  padding-right: 20px;
+}
+
+.bento-grid {
+  display: grid;
+  gap: var(--gap-bento-sm);
+}
+
+@media (min-width: 1280px) {
+  .bento-container {
+    max-width: var(--container-bento-sm);
+  }
+}
+
+@media (min-width: 1440px) {
+  .bento-container {
+    max-width: var(--container-bento-md);
+  }
+  .bento-grid {
+    gap: var(--gap-bento-md);
+  }
+}
+
+@media (min-width: 1920px) {
+  .bento-container {
+    max-width: var(--container-bento-lg);
+    padding-left: 100px;
+    padding-right: 100px;
+  }
+  .bento-grid {
+    gap: var(--gap-bento-lg);
+  }
+}
