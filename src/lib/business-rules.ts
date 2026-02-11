@@ -20,7 +20,7 @@ import type {
 const DEFAULT_COMMISSION_PERCENTAGE = 5;
 
 /** Ordem dos estagios do pipeline de vendas */
-const PIPELINE_STAGE_ORDER: PipelineStage[] = [
+export const PIPELINE_STAGE_ORDER: PipelineStage[] = [
   "lead-in",
   "contato-feito",
   "reuniao-agendada",

@@ -1,7 +1,6 @@
 import { AppShell } from "@/components/layout/app-shell";
 import { GlobalDrawers } from "@/components/shared/global-drawers";
 import { GlobalSearch } from "@/components/shared/global-search";
-import { HelpButton } from "@/components/shared/help-button";
 import { MobileBottomNav } from "@/components/shared/mobile-bottom-nav";
 
 export default function AuthLayout({
@@ -14,7 +13,6 @@ export default function AuthLayout({
       {children}
       <GlobalDrawers />
       <GlobalSearch />
-      <HelpButton />
       <MobileBottomNav />
     </AppShell>
   );

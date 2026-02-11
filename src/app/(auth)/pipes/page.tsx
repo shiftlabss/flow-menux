@@ -9,27 +9,20 @@ import {
 } from "react";
 import {
   Plus,
-  Filter,
   MoreHorizontal,
   Flame,
   Thermometer,
   Snowflake,
   Clock,
   AlertTriangle,
-  Settings2,
   Lock,
-  ChevronLeft,
-  ChevronRight,
-  Pencil,
   Palette,
   Check,
   ArrowDownToLine,
-  Download,
-  ListOrdered,
   Search,
-  User,
   CheckCircle2,
   X,
+  Filter,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -43,12 +36,10 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 import {
   Tooltip,
   TooltipContent,
@@ -57,11 +48,16 @@ import {
 } from "@/components/ui/tooltip";
 import type { Opportunity, PipelineStage, Temperature } from "@/types";
 import { useUIStore } from "@/stores/ui-store";
+import { useAuthStore } from "@/stores/auth-store";
 import {
   calculateSlaDeadline,
   calculateTemperature,
+  formatCurrencyBRL,
+  PIPELINE_STAGE_ORDER,
 } from "@/lib/business-rules";
+import { generateDynamicMockData } from "@/lib/mock-data";
 import { PipelineManagerDrawer } from "@/components/pipeline/pipeline-manager-drawer";
+import { PipelineSwitcher } from "@/components/pipeline/pipeline-switcher";
 
 // ═══════════════════════════════════════════════════════════════════
 // Funnel Definitions
@@ -76,7 +72,7 @@ interface FunnelDefinition {
 const funnels: FunnelDefinition[] = [
   {
     id: "comercial",
-    label: "Funil Comercial",
+    label: "Leads",
     stages: [
       { id: "lead-in", label: "Lead-In", slaHours: 48 },
       { id: "contato-feito", label: "Contato Feito", slaHours: 72 },
@@ -88,7 +84,7 @@ const funnels: FunnelDefinition[] = [
   },
   {
     id: "indicacao",
-    label: "Funil Indicação",
+    label: "Indicação",
     stages: [
       { id: "lead-in", label: "Lead-In", slaHours: 24 },
       { id: "contato-feito", label: "Contato Feito", slaHours: 48 },
@@ -102,14 +98,6 @@ const funnels: FunnelDefinition[] = [
 // Stage Validation
 // ═══════════════════════════════════════════════════════════════════
 
-const stageOrder: PipelineStage[] = [
-  "lead-in",
-  "contato-feito",
-  "reuniao-agendada",
-  "proposta-enviada",
-  "negociacao",
-  "fechamento",
-];
 
 const stageRequiredFields: Record<
   PipelineStage,
@@ -166,285 +154,8 @@ const temperatureConfig: Record<
 };
 
 // ═══════════════════════════════════════════════════════════════════
-// Mock Data — #2 FIX: SLA dinâmico relativo a now
-// ═══════════════════════════════════════════════════════════════════
-
-const currentUserId = "1";
-
-function generateDynamicMockData(): Opportunity[] {
-  const now = new Date();
-  const h = (hours: number) =>
-    new Date(now.getTime() + hours * 60 * 60 * 1000).toISOString();
-  const daysAgo = (days: number) =>
-    new Date(now.getTime() - days * 24 * 60 * 60 * 1000)
-      .toISOString()
-      .split("T")[0];
-  const daysFromNow = (days: number) =>
-    new Date(now.getTime() + days * 24 * 60 * 60 * 1000)
-      .toISOString()
-      .split("T")[0];
-
-  return [
-    {
-      id: "1",
-      title: "Restaurante Bela Vista",
-      clientName: "Restaurante Bela Vista Ltda",
-      neighborhood: "Altiplano",
-      value: 12000,
-      monthlyValue: 1000,
-      stage: "lead-in",
-      temperature: "hot",
-      responsibleId: "1",
-      responsibleName: "Maria Silva",
-      tags: ["food-service", "premium"],
-      createdAt: daysAgo(25),
-      updatedAt: daysAgo(1),
-      status: "open",
-      slaDeadline: h(-6), // breached 6h ago
-    },
-    {
-      id: "2",
-      title: "Padaria Pao Quente",
-      clientName: "Padaria Pao Quente ME",
-      neighborhood: "Manaíra",
-      value: 4800,
-      monthlyValue: 400,
-      stage: "lead-in",
-      temperature: "warm",
-      responsibleId: "1",
-      responsibleName: "Maria Silva",
-      tags: ["panificacao"],
-      createdAt: daysAgo(8),
-      updatedAt: daysAgo(2),
-      status: "open",
-      slaDeadline: h(30), // 30h left (ok)
-    },
-    {
-      id: "3",
-      title: "Lanchonete do Carlos",
-      clientName: "Carlos Almeida ME",
-      neighborhood: "Bancários",
-      value: 3600,
-      monthlyValue: 300,
-      stage: "lead-in",
-      temperature: "cold",
-      responsibleId: "3",
-      responsibleName: "Ana Oliveira",
-      tags: ["fast-food"],
-      createdAt: daysAgo(6),
-      updatedAt: daysAgo(5),
-      status: "open",
-      slaDeadline: h(8), // 8h left (near)
-    },
-    {
-      id: "4",
-      title: "Bar do Ze",
-      clientName: "Bar do Ze Ltda",
-      neighborhood: "Tambaú",
-      value: 8400,
-      monthlyValue: 700,
-      stage: "contato-feito",
-      temperature: "warm",
-      responsibleId: "1",
-      responsibleName: "Maria Silva",
-      tags: ["bar", "noturno"],
-      createdAt: daysAgo(8),
-      updatedAt: daysAgo(1),
-      status: "open",
-      slaDeadline: h(52), // ok
-    },
-    {
-      id: "5",
-      title: "Pizzaria Napoli",
-      clientName: "Napoli Alimentos Ltda",
-      neighborhood: "Bessa",
-      value: 15000,
-      monthlyValue: 1250,
-      stage: "contato-feito",
-      temperature: "hot",
-      responsibleId: "2",
-      responsibleName: "Joao Santos",
-      tags: ["pizzaria", "delivery"],
-      createdAt: daysAgo(12),
-      updatedAt: daysAgo(3),
-      status: "open",
-      slaDeadline: h(-24), // breached 24h ago
-    },
-    {
-      id: "6",
-      title: "Hotel Sunset",
-      clientName: "Hotel Sunset S.A.",
-      neighborhood: "Cabo Branco",
-      value: 36000,
-      monthlyValue: 3000,
-      stage: "reuniao-agendada",
-      temperature: "warm",
-      responsibleId: "1",
-      responsibleName: "Maria Silva",
-      tags: ["hotelaria"],
-      createdAt: daysAgo(20),
-      updatedAt: daysAgo(2),
-      status: "open",
-      expectedCloseDate: daysFromNow(35),
-      slaDeadline: h(96), // ok
-    },
-    {
-      id: "7",
-      title: "Sorveteria Gelato",
-      clientName: "Gelato Artesanal ME",
-      neighborhood: "Jardim Oceania",
-      value: 7200,
-      monthlyValue: 600,
-      stage: "reuniao-agendada",
-      temperature: "cold",
-      responsibleId: "1",
-      responsibleName: "Maria Silva",
-      tags: ["sorvetes"],
-      createdAt: daysAgo(18),
-      updatedAt: daysAgo(10),
-      status: "open",
-      expectedCloseDate: daysFromNow(20),
-      slaDeadline: h(4), // near
-    },
-    {
-      id: "8",
-      title: "Cafe Central",
-      clientName: "Cafe Central ME",
-      neighborhood: "Centro",
-      value: 6000,
-      monthlyValue: 500,
-      stage: "proposta-enviada",
-      temperature: "cold",
-      responsibleId: "2",
-      responsibleName: "Joao Santos",
-      tags: ["cafeteria"],
-      createdAt: daysAgo(30),
-      updatedAt: daysAgo(7),
-      status: "open",
-      expectedCloseDate: daysFromNow(19),
-      slaDeadline: h(18), // ok
-    },
-    {
-      id: "9",
-      title: "Hamburgueria Smash",
-      clientName: "Smash Burger Ltda",
-      neighborhood: "Brisamar",
-      value: 9600,
-      monthlyValue: 800,
-      stage: "proposta-enviada",
-      temperature: "hot",
-      responsibleId: "1",
-      responsibleName: "Maria Silva",
-      tags: ["hamburgueria", "premium"],
-      createdAt: daysAgo(22),
-      updatedAt: daysAgo(1),
-      status: "open",
-      expectedCloseDate: daysFromNow(11),
-      slaDeadline: h(72), // ok
-    },
-    {
-      id: "10",
-      title: "Pousada Mar Azul",
-      clientName: "Pousada Mar Azul ME",
-      neighborhood: "Tambaú",
-      value: 24000,
-      monthlyValue: 2000,
-      stage: "negociacao",
-      temperature: "hot",
-      responsibleId: "2",
-      responsibleName: "Joao Santos",
-      tags: ["hotelaria"],
-      createdAt: daysAgo(35),
-      updatedAt: daysAgo(1),
-      status: "open",
-      expectedCloseDate: daysFromNow(6),
-      slaDeadline: h(120), // ok
-    },
-    {
-      id: "11",
-      title: "Doceria Sabor & Arte",
-      clientName: "Sabor e Arte Doces Ltda",
-      neighborhood: "Torre",
-      value: 10800,
-      monthlyValue: 900,
-      stage: "negociacao",
-      temperature: "warm",
-      responsibleId: "1",
-      responsibleName: "Maria Silva",
-      tags: ["confeitaria"],
-      createdAt: daysAgo(28),
-      updatedAt: daysAgo(4),
-      status: "open",
-      expectedCloseDate: daysFromNow(16),
-      slaDeadline: h(-48), // breached 48h ago
-    },
-    {
-      id: "12",
-      title: "Churrascaria Fogo Bravo",
-      clientName: "Fogo Bravo Ltda",
-      neighborhood: "Mangabeira",
-      value: 18000,
-      monthlyValue: 1500,
-      stage: "fechamento",
-      temperature: "hot",
-      responsibleId: "1",
-      responsibleName: "Maria Silva",
-      tags: ["food-service", "churrascaria"],
-      createdAt: daysAgo(50),
-      updatedAt: daysAgo(1),
-      status: "open",
-      expectedCloseDate: daysFromNow(2),
-      slaDeadline: h(36), // ok
-    },
-    {
-      id: "13",
-      title: "Acai da Praia",
-      clientName: "Acai da Praia Franquias S.A.",
-      neighborhood: "Intermares",
-      value: 42000,
-      monthlyValue: 3500,
-      stage: "fechamento",
-      temperature: "hot",
-      responsibleId: "1",
-      responsibleName: "Maria Silva",
-      tags: ["acai", "franquia"],
-      createdAt: daysAgo(60),
-      updatedAt: daysAgo(1),
-      status: "open",
-      expectedCloseDate: daysFromNow(1),
-      slaDeadline: h(10), // near
-    },
-    {
-      id: "14",
-      title: "Cantina Bella Nonna",
-      clientName: "Bella Nonna Restaurante Ltda",
-      neighborhood: "Expedicionários",
-      value: 14400,
-      monthlyValue: 1200,
-      stage: "lead-in",
-      temperature: "warm",
-      responsibleId: "2",
-      responsibleName: "Joao Santos",
-      tags: ["italiano", "restaurante"],
-      createdAt: daysAgo(5),
-      updatedAt: daysAgo(1),
-      status: "open",
-      slaDeadline: h(40), // ok
-    },
-  ];
-}
-
-// ═══════════════════════════════════════════════════════════════════
 // Helpers
 // ═══════════════════════════════════════════════════════════════════
-
-function formatCurrency(value: number) {
-  return new Intl.NumberFormat("pt-BR", {
-    style: "currency",
-    currency: "BRL",
-    minimumFractionDigits: 0,
-  }).format(value);
-}
 
 function getInitials(name: string): string {
   return name
@@ -525,15 +236,13 @@ function validateStageTransition(
   opportunity: Opportunity,
   targetStage: PipelineStage
 ): { missing: string[]; isRegression: boolean } {
-  const currentIdx = stageOrder.indexOf(opportunity.stage);
-  const targetIdx = stageOrder.indexOf(targetStage);
+  const currentIdx = PIPELINE_STAGE_ORDER.indexOf(opportunity.stage);
+  const targetIdx = PIPELINE_STAGE_ORDER.indexOf(targetStage);
 
   // #6 FIX: Detect regression (moving backwards)
   if (targetIdx < currentIdx) {
     return { missing: [], isRegression: true };
   }
-
-  if (targetIdx <= currentIdx) return { missing: [], isRegression: false };
 
   const requiredFields = stageRequiredFields[targetStage] || [];
   const missing: string[] = [];
@@ -580,6 +289,7 @@ function loadStageCustomizations(): Record<string, StageCustomization> {
     const raw = localStorage.getItem(STAGE_CUSTOM_STORAGE_KEY);
     return raw ? JSON.parse(raw) : {};
   } catch {
+    try { localStorage.removeItem(STAGE_CUSTOM_STORAGE_KEY); } catch {}
     return {};
   }
 }
@@ -668,6 +378,8 @@ function PipelineSkeleton({ stageCount }: { stageCount: number }) {
 
 export default function PipesPage() {
   const { openDrawer, openModal } = useUIStore();
+  const { user } = useAuthStore();
+  const currentUserId = user?.id ?? "1";
   const [selectedFunnel, setSelectedFunnel] = useState("comercial");
   const [localOpportunities, setLocalOpportunities] = useState<Opportunity[]>(
     () => generateDynamicMockData()
@@ -699,10 +411,6 @@ export default function PipesPage() {
   } | null>(null);
   const dragCardRef = useRef<Opportunity | null>(null);
   const boardRef = useRef<HTMLDivElement>(null);
-
-  // #8 FIX: Track scroll overflow for conditional arrows
-  const [canScrollLeft, setCanScrollLeft] = useState(false);
-  const [canScrollRight, setCanScrollRight] = useState(false);
 
   // #5 FIX: Skeleton loading state
   const [isLoading, setIsLoading] = useState(true);
@@ -786,7 +494,7 @@ export default function PipesPage() {
       });
     }
     return grouped;
-  }, [opportunities, activeStageIds, showOnlyMine, normalizedSearch]);
+  }, [opportunities, activeStageIds, showOnlyMine, normalizedSearch, currentUserId]);
 
   // #7 FIX: Separate counts for own vs total
   const { myCount, myTotal, boardCount, boardTotal } = useMemo(() => {
@@ -800,7 +508,7 @@ export default function PipesPage() {
       boardCount: active.length,
       boardTotal: active.reduce((acc, o) => acc + o.value, 0),
     };
-  }, [opportunities, activeStageIds]);
+  }, [opportunities, activeStageIds, currentUserId]);
 
   // #15 FIX: Compute dynamic temperatures
   const averageDealValue = useMemo(() => {
@@ -819,32 +527,23 @@ export default function PipesPage() {
     [averageDealValue]
   );
 
-  // #8 FIX: Update scroll arrow visibility
-  const updateScrollState = useCallback(() => {
-    if (!boardRef.current) return;
-    const el = boardRef.current;
-    setCanScrollLeft(el.scrollLeft > 5);
-    setCanScrollRight(el.scrollLeft + el.clientWidth < el.scrollWidth - 5);
-  }, []);
-
-  useEffect(() => {
-    updateScrollState();
-    const el = boardRef.current;
-    if (!el) return;
-    el.addEventListener("scroll", updateScrollState, { passive: true });
-    window.addEventListener("resize", updateScrollState);
-    return () => {
-      el.removeEventListener("scroll", updateScrollState);
-      window.removeEventListener("resize", updateScrollState);
-    };
-  }, [updateScrollState, activeStageIds]);
-
   // #13 FIX: Announce to screen readers
   const announce = useCallback((message: string) => {
     if (liveRegionRef.current) {
       liveRegionRef.current.textContent = message;
     }
   }, []);
+
+  // Announce search results to screen readers
+  useEffect(() => {
+    if (normalizedSearch) {
+      const total = Object.values(opportunitiesByStage).reduce(
+        (acc, cards) => acc + cards.length,
+        0
+      );
+      announce(`${total} cards encontrados para "${searchQuery}"`);
+    }
+  }, [normalizedSearch, opportunitiesByStage, announce, searchQuery]);
 
   // ── Drag handlers ──────────────────────────────────────────────
 
@@ -865,7 +564,7 @@ export default function PipesPage() {
         `Arrastando card ${opportunity.title}. Solte em uma etapa para mover.`
       );
     },
-    [announce]
+    [announce, currentUserId]
   );
 
   const handleDragOver = useCallback(
@@ -937,11 +636,11 @@ export default function PipesPage() {
 
       if (isRegression) {
         const fromLabel =
-          stageOrder[stageOrder.indexOf(card.stage)]
+          PIPELINE_STAGE_ORDER[PIPELINE_STAGE_ORDER.indexOf(card.stage)]
             ?.replace(/-/g, " ")
             .replace(/\b\w/g, (c) => c.toUpperCase()) || card.stage;
         const toLabel =
-          stageOrder[stageOrder.indexOf(targetStage)]
+          PIPELINE_STAGE_ORDER[PIPELINE_STAGE_ORDER.indexOf(targetStage)]
             ?.replace(/-/g, " ")
             .replace(/\b\w/g, (c) => c.toUpperCase()) || targetStage;
         setColumnError({
@@ -1080,17 +779,6 @@ export default function PipesPage() {
     [stageCustomizations]
   );
 
-  // ── Board scroll ───────────────────────────────────────────────
-
-  const scrollBoard = useCallback((direction: "left" | "right") => {
-    if (!boardRef.current) return;
-    const amount = 350;
-    boardRef.current.scrollBy({
-      left: direction === "left" ? -amount : amount,
-      behavior: "smooth",
-    });
-  }, []);
-
   // #17 FIX: Toggle search with Ctrl+K / Cmd+K
   useEffect(() => {
     function handleKeyDown(e: KeyboardEvent) {
@@ -1137,14 +825,29 @@ export default function PipesPage() {
         <div className="shrink-0 space-y-3 pb-4">
           <div className="flex flex-wrap items-start justify-between gap-3">
             <div className="min-w-0">
-              <h1 className="font-heading text-2xl font-bold text-black">
-                Pipeline de Vendas
-              </h1>
+              <PipelineSwitcher
+                selectedPipeline={activeFunnel}
+                availablePipelines={funnels}
+                hasActiveFilters={showOnlyMine || searchQuery.length > 0}
+                isAdmin={true}
+                showOnlyMine={showOnlyMine}
+                onToggleShowOnlyMine={() => setShowOnlyMine((prev) => !prev)}
+                onPipelineChange={(pipelineId) => {
+                  setSelectedFunnel(pipelineId);
+                  // Clear filters when changing pipeline
+                  if (showOnlyMine || searchQuery) {
+                    setShowOnlyMine(false);
+                    setSearchQuery("");
+                    setIsSearchOpen(false);
+                  }
+                }}
+                onSettingsClick={() => setIsManageDrawerOpen(true)}
+              />
               {/* #7 FIX: Show own vs total counts */}
               <p className="mt-0.5 font-body text-sm text-zinc-500">
-                {myCount} meus · {formatCurrency(myTotal)}
+                {myCount} meus · {formatCurrencyBRL(myTotal)}
                 <span className="mx-1.5 text-zinc-300">|</span>
-                {boardCount} total · {formatCurrency(boardTotal)}
+                {boardCount} total · {formatCurrencyBRL(boardTotal)}
               </p>
             </div>
 
@@ -1192,42 +895,6 @@ export default function PipesPage() {
                 <TooltipContent>Buscar (⌘K)</TooltipContent>
               </Tooltip>
 
-              {/* #16 FIX: "Apenas meus" toggle */}
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Button
-                    variant={showOnlyMine ? "default" : "outline"}
-                    size="sm"
-                    onClick={() => setShowOnlyMine((prev) => !prev)}
-                    className={`h-9 rounded-full font-heading text-sm ${showOnlyMine ? "bg-black text-white hover:bg-zinc-800" : ""}`}
-                  >
-                    <User className="mr-1.5 h-3.5 w-3.5" />
-                    Meus
-                  </Button>
-                </TooltipTrigger>
-                <TooltipContent>
-                  {showOnlyMine
-                    ? "Mostrando apenas meus cards"
-                    : "Mostrar apenas meus cards"}
-                </TooltipContent>
-              </Tooltip>
-
-              <Select
-                value={selectedFunnel}
-                onValueChange={setSelectedFunnel}
-              >
-                <SelectTrigger className="h-9 w-[180px] rounded-full border-zinc-200 font-heading text-sm">
-                  <SelectValue placeholder="Selecionar funil" />
-                </SelectTrigger>
-                <SelectContent className="rounded-[var(--radius-bento-card)]">
-                  {funnels.map((funnel) => (
-                    <SelectItem key={funnel.id} value={funnel.id}>
-                      {funnel.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-
               <Button
                 variant="outline"
                 size="sm"
@@ -1237,40 +904,6 @@ export default function PipesPage() {
                 <Filter className="mr-1.5 h-3.5 w-3.5" />
                 Filtros
               </Button>
-
-              {/* #14 FIX: More options in dropdown */}
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    className="h-9 rounded-full font-heading text-sm"
-                  >
-                    <MoreHorizontal className="mr-1.5 h-3.5 w-3.5" />
-                    Mais
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent
-                  align="end"
-                  className="w-52 rounded-[var(--radius-bento-card)]"
-                >
-                  <DropdownMenuItem
-                    onClick={() => setIsManageDrawerOpen(true)}
-                  >
-                    <Settings2 className="mr-2 h-4 w-4" />
-                    Gerenciar Funis
-                  </DropdownMenuItem>
-                  <DropdownMenuItem disabled>
-                    <ListOrdered className="mr-2 h-4 w-4" />
-                    Ordenar por valor
-                  </DropdownMenuItem>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem disabled>
-                    <Download className="mr-2 h-4 w-4" />
-                    Exportar pipeline
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
 
               <Button
                 size="sm"
@@ -1291,26 +924,6 @@ export default function PipesPage() {
           role="region"
           aria-label="Pipeline de vendas — arraste os cards entre as etapas"
         >
-          {/* #8 FIX: Conditional scroll arrows */}
-          {canScrollLeft && (
-            <button
-              onClick={() => scrollBoard("left")}
-              className="absolute left-0 top-1/2 z-20 -translate-y-1/2 rounded-full border border-zinc-200 bg-white p-1.5 shadow-sm transition-colors hover:bg-zinc-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand"
-              aria-label="Rolar colunas para a esquerda"
-            >
-              <ChevronLeft className="h-4 w-4 text-zinc-500" />
-            </button>
-          )}
-          {canScrollRight && (
-            <button
-              onClick={() => scrollBoard("right")}
-              className="absolute right-0 top-1/2 z-20 -translate-y-1/2 rounded-full border border-zinc-200 bg-white p-1.5 shadow-sm transition-colors hover:bg-zinc-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand"
-              aria-label="Rolar colunas para a direita"
-            >
-              <ChevronRight className="h-4 w-4 text-zinc-500" />
-            </button>
-          )}
-
           {/* Board scroll container */}
           <div
             ref={boardRef}
@@ -1345,15 +958,55 @@ export default function PipesPage() {
                   onDrop={(e) => handleDrop(e, stageDef.id)}
                   // #13 FIX: Accessible column role
                   role="group"
-                  aria-label={`Etapa: ${stageCustomizations[stageDef.id]?.label || stageDef.label}, ${cards.length} cards, ${formatCurrency(totalValue)}`}
+                  aria-label={`Etapa: ${stageCustomizations[stageDef.id]?.label || stageDef.label}, ${cards.length} cards, ${formatCurrencyBRL(totalValue)}`}
                 >
                   {/* ── Column Header (sticky) ───────────────── */}
                   <div className="sticky top-0 z-10 rounded-t-[var(--radius-bento-card)] bg-inherit px-3 py-3">
                     <div className="flex items-center justify-between">
                       <div className="flex min-w-0 items-center gap-2">
-                        <span
-                          className={`inline-block h-2.5 w-2.5 shrink-0 rounded-full ${getStageColor(stageDef.id).bg}`}
-                        />
+                        <Popover>
+                          <PopoverTrigger asChild>
+                            <button
+                              className={`inline-block h-2.5 w-2.5 shrink-0 rounded-full transition-transform hover:scale-125 ${getStageColor(stageDef.id).bg}`}
+                              aria-label={`Cor da etapa: ${getStageColor(stageDef.id).label}`}
+                            />
+                          </PopoverTrigger>
+                          <PopoverContent
+                            align="start"
+                            className="w-auto rounded-[var(--radius-bento-card)] p-3"
+                          >
+                            <span className="mb-2 flex items-center gap-1.5 font-body text-[11px] font-medium text-zinc-500">
+                              <Palette className="h-3 w-3" />
+                              Cor da etapa
+                            </span>
+                            <div className="grid grid-cols-5 gap-1.5">
+                              {stageColorPalette.map((color) => {
+                                const isActive =
+                                  (stageCustomizations[stageDef.id]
+                                    ?.colorId || "default") === color.id;
+                                return (
+                                  <button
+                                    key={color.id}
+                                    onClick={() =>
+                                      setStageColor(stageDef.id, color.id)
+                                    }
+                                    className={`flex h-6 w-6 items-center justify-center rounded-full transition-all ${color.bg} ${
+                                      isActive
+                                        ? "ring-2 ring-zinc-900 ring-offset-2"
+                                        : "hover:ring-2 hover:ring-zinc-300 hover:ring-offset-1"
+                                    }`}
+                                    title={color.label}
+                                    aria-label={color.label}
+                                  >
+                                    {isActive && (
+                                      <Check className="h-3 w-3 text-white" />
+                                    )}
+                                  </button>
+                                );
+                              })}
+                            </div>
+                          </PopoverContent>
+                        </Popover>
 
                         {renamingStage === stageDef.id ? (
                           <input
@@ -1372,10 +1025,20 @@ export default function PipesPage() {
                             aria-label="Renomear etapa"
                           />
                         ) : (
-                          <span className="truncate font-heading text-[13px] font-semibold text-black">
+                          <button
+                            onClick={() =>
+                              startRename(
+                                stageDef.id,
+                                stageCustomizations[stageDef.id]?.label ||
+                                  stageDef.label
+                              )
+                            }
+                            className="truncate font-heading text-[13px] font-semibold text-black hover:text-brand transition-colors"
+                            title="Clique para renomear"
+                          >
                             {stageCustomizations[stageDef.id]?.label ||
                               stageDef.label}
-                          </span>
+                          </button>
                         )}
 
                         <span className="shrink-0 rounded-md bg-zinc-200/70 px-1.5 py-0.5 font-body text-[11px] font-medium text-zinc-600">
@@ -1384,82 +1047,8 @@ export default function PipesPage() {
                       </div>
                       <div className="flex shrink-0 items-center gap-1.5">
                         <span className="font-body text-[11px] font-medium text-zinc-400">
-                          {formatCurrency(totalValue)}
+                          {formatCurrencyBRL(totalValue)}
                         </span>
-
-                        {/* Stage settings dropdown */}
-                        <DropdownMenu>
-                          <DropdownMenuTrigger asChild>
-                            <button
-                              className="flex h-6 w-6 items-center justify-center rounded-md text-zinc-400 opacity-0 transition-all hover:bg-zinc-200/60 hover:text-zinc-600 group-hover/col:opacity-100 focus:opacity-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand"
-                              aria-label={`Configurar etapa ${stageDef.label}`}
-                            >
-                              <MoreHorizontal className="h-3.5 w-3.5" />
-                            </button>
-                          </DropdownMenuTrigger>
-                          <DropdownMenuContent
-                            align="end"
-                            className="w-48 rounded-[var(--radius-bento-card)]"
-                          >
-                            <DropdownMenuItem
-                              onClick={() =>
-                                openDrawer("new-opportunity", {
-                                  initialStage: stageDef.id,
-                                })
-                              }
-                            >
-                              <Plus className="mr-2 h-3.5 w-3.5" />
-                              Novo card
-                            </DropdownMenuItem>
-                            <DropdownMenuSeparator />
-                            <DropdownMenuItem
-                              onClick={() =>
-                                startRename(
-                                  stageDef.id,
-                                  stageCustomizations[stageDef.id]?.label ||
-                                    stageDef.label
-                                )
-                              }
-                            >
-                              <Pencil className="mr-2 h-3.5 w-3.5" />
-                              Renomear
-                            </DropdownMenuItem>
-                            <DropdownMenuSeparator />
-                            <div className="px-2 py-1.5">
-                              <span className="flex items-center gap-1.5 font-body text-[11px] font-medium text-zinc-500">
-                                <Palette className="h-3 w-3" />
-                                Cor da etapa
-                              </span>
-                              <div className="mt-1.5 grid grid-cols-5 gap-1.5">
-                                {stageColorPalette.map((color) => {
-                                  const isActive =
-                                    (stageCustomizations[stageDef.id]
-                                      ?.colorId || "default") === color.id;
-                                  return (
-                                    <button
-                                      key={color.id}
-                                      onClick={() =>
-                                        setStageColor(stageDef.id, color.id)
-                                      }
-                                      className={`flex h-6 w-6 items-center justify-center rounded-full transition-all ${color.bg} ${
-                                        isActive
-                                          ? "ring-2 ring-zinc-900 ring-offset-2"
-                                          : "hover:ring-2 hover:ring-zinc-300 hover:ring-offset-1"
-                                      }`}
-                                      title={color.label}
-                                      aria-label={color.label}
-                                    >
-                                      {isActive && (
-                                        <Check className="h-3 w-3 text-white" />
-                                      )}
-                                    </button>
-                                  );
-                                })}
-                              </div>
-                            </div>
-                          </DropdownMenuContent>
-                        </DropdownMenu>
-
                       </div>
                     </div>
 
@@ -1696,7 +1285,7 @@ function DealCardBento({
       // #13 FIX: Better aria labels
       role="button"
       aria-roledescription="card arrastável"
-      aria-label={`${opportunity.title}, ${formatCurrency(opportunity.value)}, ${temp.label}`}
+      aria-label={`${opportunity.title}, ${formatCurrencyBRL(opportunity.value)}, ${temp.label}`}
       onKeyDown={(e) => {
         if (e.key === "Enter" || e.key === " ") {
           e.preventDefault();
@@ -1790,7 +1379,7 @@ function DealCardBento({
       <div className="mt-2 flex items-center justify-between">
         <span className="font-heading text-[13px] font-bold text-black">
           {opportunity.value > 0
-            ? formatCurrency(opportunity.value)
+            ? formatCurrencyBRL(opportunity.value)
             : "Sem valor"}
         </span>
 
