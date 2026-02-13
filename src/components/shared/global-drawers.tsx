@@ -1,6 +1,6 @@
 "use client";
 
-import { LeadCardDrawer } from "@/components/drawers/lead-card-drawer";
+import LeadCardDrawer from "@/components/drawers/lead-card-drawer";
 import { ClientCardDrawer } from "@/components/drawers/client-card-drawer";
 import { FiltersPanel } from "@/components/shared/filters-panel";
 import { NewOpportunityModal } from "@/components/modals/new-opportunity-modal";

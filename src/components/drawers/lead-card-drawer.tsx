@@ -4,6 +4,8 @@ import { useState, useRef, useEffect, useMemo, useCallback } from "react";
 import {
   X,
   Phone,
+  MessageCircle,
+  Circle,
   Mail,
   Calendar,
   Tag,
@@ -22,6 +24,7 @@ import {
   Star,
   ChevronRight,
   Check,
+  CheckCircle,
   Pencil,
   Globe,
   MapPin,
@@ -29,7 +32,6 @@ import {
   FileText,
   ArrowRight,
   AlertTriangle,
-  Send,
   RefreshCw,
   Loader2,
   Shield,
@@ -52,17 +54,18 @@ import {
   Clock3,
   Globe2,
   LayoutList,
+  Target,
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
+import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { maskCep } from "@/lib/masks";
 import { PhoneInput } from "@/components/ui/masked-inputs";
 import { Switch } from "@/components/ui/switch";
-import { Checkbox } from "@/components/ui/checkbox";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   Select,
@@ -95,7 +98,7 @@ import { useUIStore } from "@/stores/ui-store";
 import type { Temperature, PipelineStage } from "@/types";
 import { calculateLeadScore, calculateTemperature } from "@/lib/business-rules";
 import { mockActivities } from "@/lib/mock-data";
-import { stageFieldsConfig, StageField } from "@/lib/mock-stage-fields";
+import { stageFieldsConfig } from "@/lib/mock-stage-fields";
 
 // ═══════════════════════════════════════════════════════════════════
 // Types & Constants
@@ -321,30 +324,17 @@ const mockTimeline = [
     date: "15/01/2026 10:00",
   },
   {
-    id: "t2",
-    type: "activity",
-    message: "Ligacao realizada - primeiro contato com Joao Silva",
-    user: "Maria Silva",
-    date: "16/01/2026 14:30",
-  },
-  {
-    id: "t3",
+    id: 1,
     type: "stage-change",
-    message: "Movido de Lead-In para Contato Feito",
-    user: "Maria Silva",
-    date: "16/01/2026 14:35",
+    date: "Hoje, 14:30",
+    title: "Mudança de Etapa",
+    description: "Alterado de Lead In para Contato Feito",
+    author: "Ana Silva",
+    icon: CheckCircle,
   },
   {
-    id: "t4",
+    id: 2,
     type: "note",
-    message: "Cliente muito interessado, pedir proposta urgente",
-    user: "Maria Silva",
-    date: "20/01/2026 09:15",
-  },
-  {
-    id: "t5",
-    type: "tag-added",
-    message: "Tag 'premium' adicionada",
     user: "Maria Silva",
     date: "22/01/2026 11:00",
   },
@@ -368,6 +358,48 @@ const mockTimeline = [
     message: "Reuniao online com equipe do cliente",
     user: "Maria Silva",
     date: "03/02/2026 15:00",
+  },
+];
+
+
+const mockVisits = [
+  {
+    id: "v1",
+    type: "presencial",
+    location: "Restaurante Bela Vista",
+    status: "agendada",
+    date: "15/02/2026 14:00",
+    responsible: "Maria Silva",
+  },
+  {
+    id: "v2",
+    type: "online",
+    location: "Google Meet",
+    status: "realizada",
+    date: "10/02/2026 10:00",
+    responsible: "Pedro Santos",
+    result: "Cliente demonstrou interesse no módulo financeiro.",
+  },
+];
+
+const mockNoteHistory = [
+  {
+    id: "n1",
+    author: "Maria Silva",
+    date: "14/02/2026 09:30",
+    content: "Cliente solicitou nova proposta com desconto de 5% para fechar ainda este mês.",
+  },
+  {
+    id: "n2",
+    author: "Pedro Santos",
+    date: "10/02/2026 16:15",
+    content: "Reunião de alinhamento realizada. O cliente gostou bastante da demonstração do painel financeiro.",
+  },
+  {
+    id: "n3",
+    author: "Sistema",
+    date: "05/02/2026 10:00",
+    content: "Oportunidade movida para a etapa de Negociação.",
   },
 ];
 
@@ -406,47 +438,6 @@ function getScoreLabel(score: number) {
   return "Baixo";
 }
 
-function getTimelineIcon(type: string) {
-  switch (type) {
-    case "created":
-      return <Plus className="h-3.5 w-3.5" />;
-    case "activity":
-      return <Calendar className="h-3.5 w-3.5" />;
-    case "stage-change":
-      return <ArrowRight className="h-3.5 w-3.5" />;
-    case "note":
-      return <FileText className="h-3.5 w-3.5" />;
-    case "tag-added":
-      return <Tag className="h-3.5 w-3.5" />;
-    case "value-change":
-      return <DollarSign className="h-3.5 w-3.5" />;
-    case "temperature-change":
-      return <Flame className="h-3.5 w-3.5" />;
-    default:
-      return <Clock className="h-3.5 w-3.5" />;
-  }
-}
-
-function getTimelineIconColor(type: string) {
-  switch (type) {
-    case "created":
-      return "bg-brand/10 text-brand";
-    case "activity":
-      return "bg-status-info/10 text-status-info";
-    case "stage-change":
-      return "bg-status-success/10 text-status-success";
-    case "note":
-      return "bg-zinc-100 text-zinc-500";
-    case "tag-added":
-      return "bg-purple-50 text-purple-500";
-    case "value-change":
-      return "bg-status-warning/10 text-status-warning";
-    case "temperature-change":
-      return "bg-status-danger/10 text-status-danger";
-    default:
-      return "bg-zinc-100 text-zinc-500";
-  }
-}
 
 function getInitials(name: string) {
   return name
@@ -722,254 +713,6 @@ function StageRail({
 }
 
 // ═══════════════════════════════════════════════════════════════════
-// SummaryBento Cards
-// ═══════════════════════════════════════════════════════════════════
-
-function BentoCard({
-  icon,
-  label,
-  children,
-  className = "",
-  banner,
-  onBannerDismiss,
-}: {
-  icon: React.ReactNode;
-  label: string;
-  children: React.ReactNode;
-  className?: string;
-  banner?: InlineBanner | null;
-  onBannerDismiss?: () => void;
-}) {
-  return (
-    <div
-      className={`rounded-[14px] border border-zinc-100 p-3.5 transition-all hover:border-zinc-200 hover:shadow-sm ${className}`}
-    >
-      <div className="flex items-center gap-2">
-        <div className="flex h-6 w-6 items-center justify-center rounded-lg bg-zinc-50 text-zinc-400">
-          {icon}
-        </div>
-        <span className="font-body text-[11px] font-medium uppercase tracking-wider text-zinc-400">
-          {label}
-        </span>
-      </div>
-      <div className="mt-2">{children}</div>
-      {banner && onBannerDismiss && (
-        <div className="mt-2">
-          <InlineStatusBanner banner={banner} onDismiss={onBannerDismiss} />
-        </div>
-      )}
-    </div>
-  );
-}
-
-function ForecastCard({
-  value,
-  monthlyValue,
-  expectedCloseDate,
-  onValueChange,
-  onMonthlyChange,
-  onDateChange,
-  dealStatus,
-}: {
-  value: number;
-  monthlyValue: number;
-  expectedCloseDate: string;
-  onValueChange: (v: number) => void;
-  onMonthlyChange: (v: number) => void;
-  onDateChange: (d: string) => void;
-  dealStatus: DealStatus;
-}) {
-  const [banner, setBanner] = useState<InlineBanner | null>(null);
-  const isLocked = dealStatus !== "open";
-
-  const handleValueSave = (v: string) => {
-    const num = Number(v.replace(/\D/g, ""));
-    if (isNaN(num) || num < 0) {
-      setBanner({ message: "Valor invalido", variant: "error" });
-      return;
-    }
-    if (num > 999999999) {
-      setBanner({ message: "Valor maximo: R$ 999.999.999", variant: "error" });
-      return;
-    }
-    onValueChange(num);
-    setBanner({ message: "Valor atualizado", variant: "success" });
-    trackEvent("forecast_updated_succeeded", { field: "value", value: num });
-  };
-
-  const handleMonthlySave = (v: string) => {
-    const num = Number(v.replace(/\D/g, ""));
-    if (isNaN(num) || num < 0) {
-      setBanner({ message: "Valor invalido", variant: "error" });
-      trackEvent("validation_failed", {
-        field: "monthly_value",
-        reason: "invalid",
-      });
-      return;
-    }
-    onMonthlyChange(num);
-    setBanner({ message: "Valor mensal atualizado", variant: "success" });
-    trackEvent("forecast_updated_succeeded", {
-      field: "monthly_value",
-      value: num,
-    });
-  };
-
-  return (
-    <BentoCard
-      icon={<DollarSign className="h-3.5 w-3.5" />}
-      label="Forecast"
-      banner={banner}
-      onBannerDismiss={() => setBanner(null)}
-    >
-      <div className="space-y-2.5">
-        <div>
-          <p className="font-body text-[10px] text-zinc-400">Valor Total</p>
-          <InlineEditable
-            value={formatCurrency(value)}
-            onSave={handleValueSave}
-            className="font-heading text-lg font-bold text-black"
-            readOnly={isLocked}
-            validate={(v) => {
-              const num = Number(v.replace(/\D/g, ""));
-              if (isNaN(num) || num < 0) return "Valor invalido";
-              return null;
-            }}
-          />
-        </div>
-        <div className="flex items-center gap-4">
-          <div className="flex-1">
-            <p className="font-body text-[10px] text-zinc-400">Mensal</p>
-            <InlineEditable
-              value={formatCurrency(monthlyValue)}
-              onSave={handleMonthlySave}
-              className="font-body text-sm font-medium text-black"
-              readOnly={isLocked}
-            />
-          </div>
-          <div className="flex-1">
-            <p className="font-body text-[10px] text-zinc-400">Previsao</p>
-            <InlineEditable
-              value={
-                expectedCloseDate
-                  ? new Date(expectedCloseDate).toLocaleDateString("pt-BR")
-                  : "--"
-              }
-              onSave={onDateChange}
-              className="font-body text-sm font-medium text-black"
-              readOnly={isLocked}
-              type="date"
-            />
-          </div>
-        </div>
-      </div>
-    </BentoCard>
-  );
-}
-
-function OwnerCard({
-  currentId,
-  currentName,
-  teamMembers,
-  onReassign,
-}: {
-  currentId: string;
-  currentName: string;
-  teamMembers: { id: string; name: string; avatar: string }[];
-  onReassign: (id: string, name: string) => void;
-}) {
-  return (
-    <BentoCard icon={<User className="h-3.5 w-3.5" />} label="Responsavel">
-      <DropdownMenu>
-        <DropdownMenuTrigger asChild>
-          <button className="flex w-full items-center gap-2.5 rounded-lg px-1 py-1 transition-colors hover:bg-zinc-50">
-            <div className="flex h-8 w-8 items-center justify-center rounded-full bg-brand text-xs font-bold text-white">
-              {getInitials(currentName)}
-            </div>
-            <div className="min-w-0 flex-1 text-left">
-              <p className="truncate font-heading text-sm font-semibold text-black">
-                {currentName}
-              </p>
-              <p className="font-body text-[10px] text-zinc-400">
-                Clique para alterar
-              </p>
-            </div>
-            <Pencil className="h-3 w-3 shrink-0 text-zinc-300" />
-          </button>
-        </DropdownMenuTrigger>
-        <DropdownMenuContent align="start" className="rounded-[12px]">
-          {teamMembers.map((member) => (
-            <DropdownMenuItem
-              key={member.id}
-              onClick={() => onReassign(member.id, member.name)}
-              className="flex items-center gap-2"
-            >
-              <div className="flex h-6 w-6 items-center justify-center rounded-full bg-zinc-200 text-[10px] font-bold text-zinc-600">
-                {getInitials(member.name)}
-              </div>
-              <span className="font-body text-sm">{member.name}</span>
-              {member.id === currentId && (
-                <Check className="ml-auto h-4 w-4 text-brand" />
-              )}
-            </DropdownMenuItem>
-          ))}
-        </DropdownMenuContent>
-      </DropdownMenu>
-    </BentoCard>
-  );
-}
-
-function SourceMetaCard({
-  source,
-  createdAt,
-  tags,
-}: {
-  source: string;
-  createdAt: string;
-  tags: string[];
-}) {
-  return (
-    <BentoCard icon={<Globe className="h-3.5 w-3.5" />} label="Origem & Meta">
-      <div className="space-y-2">
-        <div className="flex items-center justify-between">
-          <span className="font-body text-xs text-zinc-400">Fonte</span>
-          <span className="font-body text-sm font-medium text-black">
-            {source}
-          </span>
-        </div>
-        <div className="flex items-center justify-between">
-          <span className="font-body text-xs text-zinc-400">Criado em</span>
-          <span className="font-body text-sm font-medium text-black">
-            {new Date(createdAt).toLocaleDateString("pt-BR")}
-          </span>
-        </div>
-        {tags.length > 0 && (
-          <div className="flex flex-wrap gap-1 pt-1">
-            {tags.slice(0, 3).map((tag) => (
-              <Badge
-                key={tag}
-                variant="outline"
-                className="rounded-[8px] font-body text-[10px]"
-              >
-                {tag}
-              </Badge>
-            ))}
-            {tags.length > 3 && (
-              <Badge
-                variant="outline"
-                className="rounded-[8px] font-body text-[10px]"
-              >
-                +{tags.length - 3}
-              </Badge>
-            )}
-          </div>
-        )}
-      </div>
-    </BentoCard>
-  );
-}
-
-// ═══════════════════════════════════════════════════════════════════
 // NotesCard with autosave
 // ═══════════════════════════════════════════════════════════════════
 
@@ -1077,6 +820,42 @@ function NotesCard({
 // Timeline Premium with filter
 // ═══════════════════════════════════════════════════════════════════
 
+
+function getTimelineIcon(type: string, CustomIcon?: React.ElementType) {
+  if (CustomIcon) return <CustomIcon className="h-3.5 w-3.5" />;
+  switch (type) {
+    case "activity":
+      return <CheckCircle className="h-3.5 w-3.5" />;
+    case "stage-change":
+      return <ArrowRight className="h-3.5 w-3.5" />;
+    case "note":
+      return <FileText className="h-3.5 w-3.5" />;
+    case "value-change":
+      return <DollarSign className="h-3.5 w-3.5" />;
+    case "tag-added":
+      return <Tag className="h-3.5 w-3.5" />;
+    default:
+      return <Clock className="h-3.5 w-3.5" />;
+  }
+}
+
+function getTimelineIconColor(type: string) {
+  switch (type) {
+    case "activity":
+      return "bg-brand/10 text-brand";
+    case "stage-change":
+      return "bg-purple-50 text-purple-600";
+    case "note":
+      return "bg-yellow-50 text-yellow-600";
+    case "value-change":
+      return "bg-green-50 text-green-600";
+    case "tag-added":
+      return "bg-zinc-100 text-zinc-500";
+    default:
+      return "bg-zinc-100 text-zinc-500";
+  }
+}
+
 function TimelinePremium({ events }: { events: typeof mockTimeline }) {
   const [filter, setFilter] = useState<TimelineFilterType>("all");
 
@@ -1100,11 +879,12 @@ function TimelinePremium({ events }: { events: typeof mockTimeline }) {
           <button
             key={opt.value}
             onClick={() => setFilter(opt.value)}
-            className={`rounded-full px-2.5 py-1 font-body text-[11px] font-medium transition-all ${
-              filter === opt.value
-                ? "bg-brand/10 text-brand"
-                : "bg-zinc-50 text-zinc-400 hover:bg-zinc-100"
-            }`}
+            className={cn(
+                "rounded-full px-2.5 py-1 font-body text-[11px] font-medium transition-all",
+                filter === opt.value
+                  ? "bg-brand/10 text-brand"
+                  : "bg-zinc-50 text-zinc-400 hover:bg-zinc-100"
+            )}
           >
             {opt.label}
           </button>
@@ -1135,15 +915,31 @@ function TimelinePremium({ events }: { events: typeof mockTimeline }) {
                 <div className="absolute left-[13px] top-7 h-full w-px bg-zinc-100" />
               )}
               <div
-                className={`relative z-10 flex h-7 w-7 shrink-0 items-center justify-center rounded-full transition-all ${getTimelineIconColor(event.type)}`}
+                className={cn(
+                    "relative z-10 flex h-7 w-7 shrink-0 items-center justify-center rounded-full transition-all ring-4 ring-white",
+                    getTimelineIconColor(event.type)
+                )}
               >
-                {getTimelineIcon(event.type)}
+                {getTimelineIcon(event.type, event.icon)}
               </div>
               <div className="min-w-0 flex-1 pt-0.5">
-                <p className="font-body text-sm text-black">{event.message}</p>
-                <p className="mt-0.5 font-body text-[11px] text-zinc-400">
-                  {event.user} &middot; {event.date}
-                </p>
+                <div className="flex flex-col">
+                    <span className="font-heading text-xs font-semibold text-zinc-900">
+                        {event.title || "Evento"}
+                    </span>
+                    <p className="font-body text-sm text-zinc-600">
+                        {event.description || event.message}
+                    </p>
+                </div>
+                <div className="mt-1 flex items-center gap-1.5">
+                    {/* Tiny avatar placeholder or name */}
+                    <div className="flex h-4 w-4 items-center justify-center rounded-full bg-zinc-100 text-[9px] font-bold text-zinc-500">
+                        {(event.author || event.user || "?").charAt(0)}
+                    </div>
+                    <p className="font-body text-[10px] text-zinc-400">
+                    {event.author || event.user} &middot; {event.date}
+                    </p>
+                </div>
               </div>
             </div>
           ))}
@@ -1818,7 +1614,7 @@ function ExecutiveCompanyStrip({
                 </DropdownMenu>
               </div>
               {stripUpdatedLabel && (
-                <div className="absolute -top-1.5 right-0 inline-flex items-center gap-0.5 rounded-full bg-status-success/10 px-1.5 py-0.5 font-body text-[8px] font-semibold text-status-success animate-in fade-in duration-[90ms]">
+                <div className="absolute -top-1.5 right-0 inline-flex items-center gap-0.5 rounded-full bg-status-success/10 px-1.5 py-0.5 font-body text-[8px] font-semibold text-status-success animate-in fade-in duration-90">
                   <Check className="h-2 w-2" />
                   {stripUpdatedLabel}
                 </div>
@@ -1894,12 +1690,27 @@ function PremiumCard({
   );
 }
 
+const getActivityIcon = (type: string) => {
+  switch (type) {
+    case 'call':
+      return Phone;
+    case 'meeting':
+      return Users;
+    case 'email':
+      return Mail;
+    case 'whatsapp':
+      return MessageCircle;
+    default:
+      return Circle;
+  }
+};
+
 
 // ═══════════════════════════════════════════════════════════════════
 // Main Component — LeadCardDrawer (Premium)
 // ═══════════════════════════════════════════════════════════════════
 
-export function LeadCardDrawer() {
+export default function LeadCardDrawer() {
   const { modalType, closeModal } = useUIStore();
   const isOpen = modalType === "lead-card";
 
@@ -1985,7 +1796,7 @@ export function LeadCardDrawer() {
   );
   const [notes, setNotes] = useState(mockLead.notes || "");
 
-  const handleUpdateStageField = (fieldId: string, val: any) => {
+  const handleUpdateStageField = (fieldId: string, val: string | number | boolean | null | undefined) => {
     setStageValues((prev) => ({ ...prev, [fieldId]: val }));
     // In a real app, debounce save or mutation here
   };
@@ -2409,19 +2220,20 @@ export function LeadCardDrawer() {
             <div className="min-h-0 flex-1">
               <ScrollArea className="h-full">
                 <div className="p-5 md:px-8 lg:px-10">
-                  <Tabs defaultValue="empresa">
-                    <TabsList className="inline-flex gap-1 overflow-x-auto rounded-full bg-zinc-100/80 p-1">
+                    <Tabs defaultValue="empresa">
+                    <TabsList className="inline-flex h-9 items-center justify-start rounded-full bg-zinc-100/80 p-1">
                       {[
                         { value: "empresa", label: "Empresa" },
                         { value: "contatos", label: "Contatos" },
-                        { value: "valores", label: "Valores" },
-                        { value: "tags", label: "Tags" },
-                        { value: "historico", label: "Historico" },
+                        { value: "visitas", label: "Visitas" },
+                        { value: "atividades", label: "Atividades" },
+                        { value: "anotacoes", label: "Anotações" },
+                        { value: "linha-do-tempo", label: "Linha do Tempo" },
                       ].map((tab) => (
                         <TabsTrigger
                           key={tab.value}
                           value={tab.value}
-                          className="flex-none rounded-full px-3.5 py-1.5 font-body text-xs font-medium text-zinc-500 transition-all duration-150 hover:text-zinc-700 data-[state=active]:bg-white data-[state=active]:text-black data-[state=active]:shadow-sm"
+                          className="flex-none rounded-full px-4 py-1.5 font-heading text-[11px] font-semibold uppercase tracking-wide text-zinc-500 transition-all duration-200 hover:text-zinc-700 data-[state=active]:bg-white data-[state=active]:text-black data-[state=active]:shadow-sm"
                         >
                           {tab.label}
                         </TabsTrigger>
@@ -2436,6 +2248,134 @@ export function LeadCardDrawer() {
                         
                         {/* ── Tab: Empresa ──────────────────────────────── */}
                         <TabsContent value="empresa" className="mt-0 space-y-4">
+                            {/* ── Section: Classificação & Resumo (Moved from Values/Tags) ── */}
+                            <PremiumCard
+                              title="Classificação & Resumo"
+                              description="Dados principais do negócio"
+                              icon={Target}
+                              delay={0}
+                            >
+                                <div className="space-y-6">
+                                    {/* Row 1: Tags input & list */}
+                                    <div className="space-y-3">
+                                        <Label className="font-heading text-[10px] font-bold uppercase tracking-wider text-zinc-400">
+                                            Tags
+                                        </Label>
+                                        {!isLocked && (
+                                          <div className="flex items-center gap-2">
+                                            <Input
+                                              value={newTag}
+                                              onChange={(e) => setNewTag(e.target.value)}
+                                              onKeyDown={(e) => {
+                                                if (e.key === "Enter") {
+                                                  e.preventDefault();
+                                                  handleAddTag();
+                                                }
+                                              }}
+                                              placeholder="Nova tag..."
+                                              className="h-8 flex-1 rounded-[10px] font-body text-xs"
+                                            />
+                                            <Button
+                                              onClick={handleAddTag}
+                                              className="h-8 w-8 rounded-full bg-brand p-0 text-white hover:bg-brand/90"
+                                              size="icon"
+                                            >
+                                              <Plus className="h-4 w-4" />
+                                            </Button>
+                                          </div>
+                                        )}
+                                        <div className="flex flex-wrap gap-2">
+                                          {tags.length > 0 ? tags.map((tag) => (
+                                            <Badge
+                                              key={tag}
+                                              variant="outline"
+                                              className="gap-1.5 rounded-[6px] border-zinc-200 bg-zinc-50 py-1 pl-2 pr-1.5 font-body text-[10px] font-medium text-zinc-600"
+                                            >
+                                              {tag}
+                                              {!isLocked && (
+                                                <button
+                                                  onClick={() => handleRemoveTag(tag)}
+                                                  className="rounded-full p-0.5 transition-colors hover:bg-zinc-200"
+                                                >
+                                                  <X className="h-3 w-3 text-zinc-400" />
+                                                </button>
+                                              )}
+                                            </Badge>
+                                          )) : (
+                                            <p className="font-body text-xs text-zinc-400 italic">Nenhuma tag</p>
+                                          )}
+                                        </div>
+                                    </div>
+
+                                    <div className="h-px bg-zinc-100" />
+
+                                    {/* Row 2: Valores & Previsão */}
+                                    <div className="grid grid-cols-2 gap-4">
+                                        <EditableField
+                                          icon={<DollarSign className="h-3.5 w-3.5" />}
+                                          label="Valor Total"
+                                          value={formatCurrency(value)}
+                                          onSave={(v) => {
+                                            const num = Number(v.replace(/\D/g, ""));
+                                            if (!isNaN(num)) setValue(num);
+                                          }}
+                                          readOnly={isLocked}
+                                        />
+                                        <EditableField
+                                          icon={<DollarSign className="h-3.5 w-3.5" />}
+                                          label="Valor Mensal"
+                                          value={formatCurrency(monthlyValue)}
+                                          onSave={(v) => {
+                                            const num = Number(v.replace(/\D/g, ""));
+                                            if (!isNaN(num)) setMonthlyValue(num);
+                                          }}
+                                          readOnly={isLocked}
+                                        />
+                                        <EditableField
+                                          icon={<Calendar className="h-3.5 w-3.5" />}
+                                          label="Previsão"
+                                          value={expectedCloseDate}
+                                          onSave={setExpectedCloseDate}
+                                          type="date"
+                                          readOnly={isLocked}
+                                        />
+                                        <EditableField
+                                          icon={<Globe className="h-3.5 w-3.5" />}
+                                          label="Fonte"
+                                          value={source}
+                                          onSave={() => {}}
+                                          readOnly
+                                        />
+                                    </div>
+                                    
+                                    {/* Discount detection block */}
+                                    {dealStatus === "open" &&
+                                      (value < referenceSetup * 0.8 ||
+                                        monthlyValue < referenceMRR * 0.9) && (
+                                        <div className="flex items-start gap-3 rounded-[10px] border border-status-warning/20 bg-status-warning/5 p-3">
+                                          <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-status-warning" />
+                                          <div className="flex-1">
+                                            <p className="font-heading text-xs font-semibold text-status-warning">
+                                              Desconto detectado
+                                            </p>
+                                            <div className="mt-1 space-y-0.5">
+                                              {value < referenceSetup * 0.8 && (
+                                                <p className="font-body text-[10px] text-status-warning">
+                                                  Setup ({formatCurrency(value)}) &lt; Ref ({formatCurrency(referenceSetup)})
+                                                </p>
+                                              )}
+                                              {monthlyValue < referenceMRR * 0.9 && (
+                                                <p className="font-body text-[10px] text-status-warning">
+                                                  MRR ({formatCurrency(monthlyValue)}) &lt; Ref ({formatCurrency(referenceMRR)})
+                                                </p>
+                                              )}
+                                            </div>
+                                          </div>
+                                        </div>
+                                      )}
+                                </div>
+                            </PremiumCard>
+
                             <PremiumCard
                               title="Localização"
                               description=""
@@ -2994,151 +2934,164 @@ export function LeadCardDrawer() {
                       )}
                         </TabsContent>
 
-                        {/* ── Tab: Valores ──────────────────────────────── */}
-                        <TabsContent value="valores" className="mt-0">
-                      <div className="space-y-3">
-                        <EditableField
-                          icon={<DollarSign className="h-4 w-4" />}
-                          label="Valor Total"
-                          value={formatCurrency(value)}
-                          onSave={(v) => {
-                            const num = Number(v.replace(/\D/g, ""));
-                            if (!isNaN(num)) setValue(num);
-                          }}
-                          readOnly={isLocked}
-                        />
-                        <EditableField
-                          icon={<DollarSign className="h-4 w-4" />}
-                          label="Valor Mensal"
-                          value={formatCurrency(monthlyValue)}
-                          onSave={(v) => {
-                            const num = Number(v.replace(/\D/g, ""));
-                            if (!isNaN(num)) setMonthlyValue(num);
-                          }}
-                          readOnly={isLocked}
-                        />
 
-                        {/* Discount detection */}
-                        {dealStatus === "open" &&
-                          (value < referenceSetup * 0.8 ||
-                            monthlyValue < referenceMRR * 0.9) && (
-                            <div className="flex items-start gap-3 rounded-[14px] border border-status-warning/20 bg-status-warning/5 p-4">
-                              <AlertTriangle className="mt-0.5 h-5 w-5 shrink-0 text-status-warning" />
-                              <div className="flex-1">
-                                <p className="font-heading text-sm font-semibold text-status-warning">
-                                  Desconto detectado
-                                </p>
-                                <div className="mt-1 space-y-0.5">
-                                  {value < referenceSetup * 0.8 && (
-                                    <p className="font-body text-xs text-status-warning">
-                                      Setup ({formatCurrency(value)}) abaixo de
-                                      80% da referencia (
-                                      {formatCurrency(referenceSetup)})
-                                    </p>
-                                  )}
-                                  {monthlyValue < referenceMRR * 0.9 && (
-                                    <p className="font-body text-xs text-status-warning">
-                                      MRR ({formatCurrency(monthlyValue)})
-                                      abaixo de 90% da referencia (
-                                      {formatCurrency(referenceMRR)})
-                                    </p>
-                                  )}
-                                </div>
-                                <Button
-                                  size="sm"
-                                  className="mt-2 rounded-full bg-status-warning font-heading text-xs text-white hover:bg-status-warning/90"
-                                >
-                                  <Send className="mr-1 h-3.5 w-3.5" />{" "}
-                                  Solicitar Aprovacao
+
+                        {/* ── Tab: Visitas ──────────────────────────────── */}
+                        <TabsContent value="visitas" className="mt-0 space-y-4">
+                            <div className="flex items-center justify-between">
+                                <h3 className="font-heading text-sm font-semibold text-zinc-700">Visitas Agendadas</h3>
+                                <Button size="sm" variant="outline" className="h-8 gap-1.5 rounded-full text-xs">
+                                    <Plus className="h-3.5 w-3.5" />
+                                    Nova Visita
                                 </Button>
-                              </div>
                             </div>
-                          )}
+                            
+                            <div className="space-y-3">
+                                {mockVisits.map((visit) => (
+                                    <div key={visit.id} className="group relative flex gap-3 rounded-2xl border border-zinc-100 bg-white p-4 transition-all hover:border-zinc-200 hover:shadow-sm">
+                                        <div className={cn(
+                                            "flex h-10 w-10 shrink-0 items-center justify-center rounded-full border",
+                                            visit.type === 'presencial' 
+                                                ? "border-purple-100 bg-purple-50 text-purple-600" 
+                                                : "border-blue-100 bg-blue-50 text-blue-600"
+                                        )}>
+                                            {visit.type === 'presencial' ? <MapPin className="h-5 w-5" /> : <Globe className="h-5 w-5" />}
+                                        </div>
+                                        <div className="flex-1 space-y-1">
+                                            <div className="flex items-start justify-between">
+                                                <div>
+                                                    <p className="font-heading text-sm font-semibold text-zinc-900">
+                                                        {visit.type === 'presencial' ? 'Visita Presencial' : 'Reunião Remota'}
+                                                    </p>
+                                                    <p className="text-xs text-zinc-500">{visit.location}</p>
+                                                </div>
+                                                <Badge variant="secondary" className={cn(
+                                                    "rounded-full px-2 py-0.5 text-[10px] font-medium uppercase tracking-wide",
+                                                    visit.status === 'agendada' && "bg-amber-50 text-amber-600 hover:bg-amber-100",
+                                                    visit.status === 'realizada' && "bg-emerald-50 text-emerald-600 hover:bg-emerald-100",
+                                                )}>
+                                                    {visit.status}
+                                                </Badge>
+                                            </div>
+                                            
+                                            <div className="flex items-center gap-4 text-xs text-zinc-400">
+                                                <div className="flex items-center gap-1">
+                                                    <Calendar className="h-3.5 w-3.5" />
+                                                    {visit.date}
+                                                </div>
+                                                <div className="flex items-center gap-1">
+                                                    <UserCircle className="h-3.5 w-3.5" />
+                                                    {visit.responsible}
+                                                </div>
+                                            </div>
 
-                        <EditableField
-                          icon={<Calendar className="h-4 w-4" />}
-                          label="Previsao de Fechamento"
-                          value={expectedCloseDate}
-                          onSave={setExpectedCloseDate}
-                          type="date"
-                          readOnly={isLocked}
-                        />
-                        <EditableField
-                          icon={<Globe className="h-4 w-4" />}
-                          label="Fonte"
-                          value={source}
-                          onSave={() => {}}
-                          readOnly
-                        />
-                      </div>
+                                            {visit.result && (
+                                                <div className="mt-2 rounded-lg bg-zinc-50 p-2 text-xs text-zinc-600">
+                                                    <span className="font-semibold">Resultado:</span> {visit.result}
+                                                </div>
+                                            )}
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
                         </TabsContent>
 
-                        {/* ── Tab: Tags ─────────────────────────────────── */}
-                        <TabsContent value="tags" className="mt-0">
-                      <div className="space-y-4">
-                        {!isLocked && (
-                          <div className="flex items-center gap-2">
-                            <Input
-                              value={newTag}
-                              onChange={(e) => setNewTag(e.target.value)}
-                              onKeyDown={(e) => {
-                                if (e.key === "Enter") {
-                                  e.preventDefault();
-                                  handleAddTag();
-                                }
-                              }}
-                              placeholder="Digite uma nova tag..."
-                              className="h-8 flex-1 rounded-[10px] font-body text-sm"
-                            />
-                            <Button
-                              onClick={handleAddTag}
-                              className="rounded-full bg-brand font-heading text-xs text-white hover:bg-brand/90"
-                              size="sm"
-                            >
-                              <Plus className="mr-1 h-3.5 w-3.5" /> Adicionar
-                            </Button>
-                          </div>
-                        )}
-                        <div className="flex flex-wrap gap-2">
-                          {tags.map((tag) => (
-                            <Badge
-                              key={tag}
-                              variant="outline"
-                              className="gap-1.5 rounded-[8px] py-1.5 pr-1.5 font-body text-sm"
-                            >
-                              {tag}
-                              {!isLocked && (
-                                <button
-                                  onClick={() => handleRemoveTag(tag)}
-                                  className="rounded-full p-0.5 transition-colors hover:bg-zinc-200"
-                                  aria-label={`Remover tag ${tag}`}
-                                >
-                                  <X className="h-3 w-3 text-zinc-400" />
-                                </button>
-                              )}
-                            </Badge>
-                          ))}
-                        </div>
-                        {tags.length === 0 && (
-                          <div className="flex flex-col items-center py-8 text-center">
-                            <Tag className="h-8 w-8 text-zinc-200" />
-                            <p className="mt-2 font-body text-sm text-zinc-400">
-                              Sem tags ainda
-                            </p>
-                            {!isLocked && (
-                              <p className="mt-1 font-body text-xs text-zinc-300">
-                                Adicione tags para categorizar esta oportunidade
-                              </p>
-                            )}
-                          </div>
-                        )}
-                      </div>
+                        {/* ── Tab: Atividades ───────────────────────────── */}
+                        <TabsContent value="atividades" className="mt-0 space-y-4">
+                             <div className="flex items-center justify-between">
+                                <h3 className="font-heading text-sm font-semibold text-zinc-700">Atividades</h3>
+                                <div className="flex gap-2">
+                                     <Button size="sm" variant="outline" className="h-8 w-8 rounded-full p-0">
+                                        <Filter className="h-3.5 w-3.5" />
+                                     </Button>
+                                    <Button size="sm" variant="outline" className="h-8 gap-1.5 rounded-full text-xs">
+                                        <Plus className="h-3.5 w-3.5" />
+                                        Nova
+                                    </Button>
+                                </div>
+                            </div>
+
+                            <div className="space-y-3">
+                                {mockActivities.map((activity) => (
+                                    <div key={activity.id} className="flex items-start gap-3 rounded-2xl border border-zinc-100 bg-white p-3 transition-all hover:border-zinc-200">
+                                        <div className={cn(
+                                            "flex h-9 w-9 shrink-0 items-center justify-center rounded-full border",
+                                            activity.status === 'completed' ? "border-zinc-100 bg-zinc-50 text-zinc-400" : "border-brand/10 bg-brand/5 text-brand"
+                                        )}>
+                                           {(() => {
+                                                const Icon = getActivityIcon(activity.type);
+                                                return <Icon className="h-4 w-4" />;
+                                            })()}
+                                        </div>
+                                        <div className="flex-1 space-y-1">
+                                            <div className="flex items-start justify-between">
+                                                <p className={cn("font-heading text-sm font-medium", activity.status === 'completed' ? "text-zinc-500 line-through" : "text-zinc-900")}>
+                                                    {activity.title}
+                                                </p>
+                                                <div className="flex gap-1">
+                                                     <button className="flex h-6 w-6 items-center justify-center rounded-full text-zinc-300 hover:bg-zinc-100 hover:text-zinc-600">
+                                                        <CheckCircle className="h-4 w-4" />
+                                                     </button>
+                                                </div>
+                                            </div>
+                                            <div className="flex items-center gap-3 text-xs text-zinc-400">
+                                                <span className={cn(
+                                                    "flex items-center gap-1",
+                                                    activity.status === 'late' && "text-red-500 font-medium"
+                                                )}>
+                                                    <Clock className="h-3 w-3" />
+                                                    {activity.date}
+                                                </span>
+                                                <span className="flex items-center gap-1">
+                                                    <UserCircle className="h-3 w-3" />
+                                                    {activity.responsible}
+                                                </span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
                         </TabsContent>
 
-                        {/* ── Tab: Historico ─────────────────────────────── */}
-                        <TabsContent value="historico" className="mt-5">
-                      <TimelinePremium events={mockTimeline} />
-                    </TabsContent>
+                        {/* ── Tab: Anotações ────────────────────────────── */}
+                        <TabsContent value="anotacoes" className="mt-0 space-y-6">
+                            {/* Editor Principal */}
+                            <div className="space-y-2">
+                                <label className="text-xs font-semibold uppercase tracking-wider text-zinc-500">Nova Nota</label>
+                                <NotesCard 
+                                    initialNotes={notes}
+                                    onNotesChange={setNotes}
+                                />
+                            </div>
+
+                            <Separator />
+
+                            {/* Feed de Histórico */}
+                            <div className="space-y-4">
+                                <label className="text-xs font-semibold uppercase tracking-wider text-zinc-500">Histórico</label>
+                                <div className="space-y-4 pl-2">
+                                    {mockNoteHistory.map((note) => (
+                                        <div key={note.id} className="relative border-l border-zinc-100 pl-6 pb-2 last:pb-0">
+                                            <div className="absolute -left-1.5 top-0 h-3 w-3 rounded-full border border-zinc-100 bg-zinc-50" />
+                                            <div className="space-y-1.5">
+                                                <div className="flex items-center gap-2">
+                                                    <span className="font-heading text-xs font-semibold text-zinc-700">{note.author}</span>
+                                                    <span className="text-[10px] text-zinc-400">{note.date}</span>
+                                                </div>
+                                                <p className="font-body text-sm text-zinc-600 leading-relaxed">
+                                                    {note.content}
+                                                </p>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        </TabsContent>
+
+                        {/* ── Tab: Linha do Tempo (NEW - replaced Historico) ── */}
+                        <TabsContent value="linha-do-tempo" className="mt-0 space-y-4">
+                            <TimelinePremium events={mockTimeline} />
+                        </TabsContent>
                         </div>
 
                         {/* ── Right Column: Persistent Sidebar (Span 5) ── */}
@@ -3236,11 +3189,7 @@ export function LeadCardDrawer() {
                                     </div>
                                 </PremiumCard>
 
-                                {/* ── Notes Block ── */}
-                                <NotesCard 
-                                    initialNotes={notes}
-                                    onNotesChange={setNotes}
-                                />
+
                             </div>
                         </div>
                     </div>

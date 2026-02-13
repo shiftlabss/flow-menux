@@ -363,3 +363,297 @@
  GET /pipes 200 in 129ms (compile: 16ms, proxy.ts: 11ms, render: 102ms)
  GET /manifest.webmanifest 200 in 13ms (compile: 10ms, render: 3ms)
  GET /icons/icon-192x192.png 404 in 43ms (compile: 12ms, render: 31ms)
+ GET /dashboard 200 in 59ms (compile: 9ms, proxy.ts: 13ms, render: 37ms)
+ GET /manifest.webmanifest 200 in 9ms (compile: 1673µs, render: 8ms)
+ GET /icons/icon-192x192.png 404 in 55ms (compile: 3ms, render: 52ms)
+✓ Compiled in 1083ms
+⚠ Fast Refresh had to perform a full reload due to a runtime error.
+⚠ Fast Refresh had to perform a full reload due to a runtime error.
+⚠ Fast Refresh had to perform a full reload due to a runtime error.
+✓ Compiled in 280ms
+ GET /manifest.webmanifest 200 in 26ms (compile: 14ms, render: 11ms)
+ GET /dashboard 200 in 3.3s (compile: 570ms, proxy.ts: 47ms, render: 2.7s)
+ GET /pipes 200 in 1050ms (compile: 178ms, proxy.ts: 270ms, render: 602ms)
+ GET /dashboard 200 in 1077ms (compile: 449ms, proxy.ts: 80ms, render: 548ms)
+ GET /icons/icon-192x192.png 404 in 375ms (compile: 83ms, render: 292ms)
+ GET /manifest.webmanifest 200 in 15ms (compile: 3ms, render: 12ms)
+ GET /manifest.webmanifest 200 in 34ms (compile: 3ms, render: 31ms)
+ GET /icons/icon-192x192.png 404 in 334ms (compile: 29ms, render: 305ms)
+ GET /icons/icon-192x192.png 404 in 185ms (compile: 58ms, render: 127ms)
+✓ Compiled in 863ms
+⚠ Fast Refresh had to perform a full reload due to a runtime error.
+⚠ Fast Refresh had to perform a full reload due to a runtime error.
+⚠ Fast Refresh had to perform a full reload due to a runtime error.
+ GET /manifest.webmanifest 200 in 29ms (compile: 15ms, render: 14ms)
+ GET /dashboard 200 in 3.7s (compile: 256ms, proxy.ts: 32ms, render: 3.4s)
+ GET /pipes 200 in 3.7s (compile: 571ms, proxy.ts: 17ms, render: 3.1s)
+ GET /dashboard 200 in 3.7s (compile: 3.1s, proxy.ts: 16ms, render: 583ms)
+ GET /manifest.webmanifest 200 in 117ms (compile: 112ms, render: 4ms)
+ GET /manifest.webmanifest 200 in 17ms (compile: 12ms, render: 5ms)
+ GET /icons/icon-192x192.png 404 in 1161ms (compile: 62ms, render: 1099ms)
+ GET /icons/icon-192x192.png 404 in 1005ms (compile: 142ms, render: 864ms)
+ GET /icons/icon-192x192.png 404 in 200ms (compile: 15ms, render: 185ms)
+⚠ Fast Refresh had to perform a full reload due to a runtime error.
+⚠ Fast Refresh had to perform a full reload due to a runtime error.
+⚠ Fast Refresh had to perform a full reload due to a runtime error.
+✓ Compiled in 863ms
+⚠ Fast Refresh had to perform a full reload due to a runtime error.
+⚠ Fast Refresh had to perform a full reload due to a runtime error.
+⚠ Fast Refresh had to perform a full reload due to a runtime error.
+ GET /pipes 200 in 1290ms (compile: 456ms, proxy.ts: 50ms, render: 784ms)
+ GET /manifest.webmanifest 200 in 11ms (compile: 6ms, render: 6ms)
+ GET /dashboard 200 in 2.3s (compile: 1284ms, proxy.ts: 51ms, render: 995ms)
+ GET /dashboard 200 in 1117ms (compile: 892ms, proxy.ts: 5ms, render: 221ms)
+ GET /pipes 200 in 953ms (compile: 57ms, proxy.ts: 698ms, render: 198ms)
+ GET /manifest.webmanifest 200 in 62ms (compile: 33ms, render: 28ms)
+ GET /icons/icon-192x192.png 404 in 222ms (compile: 32ms, render: 190ms)
+ GET /manifest.webmanifest 200 in 25ms (compile: 8ms, render: 16ms)
+ GET /icons/icon-192x192.png 404 in 153ms (compile: 13ms, render: 140ms)
+ GET /icons/icon-192x192.png 404 in 57ms (compile: 7ms, render: 50ms)
+⚠ Fast Refresh had to perform a full reload due to a runtime error.
+⚠ Fast Refresh had to perform a full reload due to a runtime error.
+⚠ Fast Refresh had to perform a full reload due to a runtime error.
+⚠ Fast Refresh had to perform a full reload due to a runtime error.
+⚠ Fast Refresh had to perform a full reload due to a runtime error.
+⚠ Fast Refresh had to perform a full reload due to a runtime error.
+✓ Compiled in 1174ms
+⚠ Fast Refresh had to perform a full reload due to a runtime error.
+⚠ Fast Refresh had to perform a full reload due to a runtime error.
+⚠ Fast Refresh had to perform a full reload due to a runtime error.
+ GET /manifest.webmanifest 200 in 12ms (compile: 5ms, render: 7ms)
+ GET /dashboard 200 in 5.4s (compile: 487ms, proxy.ts: 21ms, render: 4.9s)
+ GET /dashboard 200 in 5.3s (compile: 148ms, proxy.ts: 3.0s, render: 2.1s)
+ GET /pipes 200 in 4.3s (compile: 471ms, proxy.ts: 2.0s, render: 1761ms)
+ GET /manifest.webmanifest 200 in 104ms (compile: 49ms, render: 54ms)
+ GET /manifest.webmanifest 200 in 19ms (compile: 11ms, render: 8ms)
+ GET /icons/icon-192x192.png 404 in 855ms (compile: 182ms, render: 672ms)
+ GET /icons/icon-192x192.png 404 in 674ms (compile: 49ms, render: 625ms)
+ GET /icons/icon-192x192.png 404 in 604ms (compile: 4ms, render: 600ms)
+⚠ Fast Refresh had to perform a full reload due to a runtime error.
+⚠ Fast Refresh had to perform a full reload due to a runtime error.
+⚠ Fast Refresh had to perform a full reload due to a runtime error.
+✓ Compiled in 3.7s
+⚠ Fast Refresh had to perform a full reload due to a runtime error.
+⚠ Fast Refresh had to perform a full reload due to a runtime error.
+⚠ Fast Refresh had to perform a full reload due to a runtime error.
+ GET /dashboard 200 in 3.0s (compile: 836ms, proxy.ts: 1056ms, render: 1111ms)
+ GET /manifest.webmanifest 200 in 17ms (compile: 10ms, render: 7ms)
+ GET /pipes 200 in 3.0s (compile: 1950ms, proxy.ts: 99ms, render: 942ms)
+ GET /dashboard 200 in 1045ms (compile: 48ms, proxy.ts: 413ms, render: 584ms)
+ GET /dashboard 200 in 747ms (compile: 75ms, proxy.ts: 5ms, render: 667ms)
+ GET /manifest.webmanifest 200 in 123ms (compile: 76ms, render: 47ms)
+ GET /manifest.webmanifest 200 in 23ms (compile: 15ms, render: 9ms)
+ GET /icons/icon-192x192.png 404 in 803ms (compile: 159ms, render: 643ms)
+ GET /icons/icon-192x192.png 404 in 697ms (compile: 177ms, render: 520ms)
+ GET /icons/icon-192x192.png 404 in 93ms (compile: 21ms, render: 72ms)
+✓ Compiled in 1570ms
+⚠ Fast Refresh had to perform a full reload due to a runtime error.
+⚠ Fast Refresh had to perform a full reload due to a runtime error.
+⚠ Fast Refresh had to perform a full reload due to a runtime error.
+ GET /manifest.webmanifest 200 in 25ms (compile: 16ms, render: 9ms)
+ GET /dashboard 200 in 3.3s (compile: 1277ms, proxy.ts: 142ms, render: 1923ms)
+ GET /dashboard 200 in 3.2s (compile: 2.0s, proxy.ts: 112ms, render: 1051ms)
+ GET /pipes 200 in 3.2s (compile: 2.3s, proxy.ts: 58ms, render: 885ms)
+ GET /manifest.webmanifest 200 in 41ms (compile: 32ms, render: 10ms)
+ GET /icons/icon-192x192.png 404 in 296ms (compile: 68ms, render: 228ms)
+ GET /icons/icon-192x192.png 404 in 143ms (compile: 10ms, render: 133ms)
+ GET /manifest.webmanifest 200 in 15ms (compile: 11ms, render: 5ms)
+ GET /icons/icon-192x192.png 404 in 157ms (compile: 49ms, render: 108ms)
+✓ Compiled in 797ms
+✓ Compiled in 1468ms
+✓ Compiled in 650ms
+✓ Compiled in 1244ms
+✓ Compiled in 682ms
+⚠ Fast Refresh had to perform a full reload due to a runtime error.
+⚠ Fast Refresh had to perform a full reload due to a runtime error.
+⚠ Fast Refresh had to perform a full reload due to a runtime error.
+ GET /manifest.webmanifest 200 in 28ms (compile: 15ms, render: 12ms)
+ GET /dashboard 200 in 3.6s (compile: 1103ms, proxy.ts: 12ms, render: 2.5s)
+ GET /dashboard 200 in 3.6s (compile: 2.7s, proxy.ts: 17ms, render: 863ms)
+ GET /pipes 200 in 3.6s (compile: 3.0s, proxy.ts: 20ms, render: 605ms)
+ GET /manifest.webmanifest 200 in 69ms (compile: 6ms, render: 63ms)
+ GET /manifest.webmanifest 200 in 15ms (compile: 10ms, render: 4ms)
+ GET /icons/icon-192x192.png 404 in 577ms (compile: 212ms, render: 365ms)
+ GET /icons/icon-192x192.png 404 in 297ms (compile: 17ms, render: 280ms)
+ GET /icons/icon-192x192.png 404 in 194ms (compile: 61ms, render: 133ms)
+✓ Compiled in 512ms
+⚠ Fast Refresh had to perform a full reload due to a runtime error.
+⚠ Fast Refresh had to perform a full reload due to a runtime error.
+⚠ Fast Refresh had to perform a full reload due to a runtime error.
+ GET /manifest.webmanifest 200 in 12ms (compile: 5ms, render: 7ms)
+ GET /dashboard 200 in 2.7s (compile: 519ms, proxy.ts: 12ms, render: 2.2s)
+ GET /dashboard 200 in 2.7s (compile: 1723ms, proxy.ts: 24ms, render: 929ms)
+ GET /pipes 200 in 2.7s (compile: 1876ms, proxy.ts: 33ms, render: 766ms)
+ GET /manifest.webmanifest 200 in 29ms (compile: 18ms, render: 10ms)
+ GET /manifest.webmanifest 200 in 13ms (compile: 9ms, render: 4ms)
+ GET /icons/icon-192x192.png 404 in 301ms (compile: 130ms, render: 170ms)
+ GET /icons/icon-192x192.png 404 in 251ms (compile: 133ms, render: 118ms)
+ GET /icons/icon-192x192.png 404 in 42ms (compile: 5ms, render: 37ms)
+✓ Compiled in 429ms
+✓ Compiled in 520ms
+⚠ Fast Refresh had to perform a full reload due to a runtime error.
+⚠ Fast Refresh had to perform a full reload due to a runtime error.
+⚠ Fast Refresh had to perform a full reload due to a runtime error.
+ GET /manifest.webmanifest 200 in 20ms (compile: 13ms, render: 7ms)
+ GET /dashboard 200 in 3.0s (compile: 235ms, proxy.ts: 90ms, render: 2.7s)
+ GET /pipes 200 in 3.0s (compile: 504ms, proxy.ts: 77ms, render: 2.4s)
+ GET /dashboard 200 in 2.9s (compile: 2.2s, proxy.ts: 7ms, render: 718ms)
+ GET /manifest.webmanifest 200 in 88ms (compile: 71ms, render: 17ms)
+ GET /manifest.webmanifest 200 in 64ms (compile: 16ms, render: 49ms)
+ GET /icons/icon-192x192.png 404 in 1132ms (compile: 248ms, render: 884ms)
+ GET /icons/icon-192x192.png 404 in 539ms (compile: 68ms, render: 471ms)
+ GET /icons/icon-192x192.png 404 in 266ms (compile: 7ms, render: 259ms)
+✓ Compiled in 3s
+⚠ Fast Refresh had to perform a full reload due to a runtime error.
+⚠ Fast Refresh had to perform a full reload due to a runtime error.
+⚠ Fast Refresh had to perform a full reload due to a runtime error.
+ GET /manifest.webmanifest 200 in 28ms (compile: 12ms, render: 17ms)
+ GET /dashboard 200 in 6.7s (compile: 2.3s, proxy.ts: 317ms, render: 4.0s)
+ GET /pipes 200 in 6.4s (compile: 4.9s, proxy.ts: 233ms, render: 1218ms)
+ GET /dashboard 200 in 6.5s (compile: 1977ms, proxy.ts: 211ms, render: 4.3s)
+ GET /manifest.webmanifest 200 in 216ms (compile: 163ms, render: 53ms)
+ GET /manifest.webmanifest 200 in 18ms (compile: 14ms, render: 5ms)
+ GET /icons/icon-192x192.png 404 in 567ms (compile: 223ms, render: 344ms)
+ GET /icons/icon-192x192.png 404 in 266ms (compile: 75ms, render: 191ms)
+ GET /icons/icon-192x192.png 404 in 116ms (compile: 26ms, render: 90ms)
+✓ Compiled in 1515ms
+⚠ Fast Refresh had to perform a full reload due to a runtime error.
+⚠ Fast Refresh had to perform a full reload due to a runtime error.
+⚠ Fast Refresh had to perform a full reload due to a runtime error.
+⚠ Fast Refresh had to perform a full reload due to a runtime error.
+⚠ Fast Refresh had to perform a full reload due to a runtime error.
+⚠ Fast Refresh had to perform a full reload due to a runtime error.
+ GET /manifest.webmanifest 200 in 50ms (compile: 37ms, render: 13ms)
+✓ Compiled in 8ms
+ GET /dashboard 200 in 10.4s (compile: 6.7s, proxy.ts: 174ms, render: 3.5s)
+ GET /dashboard 200 in 10.8s (compile: 7.2s, proxy.ts: 367ms, render: 3.2s)
+ GET /pipes 200 in 10.7s (compile: 2.1s, proxy.ts: 298ms, render: 8.3s)
+ GET /manifest.webmanifest 200 in 253ms (compile: 236ms, render: 16ms)
+ GET /manifest.webmanifest 200 in 50ms (compile: 41ms, render: 9ms)
+ GET /icons/icon-192x192.png 404 in 800ms (compile: 138ms, render: 662ms)
+ GET /icons/icon-192x192.png 404 in 364ms (compile: 143ms, render: 221ms)
+ GET /icons/icon-192x192.png 404 in 165ms (compile: 11ms, render: 154ms)
+✓ Compiled in 1234ms
+⚠ Fast Refresh had to perform a full reload due to a runtime error.
+⚠ Fast Refresh had to perform a full reload due to a runtime error.
+⚠ Fast Refresh had to perform a full reload due to a runtime error.
+ GET /manifest.webmanifest 200 in 77ms (compile: 56ms, render: 21ms)
+ GET /dashboard 200 in 3.7s (compile: 373ms, proxy.ts: 13ms, render: 3.4s)
+ GET /pipes 200 in 3.8s (compile: 2.1s, proxy.ts: 11ms, render: 1653ms)
+ GET /dashboard 200 in 3.8s (compile: 2.2s, proxy.ts: 5ms, render: 1581ms)
+ GET /manifest.webmanifest 200 in 235ms (compile: 181ms, render: 54ms)
+ GET /manifest.webmanifest 200 in 38ms (compile: 34ms, render: 4ms)
+ GET /icons/icon-192x192.png 404 in 1422ms (compile: 332ms, render: 1090ms)
+ GET /icons/icon-192x192.png 404 in 864ms (compile: 17ms, render: 846ms)
+ GET /icons/icon-192x192.png 404 in 609ms (compile: 85ms, render: 524ms)
+ GET /dashboard 200 in 128ms (compile: 18ms, proxy.ts: 16ms, render: 94ms)
+ GET /manifest.webmanifest 200 in 6ms (compile: 2ms, render: 4ms)
+ GET /icons/icon-192x192.png 404 in 82ms (compile: 5ms, render: 77ms)
+✓ Compiled in 1349ms
+⚠ Fast Refresh had to perform a full reload due to a runtime error.
+⚠ Fast Refresh had to perform a full reload due to a runtime error.
+⚠ Fast Refresh had to perform a full reload due to a runtime error.
+ GET /manifest.webmanifest 200 in 6ms (compile: 1616µs, render: 4ms)
+ GET /dashboard 200 in 4.8s (compile: 856ms, proxy.ts: 24ms, render: 3.9s)
+ GET /dashboard 200 in 4.8s (compile: 3.7s, proxy.ts: 74ms, render: 1014ms)
+ GET /pipes 200 in 4.8s (compile: 3.8s, proxy.ts: 76ms, render: 850ms)
+ GET /manifest.webmanifest 200 in 14ms (compile: 4ms, render: 9ms)
+ GET /manifest.webmanifest 200 in 18ms (compile: 4ms, render: 14ms)
+ GET /icons/icon-192x192.png 404 in 749ms (compile: 24ms, render: 725ms)
+ GET /icons/icon-192x192.png 404 in 322ms (compile: 63ms, render: 259ms)
+ GET /icons/icon-192x192.png 404 in 171ms (compile: 25ms, render: 145ms)
+ GET /dashboard 200 in 94ms (compile: 14ms, proxy.ts: 14ms, render: 67ms)
+ GET /manifest.webmanifest 200 in 6ms (compile: 3ms, render: 3ms)
+ GET /icons/icon-192x192.png 404 in 66ms (compile: 4ms, render: 62ms)
+ GET / 307 in 161ms (compile: 65ms, render: 96ms)
+ GET /dashboard 200 in 104ms (compile: 7ms, proxy.ts: 1807µs, render: 96ms)
+ GET /manifest.webmanifest 200 in 13ms (compile: 9ms, render: 3ms)
+ GET /icons/icon-192x192.png 404 in 71ms (compile: 3ms, render: 68ms)
+✓ Compiled in 401ms
+⚠ Fast Refresh had to perform a full reload due to a runtime error.
+ GET /manifest.webmanifest 200 in 16ms (compile: 10ms, render: 6ms)
+ GET /dashboard 200 in 845ms (compile: 250ms, proxy.ts: 34ms, render: 561ms)
+ GET /icons/icon-192x192.png 404 in 85ms (compile: 12ms, render: 73ms)
+ GET /dashboard 200 in 347ms (compile: 112ms, proxy.ts: 28ms, render: 207ms)
+ GET /manifest.webmanifest 200 in 9ms (compile: 3ms, render: 6ms)
+ GET /icons/icon-192x192.png 404 in 78ms (compile: 9ms, render: 69ms)
+✓ Compiled in 295ms
+⚠ Fast Refresh had to perform a full reload due to a runtime error.
+ GET /manifest.webmanifest 200 in 37ms (compile: 23ms, render: 13ms)
+ GET /dashboard 200 in 822ms (compile: 202ms, proxy.ts: 54ms, render: 566ms)
+ GET /icons/icon-192x192.png 404 in 94ms (compile: 12ms, render: 82ms)
+ GET /pipes 200 in 197ms (compile: 131ms, proxy.ts: 46ms, render: 20ms)
+ GET /manifest.webmanifest 200 in 5ms (compile: 2ms, render: 3ms)
+ GET /icons/icon-192x192.png 404 in 29ms (compile: 3ms, render: 26ms)
+✓ Compiled in 382ms
+ GET / 307 in 159ms (compile: 45ms, render: 115ms)
+ GET /dashboard 200 in 411ms (compile: 90ms, proxy.ts: 1249µs, render: 320ms)
+ GET /manifest.webmanifest 200 in 5ms (compile: 1355µs, render: 3ms)
+ GET /icons/icon-192x192.png 404 in 52ms (compile: 14ms, render: 39ms)
+ GET / 307 in 209ms (compile: 11ms, render: 198ms)
+ GET /manifest.webmanifest 200 in 22ms (compile: 11ms, render: 11ms)
+ GET /dashboard 200 in 195ms (compile: 12ms, proxy.ts: 3ms, render: 180ms)
+ GET /icons/icon-192x192.png 404 in 123ms (compile: 54ms, render: 68ms)
+ GET /pipes 200 in 185ms (compile: 148ms, proxy.ts: 2ms, render: 35ms)
+ GET /manifest.webmanifest 200 in 5ms (compile: 2ms, render: 3ms)
+ GET /icons/icon-192x192.png 404 in 62ms (compile: 18ms, render: 44ms)
+ GET /pipes 200 in 61ms (compile: 11ms, proxy.ts: 15ms, render: 35ms)
+ GET /manifest.webmanifest 200 in 10ms (compile: 4ms, render: 6ms)
+ GET /icons/icon-192x192.png 404 in 118ms (compile: 13ms, render: 105ms)
+ GET / 307 in 98ms (compile: 18ms, render: 80ms)
+ GET /manifest.webmanifest 200 in 16ms (compile: 8ms, render: 8ms)
+ GET /dashboard 200 in 147ms (compile: 11ms, proxy.ts: 3ms, render: 134ms)
+ GET /icons/icon-192x192.png 404 in 175ms (compile: 9ms, render: 166ms)
+ GET /pipes 200 in 72ms (compile: 9ms, proxy.ts: 29ms, render: 33ms)
+ GET /manifest.webmanifest 200 in 17ms (compile: 5ms, render: 12ms)
+ GET /icons/icon-192x192.png 404 in 60ms (compile: 4ms, render: 56ms)
+✓ Compiled in 914ms
+✓ Compiled in 565ms
+⚠ Fast Refresh had to perform a full reload due to a runtime error.
+ GET /manifest.webmanifest 200 in 12ms (compile: 6ms, render: 6ms)
+ GET /pipes 200 in 2.4s (compile: 811ms, proxy.ts: 84ms, render: 1476ms)
+ GET /pipes 200 in 1371ms (compile: 1161ms, proxy.ts: 2ms, render: 208ms)
+ GET /pipes 200 in 2.3s (compile: 970ms, proxy.ts: 11ms, render: 1366ms)
+ GET /pipes 200 in 179ms (compile: 43ms, proxy.ts: 8ms, render: 128ms)
+ GET /manifest.webmanifest 200 in 6ms (compile: 1852µs, render: 4ms)
+ GET /icons/icon-192x192.png 404 in 131ms (compile: 35ms, render: 96ms)
+ GET /icons/icon-192x192.png 404 in 28ms (compile: 3ms, render: 25ms)
+ GET /pipes 200 in 190ms (compile: 43ms, proxy.ts: 13ms, render: 133ms)
+ GET /manifest.webmanifest 200 in 6ms (compile: 3ms, render: 3ms)
+ GET /icons/icon-192x192.png 404 in 30ms (compile: 10ms, render: 20ms)
+ GET /pipes 200 in 476ms (compile: 41ms, proxy.ts: 76ms, render: 359ms)
+ GET /manifest.webmanifest 200 in 12ms (compile: 4ms, render: 8ms)
+ GET /icons/icon-192x192.png 404 in 117ms (compile: 4ms, render: 112ms)
+ GET /pipes 200 in 138ms (compile: 16ms, proxy.ts: 17ms, render: 105ms)
+ GET /manifest.webmanifest 200 in 96ms (compile: 40ms, render: 56ms)
+ GET /icons/icon-192x192.png 404 in 181ms (compile: 68ms, render: 113ms)
+✓ Compiled in 448ms
+✓ Compiled in 290ms
+⚠ Fast Refresh had to perform a full reload due to a runtime error.
+⚠ Fast Refresh had to perform a full reload due to a runtime error.
+ GET /pipes 200 in 2.1s (compile: 496ms, proxy.ts: 37ms, render: 1584ms)
+ GET /manifest.webmanifest 200 in 82ms (compile: 15ms, render: 67ms)
+ GET /pipes 200 in 2.0s (compile: 1013ms, proxy.ts: 17ms, render: 1000ms)
+ GET /manifest.webmanifest 200 in 11ms (compile: 3ms, render: 8ms)
+ GET /icons/icon-192x192.png 404 in 383ms (compile: 92ms, render: 291ms)
+ GET /icons/icon-192x192.png 404 in 50ms (compile: 6ms, render: 43ms)
+✓ Compiled in 216ms
+⚠ Fast Refresh had to perform a full reload due to a runtime error.
+⚠ Fast Refresh had to perform a full reload due to a runtime error.
+ GET /manifest.webmanifest 200 in 18ms (compile: 12ms, render: 6ms)
+ GET /pipes 200 in 945ms (compile: 230ms, proxy.ts: 58ms, render: 657ms)
+ GET /pipes 200 in 888ms (compile: 748ms, proxy.ts: 7ms, render: 132ms)
+ GET /manifest.webmanifest 200 in 61ms (compile: 52ms, render: 9ms)
+ GET /icons/icon-192x192.png 404 in 727ms (compile: 384ms, render: 343ms)
+ GET /icons/icon-192x192.png 404 in 198ms (compile: 19ms, render: 179ms)
+⚠ Fast Refresh had to perform a full reload due to a runtime error.
+⚠ Fast Refresh had to perform a full reload due to a runtime error.
+✓ Compiled in 559ms
+⚠ Fast Refresh had to perform a full reload due to a runtime error.
+⚠ Fast Refresh had to perform a full reload due to a runtime error.
+ GET /manifest.webmanifest 200 in 18ms (compile: 10ms, render: 8ms)
+ GET /pipes 200 in 1777ms (compile: 230ms, proxy.ts: 28ms, render: 1519ms)
+ GET /pipes 200 in 1729ms (compile: 678ms, proxy.ts: 5ms, render: 1046ms)
+ GET /manifest.webmanifest 200 in 29ms (compile: 21ms, render: 8ms)
+ GET /icons/icon-192x192.png 404 in 212ms (compile: 99ms, render: 112ms)
+ GET /icons/icon-192x192.png 404 in 176ms (compile: 131ms, render: 45ms)
