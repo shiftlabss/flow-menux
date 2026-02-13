@@ -53,6 +53,7 @@ import {
   Wine,
   Clock3,
   Globe2,
+  Handshake,
   LayoutList,
   Target,
 } from "lucide-react";
@@ -2227,6 +2228,7 @@ export default function LeadCardDrawer() {
                         { value: "contatos", label: "Contatos" },
                         { value: "visitas", label: "Visitas" },
                         { value: "atividades", label: "Atividades" },
+                        { value: "negociacao", label: "Negociação" },
                         { value: "anotacoes", label: "Anotações" },
                         { value: "linha-do-tempo", label: "Linha do Tempo" },
                       ].map((tab) => (
@@ -2248,133 +2250,7 @@ export default function LeadCardDrawer() {
                         
                         {/* ── Tab: Empresa ──────────────────────────────── */}
                         <TabsContent value="empresa" className="mt-0 space-y-4">
-                            {/* ── Section: Classificação & Resumo (Moved from Values/Tags) ── */}
-                            <PremiumCard
-                              title="Classificação & Resumo"
-                              description="Dados principais do negócio"
-                              icon={Target}
-                              delay={0}
-                            >
-                                <div className="space-y-6">
-                                    {/* Row 1: Tags input & list */}
-                                    <div className="space-y-3">
-                                        <Label className="font-heading text-[10px] font-bold uppercase tracking-wider text-zinc-400">
-                                            Tags
-                                        </Label>
-                                        {!isLocked && (
-                                          <div className="flex items-center gap-2">
-                                            <Input
-                                              value={newTag}
-                                              onChange={(e) => setNewTag(e.target.value)}
-                                              onKeyDown={(e) => {
-                                                if (e.key === "Enter") {
-                                                  e.preventDefault();
-                                                  handleAddTag();
-                                                }
-                                              }}
-                                              placeholder="Nova tag..."
-                                              className="h-8 flex-1 rounded-[10px] font-body text-xs"
-                                            />
-                                            <Button
-                                              onClick={handleAddTag}
-                                              className="h-8 w-8 rounded-full bg-brand p-0 text-white hover:bg-brand/90"
-                                              size="icon"
-                                            >
-                                              <Plus className="h-4 w-4" />
-                                            </Button>
-                                          </div>
-                                        )}
-                                        <div className="flex flex-wrap gap-2">
-                                          {tags.length > 0 ? tags.map((tag) => (
-                                            <Badge
-                                              key={tag}
-                                              variant="outline"
-                                              className="gap-1.5 rounded-[6px] border-zinc-200 bg-zinc-50 py-1 pl-2 pr-1.5 font-body text-[10px] font-medium text-zinc-600"
-                                            >
-                                              {tag}
-                                              {!isLocked && (
-                                                <button
-                                                  onClick={() => handleRemoveTag(tag)}
-                                                  className="rounded-full p-0.5 transition-colors hover:bg-zinc-200"
-                                                >
-                                                  <X className="h-3 w-3 text-zinc-400" />
-                                                </button>
-                                              )}
-                                            </Badge>
-                                          )) : (
-                                            <p className="font-body text-xs text-zinc-400 italic">Nenhuma tag</p>
-                                          )}
-                                        </div>
-                                    </div>
 
-                                    <div className="h-px bg-zinc-100" />
-
-                                    {/* Row 2: Valores & Previsão */}
-                                    <div className="grid grid-cols-2 gap-4">
-                                        <EditableField
-                                          icon={<DollarSign className="h-3.5 w-3.5" />}
-                                          label="Valor Total"
-                                          value={formatCurrency(value)}
-                                          onSave={(v) => {
-                                            const num = Number(v.replace(/\D/g, ""));
-                                            if (!isNaN(num)) setValue(num);
-                                          }}
-                                          readOnly={isLocked}
-                                        />
-                                        <EditableField
-                                          icon={<DollarSign className="h-3.5 w-3.5" />}
-                                          label="Valor Mensal"
-                                          value={formatCurrency(monthlyValue)}
-                                          onSave={(v) => {
-                                            const num = Number(v.replace(/\D/g, ""));
-                                            if (!isNaN(num)) setMonthlyValue(num);
-                                          }}
-                                          readOnly={isLocked}
-                                        />
-                                        <EditableField
-                                          icon={<Calendar className="h-3.5 w-3.5" />}
-                                          label="Previsão"
-                                          value={expectedCloseDate}
-                                          onSave={setExpectedCloseDate}
-                                          type="date"
-                                          readOnly={isLocked}
-                                        />
-                                        <EditableField
-                                          icon={<Globe className="h-3.5 w-3.5" />}
-                                          label="Fonte"
-                                          value={source}
-                                          onSave={() => {}}
-                                          readOnly
-                                        />
-                                    </div>
-                                    
-                                    {/* Discount detection block */}
-                                    {dealStatus === "open" &&
-                                      (value < referenceSetup * 0.8 ||
-                                        monthlyValue < referenceMRR * 0.9) && (
-                                        <div className="flex items-start gap-3 rounded-[10px] border border-status-warning/20 bg-status-warning/5 p-3">
-                                          <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-status-warning" />
-                                          <div className="flex-1">
-                                            <p className="font-heading text-xs font-semibold text-status-warning">
-                                              Desconto detectado
-                                            </p>
-                                            <div className="mt-1 space-y-0.5">
-                                              {value < referenceSetup * 0.8 && (
-                                                <p className="font-body text-[10px] text-status-warning">
-                                                  Setup ({formatCurrency(value)}) &lt; Ref ({formatCurrency(referenceSetup)})
-                                                </p>
-                                              )}
-                                              {monthlyValue < referenceMRR * 0.9 && (
-                                                <p className="font-body text-[10px] text-status-warning">
-                                                  MRR ({formatCurrency(monthlyValue)}) &lt; Ref ({formatCurrency(referenceMRR)})
-                                                </p>
-                                              )}
-                                            </div>
-                                          </div>
-                                        </div>
-                                      )}
-                                </div>
-                            </PremiumCard>
 
                             <PremiumCard
                               title="Localização"
@@ -2683,6 +2559,134 @@ export default function LeadCardDrawer() {
                               </div>
                             ))}
                           </div>
+                        </PremiumCard>
+
+                        {/* ── Section: Classificação & Resumo ── */}
+                        <PremiumCard
+                          title="Classificação & Resumo"
+                          description="Dados principais do negócio"
+                          icon={Target}
+                          delay={0.24}
+                        >
+                            <div className="space-y-6">
+                                {/* Row 1: Tags input & list */}
+                                <div className="space-y-3">
+                                    <Label className="font-heading text-[10px] font-bold uppercase tracking-wider text-zinc-400">
+                                        Tags
+                                    </Label>
+                                    {!isLocked && (
+                                      <div className="flex items-center gap-2">
+                                        <Input
+                                          value={newTag}
+                                          onChange={(e) => setNewTag(e.target.value)}
+                                          onKeyDown={(e) => {
+                                            if (e.key === "Enter") {
+                                              e.preventDefault();
+                                              handleAddTag();
+                                            }
+                                          }}
+                                          placeholder="Nova tag..."
+                                          className="h-8 flex-1 rounded-[10px] font-body text-xs"
+                                        />
+                                        <Button
+                                          onClick={handleAddTag}
+                                          className="h-8 w-8 rounded-full bg-brand p-0 text-white hover:bg-brand/90"
+                                          size="icon"
+                                        >
+                                          <Plus className="h-4 w-4" />
+                                        </Button>
+                                      </div>
+                                    )}
+                                    <div className="flex flex-wrap gap-2">
+                                      {tags.length > 0 ? tags.map((tag) => (
+                                        <Badge
+                                          key={tag}
+                                          variant="outline"
+                                          className="gap-1.5 rounded-[6px] border-zinc-200 bg-zinc-50 py-1 pl-2 pr-1.5 font-body text-[10px] font-medium text-zinc-600"
+                                        >
+                                          {tag}
+                                          {!isLocked && (
+                                            <button
+                                              onClick={() => handleRemoveTag(tag)}
+                                              className="rounded-full p-0.5 transition-colors hover:bg-zinc-200"
+                                            >
+                                              <X className="h-3 w-3 text-zinc-400" />
+                                            </button>
+                                          )}
+                                        </Badge>
+                                      )) : (
+                                        <p className="font-body text-xs text-zinc-400 italic">Nenhuma tag</p>
+                                      )}
+                                    </div>
+                                </div>
+
+                                <div className="h-px bg-zinc-100" />
+
+                                {/* Row 2: Valores & Previsão */}
+                                <div className="grid grid-cols-2 gap-4">
+                                    <EditableField
+                                      icon={<DollarSign className="h-3.5 w-3.5" />}
+                                      label="Valor Total"
+                                      value={formatCurrency(value)}
+                                      onSave={(v) => {
+                                        const num = Number(v.replace(/\D/g, ""));
+                                        if (!isNaN(num)) setValue(num);
+                                      }}
+                                      readOnly={isLocked}
+                                    />
+                                    <EditableField
+                                      icon={<DollarSign className="h-3.5 w-3.5" />}
+                                      label="Valor Mensal"
+                                      value={formatCurrency(monthlyValue)}
+                                      onSave={(v) => {
+                                        const num = Number(v.replace(/\D/g, ""));
+                                        if (!isNaN(num)) setMonthlyValue(num);
+                                      }}
+                                      readOnly={isLocked}
+                                    />
+                                    <EditableField
+                                      icon={<Calendar className="h-3.5 w-3.5" />}
+                                      label="Previsão"
+                                      value={expectedCloseDate}
+                                      onSave={setExpectedCloseDate}
+                                      type="date"
+                                      readOnly={isLocked}
+                                    />
+                                    <EditableField
+                                      icon={<Globe className="h-3.5 w-3.5" />}
+                                      label="Fonte"
+                                      value={source}
+                                      onSave={() => {}}
+                                      readOnly
+                                    />
+                                </div>
+                                
+                                {/* Discount detection block */}
+                                {dealStatus === "open" &&
+                                  (value < referenceSetup * 0.8 ||
+                                    monthlyValue < referenceMRR * 0.9) && (
+                                    <div className="flex items-start gap-3 rounded-[10px] border border-status-warning/20 bg-status-warning/5 p-3">
+                                      <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-status-warning" />
+                                      <div className="flex-1">
+                                        <p className="font-heading text-xs font-semibold text-status-warning">
+                                          Desconto detectado
+                                        </p>
+                                        <div className="mt-1 space-y-0.5">
+                                          {value < referenceSetup * 0.8 && (
+                                            <p className="font-body text-[10px] text-status-warning">
+                                              Setup ({formatCurrency(value)}) &lt; Ref ({formatCurrency(referenceSetup)})
+                                            </p>
+                                          )}
+                                          {monthlyValue < referenceMRR * 0.9 && (
+                                            <p className="font-body text-[10px] text-status-warning">
+                                              MRR ({formatCurrency(monthlyValue)}) &lt; Ref ({formatCurrency(referenceMRR)})
+                                            </p>
+                                          )}
+                                        </div>
+                                      </div>
+                                    </div>
+                                  )}
+                            </div>
                         </PremiumCard>
 
                         <div className="flex justify-end pt-2">
@@ -3037,20 +3041,35 @@ export default function LeadCardDrawer() {
                                             <div className="flex items-center gap-3 text-xs text-zinc-400">
                                                 <span className={cn(
                                                     "flex items-center gap-1",
-                                                    activity.status === 'late' && "text-red-500 font-medium"
+                                                    activity.status === 'overdue' && "text-red-500 font-medium"
                                                 )}>
                                                     <Clock className="h-3 w-3" />
-                                                    {activity.date}
+                                                    {activity.dueDate}
                                                 </span>
                                                 <span className="flex items-center gap-1">
                                                     <UserCircle className="h-3 w-3" />
-                                                    {activity.responsible}
+                                                    {activity.responsibleName}
                                                 </span>
                                             </div>
                                         </div>
                                     </div>
                                 ))}
                             </div>
+                        </TabsContent>
+
+                        {/* ── Tab: Negociação ───────────────────────────── */}
+                        <TabsContent value="negociacao" className="mt-0 space-y-4">
+                            <PremiumCard
+                                title="Negociação"
+                                description="Detalhes da negociação"
+                                icon={Handshake}
+                                delay={0}
+                            >
+                                <div className="flex flex-col items-center justify-center py-8 text-center bg-zinc-50/50 rounded-xl border border-dashed border-zinc-200">
+                                    <Handshake className="h-8 w-8 text-zinc-200 mb-2" />
+                                    <p className="font-heading text-xs font-medium text-zinc-400">Funcionalidades de negociação em breve</p>
+                                </div>
+                            </PremiumCard>
                         </TabsContent>
 
                         {/* ── Tab: Anotações ────────────────────────────── */}
