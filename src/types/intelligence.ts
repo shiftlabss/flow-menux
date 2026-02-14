@@ -17,7 +17,12 @@ export type SlashCommand =
   | "/comparar"
   | "/planos"
   | "/followup"
-  | "/ajuda";
+  | "/ajuda"
+  | "/resumo"
+  | "/riscos"
+  | "/meta"
+  | "/coaching"
+  | "/agenda";
 
 export interface SlashCommandDefinition {
   command: SlashCommand;
@@ -75,7 +80,12 @@ export type MessageContentType =
   | "help"
   | "greeting"
   | "context-loaded"
-  | "error";
+  | "error"
+  | "morning-briefing"
+  | "risk-report"
+  | "goal-progress"
+  | "coaching"
+  | "agenda";
 
 /** Bloco copiável dentro de uma mensagem — seção 6.1 */
 export interface CopyableBlock {
@@ -155,7 +165,16 @@ export type ProactiveSuggestionType =
   | "hot-lead-idle"
   | "advanced-stage-opened"
   | "morning-summary"
-  | "missing-fields";
+  | "missing-fields"
+  | "sla-approaching"
+  | "stale-deal"
+  | "follow-up-reminder"
+  | "goal-risk"
+  | "win-probability-drop"
+  | "contract-expiring"
+  | "cross-sell-opportunity"
+  | "competitive-intelligence"
+  | "team-performance";
 
 export type ProactiveSuggestionPriority = "high" | "medium" | "low";
 
@@ -384,7 +403,7 @@ export const INTELLIGENCE_LIMITS = {
   /** Máx caracteres por resposta da IA */
   MAX_AI_RESPONSE_LENGTH: 6000,
   /** Sugestões proativas por dia */
-  MAX_PROACTIVE_SUGGESTIONS_PER_DAY: 3,
+  MAX_PROACTIVE_SUGGESTIONS_PER_DAY: 15,
   /** Consultas por hora */
   MAX_QUERIES_PER_HOUR: 60,
   /** Janela de contexto (mensagens) */

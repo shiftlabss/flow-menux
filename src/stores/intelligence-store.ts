@@ -24,6 +24,10 @@ import {
   generateErrorMessage,
 } from "@/lib/intelligence-engine";
 import { useAuthStore } from "@/stores/auth-store";
+import { useOpportunityStore } from "@/stores/opportunity-store";
+import { useActivityStore } from "@/stores/activity-store";
+import { usePipelineStore } from "@/stores/pipeline-store";
+import { computePipelineContext } from "@/lib/proactive-engine";
 
 // ─── Helpers ──────────────────────────────────────────────────────────────
 
@@ -48,13 +52,33 @@ function createConversation(messages: Message[] = []): Conversation {
 
 function getVendorContext() {
   const user = useAuthStore.getState().user;
+  const opportunities = useOpportunityStore.getState().opportunities;
+  const userOpps = opportunities.filter((o) => o.responsibleId === user?.id);
+  const closed = userOpps.filter((o) => o.status === "won" || o.status === "lost");
+  const won = closed.filter((o) => o.status === "won");
+  const conversionRate = closed.length >= 3 ? Math.round((won.length / closed.length) * 100) : undefined;
+
   return {
     id: user?.id ?? "unknown",
     name: user?.name ?? "Vendedor",
     role: (user?.role ?? "comercial") as any,
-    assignedCardCount: 0,
-    conversionRate: undefined,
+    assignedCardCount: userOpps.filter((o) => o.status === "open").length,
+    conversionRate,
   };
+}
+
+function getPipelineContext() {
+  try {
+    const user = useAuthStore.getState().user;
+    if (!user) return null;
+
+    const opportunities = useOpportunityStore.getState().opportunities;
+    const activities = useActivityStore.getState().activities;
+    return computePipelineContext(opportunities, activities, user.id, user.role);
+  } catch (err) {
+    console.error("[Intelligence] Erro ao computar pipeline context:", err);
+    return null;
+  }
 }
 
 // ─── Store ────────────────────────────────────────────────────────────────
@@ -164,7 +188,7 @@ export const useIntelligenceStore = create<IntelligenceStore>((set, get) => ({
         text,
         card: state.contextCard,
         vendor,
-        pipeline: null, // TODO: conectar com pipeline store
+        pipeline: getPipelineContext(),
       });
 
       set((s) => ({
@@ -226,7 +250,7 @@ export const useIntelligenceStore = create<IntelligenceStore>((set, get) => ({
         command,
         card: state.contextCard,
         vendor,
-        pipeline: null, // TODO: conectar com pipeline store
+        pipeline: getPipelineContext(),
       });
 
       set((s) => ({

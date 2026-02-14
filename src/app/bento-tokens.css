@@ -10,21 +10,40 @@
   --color-surface-overlay: #f4f4f5;
 
   /* === BENTO SHADOWS === */
-  /* Hierarquia de elevação para cards Bento */
-  --shadow-bento-sm: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
-  --shadow-bento-md: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
-  --shadow-bento-lg: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
+  /* Linear/Stripe inspired - Ultra smooth & diffuse */
+  --shadow-bento-sm: 
+    0 1px 2px 0 rgba(0, 0, 0, 0.02),
+    0 1px 3px 0 rgba(0, 0, 0, 0.02),
+    0 0 0 1px rgba(0, 0, 0, 0.03); /* Subtle ring for definition */
+    
+  --shadow-bento-md: 
+    0 4px 6px -1px rgba(0, 0, 0, 0.02),
+    0 2px 4px -1px rgba(0, 0, 0, 0.02),
+    0 0 0 1px rgba(0, 0, 0, 0.03);
+    
+  --shadow-bento-lg: 
+    0 10px 15px -3px rgba(0, 0, 0, 0.03),
+    0 4px 6px -2px rgba(0, 0, 0, 0.01),
+    0 0 0 1px rgba(0, 0, 0, 0.03);
 
-  /* Hover states */
-  --shadow-bento-sm-hover: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
-  --shadow-bento-md-hover: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
+  /* Hover states - Evaluation without lift (Linear style) */
+  --shadow-bento-sm-hover: 
+    0 4px 8px -2px rgba(0, 0, 0, 0.04),
+    0 2px 4px -2px rgba(0, 0, 0, 0.02),
+    0 0 0 1px rgba(0, 0, 0, 0.04);
+    
+  --shadow-bento-md-hover: 
+    0 12px 24px -6px rgba(0, 0, 0, 0.06),
+    0 4px 8px -4px rgba(0, 0, 0, 0.03),
+    0 0 0 1px rgba(0, 0, 0, 0.04);
 
   /* === BENTO BORDERS === */
-  --border-bento-default: #e4e4e7;
-  --border-bento-subtle: #f4f4f5;
-  --border-bento-focus: #7A55FD;
-  --border-bento-error: #DC2626;
-  --border-bento-success: #16A34A;
+  /* Bordas de 1px com baixa opacidade */
+  --border-bento-default: rgba(0, 0, 0, 0.06); /* Ultra subtle in light mode */
+  --border-bento-subtle: rgba(0, 0, 0, 0.04);
+  --border-bento-focus: rgba(122, 85, 253, 0.4);
+  --border-bento-error: rgba(220, 38, 38, 0.3);
+  --border-bento-success: rgba(22, 163, 74, 0.3);
 
   /* === BENTO SPACING === */
   --spacing-1-5: 6px;
@@ -34,32 +53,32 @@
   --spacing-14: 56px;
 
   /* === BENTO RADIUS === */
-  --radius-bento-card: 15px;
-  --radius-bento-inner: 10px;
-  --radius-bento-small: 4px;
+  --radius-bento-card: 20px; /* Requested 18-22px */
+  --radius-bento-inner: 14px;
+  --radius-bento-small: 8px;
 
   /* === TYPOGRAPHY SCALES === */
-  --text-bento-value-lg: 2.25rem;
-  --text-bento-value: 1.875rem;
-  --text-bento-value-sm: 1.5rem;
+  --text-bento-value-lg: 2rem; /* Adjusted for cleaner look */
+  --text-bento-value: 1.5rem;
+  --text-bento-value-sm: 1.25rem;
   --text-bento-label: 0.875rem;
   --text-bento-helper: 0.75rem;
   --text-bento-subheader: 0.75rem;
 
   /* === TRANSITIONS === */
-  --transition-bento-fast: 150ms cubic-bezier(0.4, 0, 0.2, 1);
-  --transition-bento: 200ms cubic-bezier(0.4, 0, 0.2, 1);
-  --transition-bento-slow: 300ms cubic-bezier(0.4, 0, 0.2, 1);
-  --transition-bento-chart: 700ms cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-bento-fast: 120ms cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  --transition-bento: 240ms cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  --transition-bento-slow: 360ms cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  --transition-bento-chart: 600ms cubic-bezier(0.25, 0.46, 0.45, 0.94);
 
   /* === INTERACTION SCALES === */
-  --scale-bento-active: 0.98;
-  --scale-bento-hover: 1.02;
+  --scale-bento-active: 0.99; /* Requested 0.99 */
+  --scale-bento-hover: 1.00; /* No scale on hover, just shadow as per Linear style */
 
   /* === BENTO GRID === */
-  --gap-bento-sm: 16px;
-  --gap-bento-md: 20px;
-  --gap-bento-lg: 24px;
+  --gap-bento-sm: 16px; /* Requested 16px */
+  --gap-bento-md: 16px; 
+  --gap-bento-lg: 16px;
 
   /* Container max-widths */
   --container-bento-sm: 1240px;

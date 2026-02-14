@@ -5,11 +5,12 @@
 // Connected to Zustand store for real message flow
 // ============================================================================
 
-import { Send, Sparkles, User, Command } from "lucide-react";
+import { Send, Sparkles, User, Command, X, AlertTriangle, Lightbulb, TrendingUp } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { cn } from "@/lib/cn";
 import { useState, useRef, useEffect, useCallback, useMemo } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import { useIntelligenceStore } from "@/stores/intelligence-store";
 import { useAuthStore } from "@/stores/auth-store";
 import { IntelligenceMessage } from "./intelligence-message";
@@ -163,6 +164,9 @@ export function JarvisFullConsole() {
           </button>
         </div>
       )}
+
+      {/* Banner Proativo — sugestão de maior prioridade */}
+      <ProactiveBanner />
 
       {/* Chat Area */}
       <ScrollArea className="flex-1 p-4">
@@ -339,5 +343,98 @@ export function JarvisFullConsole() {
         </div>
       )}
     </div>
+  );
+}
+
+// ============================================================================
+// Banner Proativo — exibe a sugestão de maior prioridade no topo do chat
+// ============================================================================
+
+function ProactiveBanner() {
+  const { proactiveSuggestions, dismissSuggestion, sendMessage } =
+    useIntelligenceStore();
+
+  const topSuggestion = useMemo(() => {
+    const pending = proactiveSuggestions.filter((s) => !s.dismissed);
+    if (pending.length === 0) return null;
+    // Prioridade: high > medium > low
+    const priorityOrder = { high: 0, medium: 1, low: 2 };
+    return [...pending].sort(
+      (a, b) => priorityOrder[a.priority] - priorityOrder[b.priority]
+    )[0];
+  }, [proactiveSuggestions]);
+
+  if (!topSuggestion) return null;
+
+  const priorityConfig = {
+    high: {
+      bg: "bg-red-50 border-red-200",
+      text: "text-red-700",
+      icon: <AlertTriangle className="h-4 w-4 text-red-500" />,
+    },
+    medium: {
+      bg: "bg-amber-50 border-amber-200",
+      text: "text-amber-700",
+      icon: <TrendingUp className="h-4 w-4 text-amber-500" />,
+    },
+    low: {
+      bg: "bg-blue-50 border-blue-200",
+      text: "text-blue-700",
+      icon: <Lightbulb className="h-4 w-4 text-blue-500" />,
+    },
+  };
+
+  const config = priorityConfig[topSuggestion.priority];
+
+  return (
+    <AnimatePresence>
+      <motion.div
+        initial={{ opacity: 0, y: -10 }}
+        animate={{ opacity: 1, y: 0 }}
+        exit={{ opacity: 0, y: -10 }}
+        className={cn(
+          "flex items-center gap-3 border-b px-4 py-2.5",
+          config.bg
+        )}
+      >
+        {config.icon}
+        <div className="flex-1 min-w-0">
+          <p className={cn("text-xs font-semibold truncate", config.text)}>
+            {topSuggestion.cardName
+              ? `${topSuggestion.cardName} — ${topSuggestion.message}`
+              : topSuggestion.message}
+          </p>
+          <p className="text-[10px] text-zinc-500 truncate capitalize">
+            {topSuggestion.type.replace(/-/g, " ")}
+          </p>
+        </div>
+        <button
+          onClick={() => {
+            const actionText = topSuggestion.cardName
+              ? `Analisar: ${topSuggestion.cardName}`
+              : `Analisar: ${topSuggestion.message}`;
+            sendMessage(actionText);
+            dismissSuggestion(topSuggestion.id);
+          }}
+          className={cn(
+            "shrink-0 rounded-full px-3 py-1 text-[10px] font-semibold transition-colors",
+            topSuggestion.priority === "high"
+              ? "bg-red-100 text-red-700 hover:bg-red-200"
+              : topSuggestion.priority === "medium"
+                ? "bg-amber-100 text-amber-700 hover:bg-amber-200"
+                : "bg-blue-100 text-blue-700 hover:bg-blue-200"
+          )}
+        >
+          Investigar
+        </button>
+        <button
+          onClick={() => dismissSuggestion(topSuggestion.id)}
+          className="shrink-0 rounded-full p-1 text-zinc-400 hover:text-zinc-600 hover:bg-white/60 transition-colors"
+          title="Dispensar"
+        >
+          <X className="h-3.5 w-3.5" />
+        </button>
+      </motion.div>
+    </AnimatePresence>
   );
 }

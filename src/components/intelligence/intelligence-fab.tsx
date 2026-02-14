@@ -77,23 +77,25 @@ export function IntelligenceFAB() {
             {/* Icon */}
             <Sparkles className="relative z-10 h-5 w-5 transition-transform group-hover:rotate-12" />
 
-            {/* Proactive suggestion badge — seção 5.1 */}
+            {/* Proactive suggestion badge com contagem — seção 5.1 */}
             {hasPendingSuggestions && (
               <motion.span
                 initial={{ scale: 0 }}
                 animate={{ scale: 1 }}
                 className={cn(
-                  "absolute -right-0.5 -top-0.5 z-20 flex h-3.5 w-3.5 items-center justify-center rounded-full",
+                  "absolute -right-1 -top-1 z-20 flex items-center justify-center rounded-full text-[10px] font-bold text-white",
                   "ring-2 ring-white",
+                  pendingSuggestions.length > 9 ? "h-5 w-5" : "h-4.5 w-4.5 min-w-[18px]",
                   highPriority
-                    ? "bg-red-500" // Dot vermelho — atividade vencida / lead quente parado
-                    : "bg-blue-500" // Dot azul — início do dia / resumo
+                    ? "bg-red-500" // Vermelho — atividade vencida / lead quente parado
+                    : "bg-blue-500" // Azul — início do dia / resumo
                 )}
               >
                 {/* Inner pulse for high priority */}
                 {highPriority && (
                   <span className="absolute inset-0 rounded-full bg-red-500 animate-ping opacity-75" />
                 )}
+                {pendingSuggestions.length > 99 ? "99+" : pendingSuggestions.length}
               </motion.span>
             )}
           </button>

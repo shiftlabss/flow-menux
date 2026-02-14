@@ -9,14 +9,17 @@
 
 import { useEffect } from "react";
 import { useIntelligenceStore } from "@/stores/intelligence-store";
-import { useUIStore } from "@/stores/ui-store";
 import { useAuthStore } from "@/stores/auth-store";
 import { canAccessIntelligence } from "@/lib/intelligence-permissions";
+import { useProactiveEngine } from "@/hooks/use-proactive-engine";
 import { IntelligenceFAB } from "./intelligence-fab";
 
 export function IntelligenceProvider() {
   const user = useAuthStore((s) => s.user);
   const hasAccess = user?.role ? canAccessIntelligence(user.role) : false;
+
+  // Motor proativo: roda a cada 5 min e gera sugestões automáticas
+  useProactiveEngine();
 
   // Reset de rate limit a cada hora
   useEffect(() => {

@@ -9,7 +9,7 @@ import type {
   UserRoleIntelligence,
 } from "@/types/intelligence";
 
-/** Definições de todos os 10 slash commands */
+/** Definições de todos os 15 slash commands */
 export const SLASH_COMMANDS: SlashCommandDefinition[] = [
   {
     command: "/briefing",
@@ -110,6 +110,56 @@ export const SLASH_COMMANDS: SlashCommandDefinition[] = [
     label: "O que você pode fazer?",
     icon: "❓",
     description: "Lista capacidades da Intelligence com exemplos",
+    requiresCard: false,
+    availableFor: ["comercial", "cs", "admin", "master"],
+    requiresInput: false,
+  },
+  {
+    command: "/resumo",
+    label: "Briefing Matinal",
+    icon: "🌅",
+    description:
+      "Resumo do dia: prioridades, ganhos rápidos, alertas e métricas",
+    requiresCard: false,
+    availableFor: ["comercial", "cs", "admin", "master"],
+    requiresInput: false,
+  },
+  {
+    command: "/riscos",
+    label: "Alertas de Risco",
+    icon: "🚨",
+    description:
+      "Todos os alertas de risco: SLA, deals parados, contratos expirando, saúde de clientes",
+    requiresCard: false,
+    availableFor: ["comercial", "admin", "master"],
+    requiresInput: false,
+  },
+  {
+    command: "/meta",
+    label: "Progresso da Meta",
+    icon: "🎯",
+    description:
+      "Progresso das suas metas com projeções e o que falta para bater",
+    requiresCard: false,
+    availableFor: ["comercial", "cs", "admin", "master"],
+    requiresInput: false,
+  },
+  {
+    command: "/coaching",
+    label: "Coaching de Vendas",
+    icon: "📈",
+    description:
+      "Insights de performance, taxa de conversão, dicas personalizadas de melhoria",
+    requiresCard: false,
+    availableFor: ["comercial", "admin", "master"],
+    requiresInput: false,
+  },
+  {
+    command: "/agenda",
+    label: "Agenda do Dia",
+    icon: "📅",
+    description:
+      "Atividades de hoje + sugestão de ordem de prioridade",
     requiresCard: false,
     availableFor: ["comercial", "cs", "admin", "master"],
     requiresInput: false,

@@ -191,10 +191,15 @@ const BentoStatCard = React.forwardRef<HTMLDivElement, BentoStatCardProps>(
           // Base
           "group rounded-[var(--radius-bento-card)]",
           "border border-[var(--border-bento-default)]",
-          "bg-white",
+          
+          // Glass vs Solid
+          className?.includes("backdrop-blur") 
+            ? "bg-white/80 backdrop-blur-md" 
+            : "bg-white",
+
           "shadow-[var(--shadow-bento-sm)]",
-          "transition-shadow duration-[var(--transition-bento)]",
-          "hover:shadow-[var(--shadow-bento-sm-hover)]",
+          "transition-all duration-[var(--transition-bento)]", // Changed to transition-all for smoother hover
+          "hover:shadow-[var(--shadow-bento-sm-hover)] hover:-translate-y-1", // Added lift effect
 
           // Padding variável por size
           size === "sm" && "p-4",
