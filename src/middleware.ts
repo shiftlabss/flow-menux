@@ -7,6 +7,7 @@ const protectedRoutes = [
   "/clients",
   "/finance",
   "/settings",
+  "/intelligence",
 ];
 
 const authRoutes = ["/login", "/forgot-password", "/reset-password"];
@@ -49,6 +50,7 @@ export const config = {
     "/clients/:path*",
     "/finance/:path*",
     "/settings/:path*",
+    "/intelligence/:path*",
     "/login",
     "/forgot-password",
     "/reset-password",

@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import { toast } from "sonner";
 import {
   Trophy,
   Target,
@@ -37,8 +36,27 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { motion } from "framer-motion";
 import type { Goal } from "@/types";
 import { useGoalStore } from "@/stores/goal-store";
+import { InlineFeedback } from "@/components/ui/inline-feedback";
+
+// ---------------------------------------------------------------------------
+// Framer Motion Variants
+// ---------------------------------------------------------------------------
+
+const staggerContainer = {
+  hidden: { opacity: 0 },
+  show: { opacity: 1, transition: { staggerChildren: 0.08, delayChildren: 0.1 } },
+};
+const fadeUp = {
+  hidden: { opacity: 0, y: 20 },
+  show: { opacity: 1, y: 0, transition: { duration: 0.45, ease: [0.25, 0.46, 0.45, 0.94] as const } },
+};
+const scaleIn = {
+  hidden: { opacity: 0, scale: 0.95 },
+  show: { opacity: 1, scale: 1, transition: { duration: 0.35, ease: [0.25, 0.46, 0.45, 0.94] as const } },
+};
 
 interface RankedUser {
   id: string;
@@ -191,9 +209,11 @@ function GoalCard({ goal }: { goal: Goal }) {
         {/* Progress bar */}
         <div className="mt-3 space-y-1.5">
           <div className="relative h-3 w-full overflow-hidden rounded-full bg-zinc-100">
-            <div
-              className="absolute inset-y-0 left-0 rounded-full bg-brand transition-all duration-700 ease-out"
-              style={{ width: `${percentage}%` }}
+            <motion.div
+              className="absolute inset-y-0 left-0 rounded-full bg-brand"
+              initial={{ width: 0 }}
+              animate={{ width: `${percentage}%` }}
+              transition={{ duration: 0.8, ease: [0.25, 0.46, 0.45, 0.94] as const, delay: 0.3 }}
             />
           </div>
           <div className="flex items-center justify-between">
@@ -347,6 +367,7 @@ function NewGoalDialog() {
   const [target, setTarget] = useState<string>("");
   const [period, setPeriod] = useState<string>("");
   const [assignTo, setAssignTo] = useState<string>("");
+  const [feedback, setFeedback] = useState<string | null>(null);
 
   function handleCreate() {
     if (!goalType || !target || !period || !assignTo) return;
@@ -376,15 +397,16 @@ function NewGoalDialog() {
       userName: assignTo === "team-all" ? undefined : userNames[assignTo],
     });
 
-    toast.success("Meta criada com sucesso!", {
-      description: `${goalTypeLabels[goalType]} — Meta: ${target} (${period === "monthly" ? "Mensal" : "Trimestral"})`,
-    });
+    setFeedback(`Meta criada: ${goalTypeLabels[goalType]} — Meta: ${target} (${period === "monthly" ? "Mensal" : "Trimestral"})`);
 
-    setOpen(false);
     setGoalType("");
     setTarget("");
     setPeriod("");
     setAssignTo("");
+    setTimeout(() => {
+      setOpen(false);
+      setFeedback(null);
+    }, 1500);
   }
 
   return (
@@ -401,6 +423,17 @@ function NewGoalDialog() {
             Nova Meta
           </DialogTitle>
         </DialogHeader>
+
+        {feedback && (
+          <div className="pt-2">
+            <InlineFeedback
+              type="success"
+              message={feedback}
+              compact
+              onClose={() => setFeedback(null)}
+            />
+          </div>
+        )}
 
         <div className="space-y-5 pt-2">
           {/* Type */}
@@ -543,9 +576,9 @@ export default function GoalsPage() {
   const { goals } = useGoalStore();
 
   return (
-    <div className="space-y-8">
+    <motion.div initial="hidden" animate="show" variants={staggerContainer} className="space-y-8">
       {/* Page Header */}
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+      <motion.div variants={fadeUp} className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h1 className="font-heading text-2xl font-bold text-black sm:text-3xl">
             Metas & Gamificacao
@@ -555,17 +588,21 @@ export default function GoalsPage() {
           </p>
         </div>
         <NewGoalDialog />
-      </div>
+      </motion.div>
 
       {/* Goal Cards — responsive grid */}
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
         {goals.map((goal) => (
-          <GoalCard key={goal.id} goal={goal} />
+          <motion.div key={goal.id} variants={scaleIn}>
+            <GoalCard goal={goal} />
+          </motion.div>
         ))}
       </div>
 
       {/* Ranking Section */}
-      <Leaderboard ranking={mockRanking} />
-    </div>
+      <motion.div variants={fadeUp}>
+        <Leaderboard ranking={mockRanking} />
+      </motion.div>
+    </motion.div>
   );
 }

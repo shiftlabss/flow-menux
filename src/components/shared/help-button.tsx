@@ -12,7 +12,6 @@ import {
   ChevronUp,
   X,
 } from "lucide-react";
-import { toast } from "sonner";
 import {
   Popover,
   PopoverContent,
@@ -27,7 +26,7 @@ import { Input } from "@/components/ui/input";
 interface QuickLink {
   title: string;
   icon: React.ReactNode;
-  action: () => void;
+  description: string;
 }
 
 interface FAQItem {
@@ -43,36 +42,22 @@ const quickLinks: QuickLink[] = [
   {
     title: "Central de Ajuda",
     icon: <BookOpen className="h-4 w-4" />,
-    action: () =>
-      toast.info("Central de Ajuda", {
-        description:
-          "A central de ajuda completa estará disponível em breve. Consulte as perguntas frequentes abaixo.",
-      }),
+    description: "A central de ajuda completa estará disponível em breve. Consulte as perguntas frequentes abaixo.",
   },
   {
     title: "Atalhos de teclado",
     icon: <Keyboard className="h-4 w-4" />,
-    action: () =>
-      toast.info("Atalhos de teclado", {
-        description: "Ctrl+K: Busca global · Esc: Fechar painel",
-      }),
+    description: "Ctrl+K: Busca global · Esc: Fechar painel",
   },
   {
     title: "Novidades",
     icon: <Sparkles className="h-4 w-4" />,
-    action: () =>
-      toast.info("Novidades do Flow", {
-        description:
-          "Versão 1.0: Pipeline Kanban, Gestão de Clientes, Relatórios e mais!",
-      }),
+    description: "Versão 1.0: Pipeline Kanban, Gestão de Clientes, Relatórios e mais!",
   },
   {
     title: "Fale conosco",
     icon: <MessageCircle className="h-4 w-4" />,
-    action: () =>
-      toast.info("Fale conosco", {
-        description: "Envie um e-mail para suporte@menux.com.br",
-      }),
+    description: "Envie um e-mail para suporte@menux.com.br",
   },
 ];
 
@@ -145,6 +130,7 @@ function FAQAccordionItem({
 export function HelpButton() {
   const [searchQuery, setSearchQuery] = useState("");
   const [openFAQIndex, setOpenFAQIndex] = useState<number | null>(null);
+  const [expandedLinkIndex, setExpandedLinkIndex] = useState<number | null>(null);
 
   const handleToggleFAQ = useCallback((index: number) => {
     setOpenFAQIndex((prev) => (prev === index ? null : index));
@@ -217,20 +203,34 @@ export function HelpButton() {
                 Links rápidos
               </p>
               <div className="grid grid-cols-2 gap-1.5">
-                {filteredLinks.map((link) => (
-                  <button
-                    key={link.title}
-                    onClick={link.action}
-                    className="flex items-center gap-2 rounded-[10px] px-3 py-2.5 transition-colors hover:bg-zinc-50"
-                  >
-                    <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-brand-light text-brand">
-                      {link.icon}
+                {filteredLinks.map((link, idx) => {
+                  const globalIdx = quickLinks.indexOf(link);
+                  const isExpanded = expandedLinkIndex === globalIdx;
+                  return (
+                    <div key={link.title} className="col-span-1">
+                      <button
+                        onClick={() => setExpandedLinkIndex(isExpanded ? null : globalIdx)}
+                        className={`flex w-full items-center gap-2 rounded-[10px] px-3 py-2.5 transition-colors ${
+                          isExpanded ? "bg-brand/5" : "hover:bg-zinc-50"
+                        }`}
+                      >
+                        <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-brand-light text-brand">
+                          {link.icon}
+                        </div>
+                        <span className="font-body text-xs font-medium text-zinc-700">
+                          {link.title}
+                        </span>
+                      </button>
+                      {isExpanded && (
+                        <div className="animate-in fade-in slide-in-from-top-1 mt-1 rounded-[8px] bg-zinc-50 px-3 py-2">
+                          <p className="font-body text-xs leading-relaxed text-zinc-500">
+                            {link.description}
+                          </p>
+                        </div>
+                      )}
                     </div>
-                    <span className="font-body text-xs font-medium text-zinc-700">
-                      {link.title}
-                    </span>
-                  </button>
-                ))}
+                  );
+                })}
               </div>
             </div>
           )}

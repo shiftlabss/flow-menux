@@ -1,10 +1,10 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { toast } from "sonner";
+import { InlineFeedback } from "@/components/ui/inline-feedback";
 import {
   Dialog,
   DialogContent,
@@ -42,6 +42,8 @@ interface PipelineFormModalProps {
 export function PipelineFormModal({ open, onOpenChange, pipeline }: PipelineFormModalProps) {
   const { pipelines, addPipeline, updatePipeline } = usePipelineStore();
   const isEdit = Boolean(pipeline);
+  const [nameError, setNameError] = useState<string | null>(null);
+  const [feedback, setFeedback] = useState<{ type: "success" | "error" | "warning"; message: string } | null>(null);
 
   const {
     register,
@@ -58,6 +60,8 @@ export function PipelineFormModal({ open, onOpenChange, pipeline }: PipelineForm
 
   // Reset form when pipeline changes
   useEffect(() => {
+    setNameError(null);
+    setFeedback(null);
     if (pipeline) {
       reset({
         name: pipeline.name,
@@ -72,23 +76,22 @@ export function PipelineFormModal({ open, onOpenChange, pipeline }: PipelineForm
   }, [pipeline, reset]);
 
   const onSubmit = (data: PipelineFormData) => {
+    setNameError(null);
+    setFeedback(null);
+
     // Validate unique name (except for current pipeline when editing)
     const nameExists = pipelines.some(
       (p) => p.name.toLowerCase() === data.name.toLowerCase() && p.id !== pipeline?.id
     );
 
     if (nameExists) {
-      toast.error("Nome já existe", {
-        description: "Já existe um funil com este nome. Escolha outro nome.",
-      });
+      setNameError("Já existe um funil com este nome. Escolha outro nome.");
       return;
     }
 
     // Validate name for default pipeline
     if (pipeline?.isDefault && data.name !== pipeline.name) {
-      toast.error("Não é possível renomear", {
-        description: 'O funil padrão "Leads" não pode ter seu nome alterado.',
-      });
+      setNameError('O funil padrão "Leads" não pode ter seu nome alterado.');
       return;
     }
 
@@ -97,9 +100,8 @@ export function PipelineFormModal({ open, onOpenChange, pipeline }: PipelineForm
         name: data.name,
         description: data.description || "",
       });
-      toast.success("Funil atualizado", {
-        description: `O funil "${data.name}" foi atualizado com sucesso.`,
-      });
+      setFeedback({ type: "success", message: `O funil "${data.name}" foi atualizado com sucesso.` });
+      setTimeout(() => onOpenChange(false), 1200);
     } else {
       addPipeline({
         name: data.name,
@@ -108,17 +110,16 @@ export function PipelineFormModal({ open, onOpenChange, pipeline }: PipelineForm
         cardCount: 0,
         stages: [],
       });
-      toast.success("Funil criado", {
-        description: `O funil "${data.name}" foi criado. Agora adicione etapas a ele.`,
-      });
+      setFeedback({ type: "success", message: `O funil "${data.name}" foi criado. Agora adicione etapas a ele.` });
+      setTimeout(() => onOpenChange(false), 1200);
     }
-
-    onOpenChange(false);
   };
 
   const handleClose = () => {
     if (!isSubmitting) {
       reset();
+      setNameError(null);
+      setFeedback(null);
       onOpenChange(false);
     }
   };
@@ -138,6 +139,18 @@ export function PipelineFormModal({ open, onOpenChange, pipeline }: PipelineForm
             </DialogDescription>
           </DialogHeader>
 
+          {/* Inline Feedback */}
+          {feedback && (
+            <div className="pt-4 pb-0">
+              <InlineFeedback
+                type={feedback.type}
+                message={feedback.message}
+                compact
+                onClose={() => setFeedback(null)}
+              />
+            </div>
+          )}
+
           <div className="space-y-4 py-6">
             {/* Name Field */}
             <div className="space-y-2">
@@ -146,7 +159,7 @@ export function PipelineFormModal({ open, onOpenChange, pipeline }: PipelineForm
               </Label>
               <Input
                 id="name"
-                {...register("name")}
+                {...register("name", { onChange: () => setNameError(null) })}
                 placeholder="Ex: Leads, Indicação, Parcerias..."
                 disabled={pipeline?.isDefault}
                 className="rounded-[15px]"
@@ -154,6 +167,9 @@ export function PipelineFormModal({ open, onOpenChange, pipeline }: PipelineForm
               />
               {errors.name && (
                 <p className="font-body text-xs text-status-danger">{errors.name.message}</p>
+              )}
+              {nameError && (
+                <p className="font-body text-xs text-status-danger">{nameError}</p>
               )}
               {pipeline?.isDefault && (
                 <p className="font-body text-xs text-zinc-500">

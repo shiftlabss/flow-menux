@@ -12,7 +12,6 @@ import {
   AtSign,
   Bell,
 } from "lucide-react";
-import { toast } from "sonner";
 import {
   Popover,
   PopoverContent,
@@ -70,9 +69,6 @@ export function NotificationsDropdown() {
 
   const handleMarkAllAsRead = () => {
     setNotifications((prev) => prev.map((n) => ({ ...n, isRead: true })));
-    toast.success("Notificações marcadas como lidas", {
-      description: "Todas as notificações foram marcadas como lidas.",
-    });
   };
 
   return (
@@ -157,17 +153,9 @@ export function NotificationsDropdown() {
 
         {/* Footer */}
         <div className="border-t border-zinc-200 px-4 py-2.5 text-center">
-          <button
-            onClick={() => {
-              setNotificationsOpen(false);
-              toast.info("Todas as notificações", {
-                description: "A página de notificações estará disponível em breve.",
-              });
-            }}
-            className="font-body text-sm text-brand hover:underline"
-          >
-            Ver todas
-          </button>
+          <span className="font-body text-sm text-zinc-400">
+            Página de notificações em breve
+          </span>
         </div>
       </PopoverContent>
     </Popover>

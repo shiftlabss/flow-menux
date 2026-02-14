@@ -36,7 +36,7 @@ import {
   ChevronUp,
   ChevronDown,
 } from "lucide-react";
-import { toast } from "sonner";
+import { InlineFeedback } from "@/components/ui/inline-feedback";
 import {
   Dialog,
   DialogContent,
@@ -89,15 +89,15 @@ export default function SettingsTabPage({
 }) {
   const { tab } = use(params);
   const [isDirty, setIsDirty] = useState(false);
+  const [saveFeedback, setSaveFeedback] = useState<{ type: "success" | "error"; message: string } | null>(null);
 
   const markDirty = useCallback(() => {
     if (!isDirty) setIsDirty(true);
   }, [isDirty]);
 
   const handleSave = () => {
-    toast.success("Alterações salvas!", {
-      description: "Suas configurações foram atualizadas com sucesso.",
-    });
+    setSaveFeedback({ type: "success", message: "Alterações salvas! — Suas configurações foram atualizadas com sucesso." });
+    setTimeout(() => setSaveFeedback(null), 3000);
     setIsDirty(false);
   };
 
@@ -161,6 +161,14 @@ export default function SettingsTabPage({
           </div>
         )}
 
+        {saveFeedback && (
+          <InlineFeedback
+            type={saveFeedback.type}
+            message={saveFeedback.message}
+            onClose={() => setSaveFeedback(null)}
+          />
+        )}
+
         {/* Page Title */}
         <div>
           <h1 className="font-heading text-2xl font-bold text-black sm:text-3xl">
@@ -190,6 +198,8 @@ export default function SettingsTabPage({
 // ===== General Settings =====
 
 function GeneralSettings({ onDirty }: { onDirty: () => void }) {
+  const [generalFeedback, setGeneralFeedback] = useState<{ type: "success" | "error"; message: string } | null>(null);
+
   return (
     <div className="space-y-6">
       <Card className="rounded-[15px] border-zinc-200">
@@ -220,15 +230,21 @@ function GeneralSettings({ onDirty }: { onDirty: () => void }) {
           <div className="flex justify-end pt-2">
             <Button
               onClick={() => {
-                toast.success("Informações salvas!", {
-                  description: "As informações da empresa foram atualizadas.",
-                });
+                setGeneralFeedback({ type: "success", message: "Informações salvas! — As informações da empresa foram atualizadas." });
+                setTimeout(() => setGeneralFeedback(null), 3000);
               }}
               className="rounded-full bg-black font-heading text-sm text-white hover:bg-zinc-800"
             >
               Salvar
             </Button>
           </div>
+          {generalFeedback && (
+            <InlineFeedback
+              type={generalFeedback.type}
+              message={generalFeedback.message}
+              onClose={() => setGeneralFeedback(null)}
+            />
+          )}
         </CardContent>
       </Card>
 
@@ -291,6 +307,8 @@ function GeneralSettings({ onDirty }: { onDirty: () => void }) {
 // ===== Pipeline Settings =====
 
 function PipelineSettings({ onDirty }: { onDirty: () => void }) {
+  const [pipelineFeedback, setPipelineFeedback] = useState<{ type: "success" | "error"; message: string } | null>(null);
+
   const stages = [
     { id: "lead-in", label: "Lead-In", sla: 24 },
     { id: "contato-feito", label: "Contato Feito", sla: 48 },
@@ -338,15 +356,21 @@ function PipelineSettings({ onDirty }: { onDirty: () => void }) {
         <div className="mt-4 flex justify-end">
           <Button
             onClick={() => {
-              toast.success("Pipeline atualizado!", {
-                description: "As etapas do pipeline foram salvas com sucesso.",
-              });
+              setPipelineFeedback({ type: "success", message: "Pipeline atualizado! — As etapas do pipeline foram salvas com sucesso." });
+              setTimeout(() => setPipelineFeedback(null), 3000);
             }}
             className="rounded-full bg-black font-heading text-sm text-white hover:bg-zinc-800"
           >
             Salvar configuração
           </Button>
         </div>
+        {pipelineFeedback && (
+          <InlineFeedback
+            type={pipelineFeedback.type}
+            message={pipelineFeedback.message}
+            onClose={() => setPipelineFeedback(null)}
+          />
+        )}
       </CardContent>
     </Card>
   );
@@ -382,6 +406,7 @@ function FunnelsSettings() {
     },
   ]);
 
+  const [funnelFeedback, setFunnelFeedback] = useState<{ type: "success" | "error"; message: string } | null>(null);
   const [editingFunnel, setEditingFunnel] = useState<(typeof funnels)[0] | null>(null);
   const [editName, setEditName] = useState("");
   const [editDescription, setEditDescription] = useState("");
@@ -406,9 +431,8 @@ function FunnelsSettings() {
       )
     );
     setEditingFunnel(null);
-    toast.success("Funil atualizado!", {
-      description: `O funil "${editName}" foi salvo com sucesso.`,
-    });
+    setFunnelFeedback({ type: "success", message: `Funil atualizado! — O funil "${editName}" foi salvo com sucesso.` });
+    setTimeout(() => setFunnelFeedback(null), 3000);
   }
 
   function handleAddStage() {
@@ -432,6 +456,13 @@ function FunnelsSettings() {
 
   return (
     <>
+      {funnelFeedback && (
+        <InlineFeedback
+          type={funnelFeedback.type}
+          message={funnelFeedback.message}
+          onClose={() => setFunnelFeedback(null)}
+        />
+      )}
       <div className="grid gap-6 md:grid-cols-2">
         {funnels.map((funnel) => (
           <Card key={funnel.id} className="rounded-[15px] border-zinc-200">
@@ -588,6 +619,8 @@ function FunnelsSettings() {
 // ===== SLA Settings =====
 
 function SLASettings({ onDirty }: { onDirty: () => void }) {
+  const [slaFeedback, setSlaFeedback] = useState<{ type: "success" | "error"; message: string } | null>(null);
+
   const stages = [
     { id: "lead-in", label: "Lead-In", slaHours: 24, warningHours: 18 },
     { id: "contato-feito", label: "Contato Feito", slaHours: 48, warningHours: 36 },
@@ -655,15 +688,21 @@ function SLASettings({ onDirty }: { onDirty: () => void }) {
         <div className="mt-4 flex justify-end">
           <Button
             onClick={() => {
-              toast.success("SLA atualizado!", {
-                description: "Os prazos de SLA foram salvos com sucesso.",
-              });
+              setSlaFeedback({ type: "success", message: "SLA atualizado! — Os prazos de SLA foram salvos com sucesso." });
+              setTimeout(() => setSlaFeedback(null), 3000);
             }}
             className="rounded-full bg-black font-heading text-sm text-white hover:bg-zinc-800"
           >
             Salvar SLA
           </Button>
         </div>
+        {slaFeedback && (
+          <InlineFeedback
+            type={slaFeedback.type}
+            message={slaFeedback.message}
+            onClose={() => setSlaFeedback(null)}
+          />
+        )}
       </CardContent>
     </Card>
   );
@@ -672,6 +711,8 @@ function SLASettings({ onDirty }: { onDirty: () => void }) {
 // ===== Commissions Settings =====
 
 function CommissionsSettings({ onDirty }: { onDirty: () => void }) {
+  const [commFeedback, setCommFeedback] = useState<{ type: "success" | "error"; message: string } | null>(null);
+
   const roles = [
     { id: "comercial", label: "Comercial", percentage: 10, minValue: 500 },
     { id: "cs", label: "CS", percentage: 5, minValue: 300 },
@@ -737,15 +778,21 @@ function CommissionsSettings({ onDirty }: { onDirty: () => void }) {
         <div className="mt-4 flex justify-end">
           <Button
             onClick={() => {
-              toast.success("Comissões salvas!", {
-                description: "As regras de comissão foram atualizadas.",
-              });
+              setCommFeedback({ type: "success", message: "Comissões salvas! — As regras de comissão foram atualizadas." });
+              setTimeout(() => setCommFeedback(null), 3000);
             }}
             className="rounded-full bg-black font-heading text-sm text-white hover:bg-zinc-800"
           >
             Salvar comissões
           </Button>
         </div>
+        {commFeedback && (
+          <InlineFeedback
+            type={commFeedback.type}
+            message={commFeedback.message}
+            onClose={() => setCommFeedback(null)}
+          />
+        )}
       </CardContent>
     </Card>
   );
@@ -754,6 +801,8 @@ function CommissionsSettings({ onDirty }: { onDirty: () => void }) {
 // ===== Custom Fields Settings =====
 
 function FieldsSettings({ onDirty }: { onDirty: () => void }) {
+  const [fieldsFeedback, setFieldsFeedback] = useState<{ type: "success" | "error"; message: string } | null>(null);
+
   const [fields, setFields] = useState([
     { id: "1", name: "Segmento", type: "select", required: true },
     { id: "2", name: "Faturamento Anual", type: "number", required: false },
@@ -859,15 +908,21 @@ function FieldsSettings({ onDirty }: { onDirty: () => void }) {
         <div className="mt-4 flex justify-end">
           <Button
             onClick={() => {
-              toast.success("Campos salvos!", {
-                description: "Os campos personalizados foram atualizados.",
-              });
+              setFieldsFeedback({ type: "success", message: "Campos salvos! — Os campos personalizados foram atualizados." });
+              setTimeout(() => setFieldsFeedback(null), 3000);
             }}
             className="rounded-full bg-black font-heading text-sm text-white hover:bg-zinc-800"
           >
             Salvar campos
           </Button>
         </div>
+        {fieldsFeedback && (
+          <InlineFeedback
+            type={fieldsFeedback.type}
+            message={fieldsFeedback.message}
+            onClose={() => setFieldsFeedback(null)}
+          />
+        )}
       </CardContent>
     </Card>
   );
@@ -1078,6 +1133,8 @@ function TagsSettings({ onDirty }: { onDirty: () => void }) {
 // ===== Terms Settings =====
 
 function TermsSettings({ onDirty }: { onDirty: () => void }) {
+  const [termsFeedback, setTermsFeedback] = useState<{ type: "success" | "error"; message: string } | null>(null);
+
   const [content, setContent] = useState(
     `Termos de Uso do Flow CRM
 
@@ -1117,15 +1174,21 @@ O usuário é responsável por manter a segurança de suas credenciais de acesso
         <div className="mt-4 flex justify-end">
           <Button
             onClick={() => {
-              toast.success("Termos salvos!", {
-                description: "Os termos de uso foram atualizados.",
-              });
+              setTermsFeedback({ type: "success", message: "Termos salvos! — Os termos de uso foram atualizados." });
+              setTimeout(() => setTermsFeedback(null), 3000);
             }}
             className="rounded-full bg-black font-heading text-sm text-white hover:bg-zinc-800"
           >
             Salvar termos
           </Button>
         </div>
+        {termsFeedback && (
+          <InlineFeedback
+            type={termsFeedback.type}
+            message={termsFeedback.message}
+            onClose={() => setTermsFeedback(null)}
+          />
+        )}
       </CardContent>
     </Card>
   );

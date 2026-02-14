@@ -3,6 +3,7 @@
 import { AlertTriangle, Loader2 } from "lucide-react";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
+import { InlineFeedback } from "@/components/ui/inline-feedback";
 import {
   Dialog,
   DialogContent,
@@ -16,6 +17,7 @@ import { useUIStore } from "@/stores/ui-store";
 export function ConfirmDeleteModal() {
   const { modalType, modalData, closeModal } = useUIStore();
   const [isDeleting, setIsDeleting] = useState(false);
+  const [feedback, setFeedback] = useState<{type: "error", message: string} | null>(null);
   const isOpen = modalType === "confirm-delete";
 
   const description =
@@ -23,7 +25,7 @@ export function ConfirmDeleteModal() {
     "Esta ação não pode ser desfeita. O item será removido permanentemente.";
 
   return (
-    <Dialog open={isOpen} onOpenChange={() => closeModal()}>
+    <Dialog open={isOpen} onOpenChange={() => { setFeedback(null); closeModal(); }}>
       <DialogContent className="max-w-[400px] rounded-[20px] p-8">
         <DialogHeader>
           <div className="flex items-center gap-3">
@@ -38,6 +40,14 @@ export function ConfirmDeleteModal() {
             {description}
           </DialogDescription>
         </DialogHeader>
+
+        {feedback && (
+          <InlineFeedback
+            type={feedback.type}
+            message={feedback.message}
+            onClose={() => setFeedback(null)}
+          />
+        )}
 
         <DialogFooter className="mt-4">
           <Button
@@ -60,7 +70,7 @@ export function ConfirmDeleteModal() {
                 }
                 closeModal();
               } catch (error) {
-                console.error("Error deleting:", error);
+                setFeedback({ type: "error", message: "Erro ao excluir. Tente novamente." });
               } finally {
                 setIsDeleting(false);
               }

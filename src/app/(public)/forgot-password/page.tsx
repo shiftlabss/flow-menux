@@ -5,10 +5,12 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { ArrowLeft, Loader2, Mail } from "lucide-react";
 import Link from "next/link";
+import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent } from "@/components/ui/card";
+import { InlineFeedback } from "@/components/ui/inline-feedback";
 import {
   forgotPasswordSchema,
   type ForgotPasswordFormData,
@@ -17,6 +19,7 @@ import {
 export default function ForgotPasswordPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSent, setIsSent] = useState(false);
+  const [formError, setFormError] = useState<string | null>(null);
 
   const {
     register,
@@ -28,18 +31,25 @@ export default function ForgotPasswordPage() {
 
   async function onSubmit(data: ForgotPasswordFormData) {
     setIsSubmitting(true);
+    setFormError(null);
     try {
-      // TODO: Replace with actual API call
-      void data;
+      // Mock: em produção, substituir por chamada à API POST /api/auth/forgot-password
+      console.log("Requesting password reset for:", data.email);
+      await new Promise(resolve => setTimeout(resolve, 800));
       setIsSent(true);
     } catch {
-      // Handle error
+      setFormError("Erro ao enviar e-mail. Tente novamente.");
     } finally {
       setIsSubmitting(false);
     }
   }
 
   return (
+    <motion.div
+      initial={{ opacity: 0, y: 30 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.5, ease: [0.25, 0.46, 0.45, 0.94] as const }}
+    >
     <Card className="w-full max-w-[440px] rounded-[20px] border-zinc-200 shadow-xl">
       <CardContent className="p-8">
         {/* Back to login */}
@@ -106,6 +116,14 @@ export default function ForgotPasswordPage() {
                 )}
               </div>
 
+              {formError && (
+                <InlineFeedback
+                  type="error"
+                  message={formError}
+                  onClose={() => setFormError(null)}
+                />
+              )}
+
               <Button
                 type="submit"
                 disabled={isSubmitting}
@@ -122,5 +140,6 @@ export default function ForgotPasswordPage() {
         )}
       </CardContent>
     </Card>
+    </motion.div>
   );
 }

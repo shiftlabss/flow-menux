@@ -29,18 +29,18 @@
   --color-ring: var(--ring);
 
   /* Brand */
-  --color-brand: #7A55FD;
+  --color-brand: #7a55fd;
   --color-brand-light: rgba(122, 85, 253, 0.1);
 
   /* Status Colors */
-  --color-status-success: #16A34A;
-  --color-status-success-light: #F0FDF4;
-  --color-status-warning: #D97706;
-  --color-status-warning-light: #FFFBEB;
-  --color-status-danger: #DC2626;
-  --color-status-danger-light: #FEF2F2;
-  --color-status-info: #2563EB;
-  --color-status-info-light: #EFF6FF;
+  --color-status-success: #16a34a;
+  --color-status-success-light: #f0fdf4;
+  --color-status-warning: #d97706;
+  --color-status-warning-light: #fffbeb;
+  --color-status-danger: #dc2626;
+  --color-status-danger-light: #fef2f2;
+  --color-status-info: #2563eb;
+  --color-status-info-light: #eff6ff;
 
   /* Fonts */
   --font-heading: var(--font-bricolage);
@@ -98,8 +98,10 @@
   --shadow-none: none;
   --shadow-base: 0 1px 2px 0 rgb(0 0 0 / 0.05);
   --shadow-card: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
-  --shadow-drawer: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
-  --shadow-modal: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
+  --shadow-drawer:
+    0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+  --shadow-modal:
+    0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
   --shadow-overlay: 0 25px 50px -12px rgb(0 0 0 / 0.25);
 
   /* Sizing */
@@ -134,15 +136,15 @@
   --muted-foreground: #52525b;
   --accent: #f4f4f5;
   --accent-foreground: #000000;
-  --destructive: #DC2626;
+  --destructive: #dc2626;
   --border: #e4e4e7;
   --input: #e4e4e7;
-  --ring: #7A55FD;
-  --chart-1: #7A55FD;
-  --chart-2: #16A34A;
-  --chart-3: #D97706;
-  --chart-4: #2563EB;
-  --chart-5: #DC2626;
+  --ring: #7a55fd;
+  --chart-1: #7a55fd;
+  --chart-2: #16a34a;
+  --chart-3: #d97706;
+  --chart-4: #2563eb;
+  --chart-5: #dc2626;
   --sidebar: #ffffff;
   --sidebar-foreground: #000000;
   --sidebar-primary: #000000;
@@ -150,7 +152,7 @@
   --sidebar-accent: #f4f4f5;
   --sidebar-accent-foreground: #000000;
   --sidebar-border: #e4e4e7;
-  --sidebar-ring: #7A55FD;
+  --sidebar-ring: #7a55fd;
 }
 
 @layer base {

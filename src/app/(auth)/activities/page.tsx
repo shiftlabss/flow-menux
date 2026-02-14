@@ -11,7 +11,21 @@ import { ActivityListView } from "./components/activity-list-view";
 import { ActivityTimelineView } from "./components/activity-timeline-view";
 import { ActivityWeekView } from "./components/activity-week-view";
 import { ActivityMonthView } from "./components/activity-month-view";
+import { motion } from "framer-motion";
 import { ActivitySideMetrics } from "./components/activity-side-metrics";
+
+// ---------------------------------------------------------------------------
+// Framer Motion Variants
+// ---------------------------------------------------------------------------
+
+const staggerContainer = {
+  hidden: { opacity: 0 },
+  show: { opacity: 1, transition: { staggerChildren: 0.08, delayChildren: 0.1 } },
+};
+const fadeUp = {
+  hidden: { opacity: 0, y: 20 },
+  show: { opacity: 1, y: 0, transition: { duration: 0.45, ease: [0.25, 0.46, 0.45, 0.94] as const } },
+};
 
 // ---------------------------------------------------------------------------
 // Main Page
@@ -117,10 +131,11 @@ export default function ActivitiesPage() {
   // ── Render ───────────────────────────────────────────────────────
 
   return (
-    <div className="bento-container mx-auto">
+    <motion.div initial="hidden" animate="show" variants={staggerContainer} className="bento-container mx-auto">
       <div className="flex gap-6">
         {/* Main content */}
         <div className="min-w-0 flex-1 space-y-6">
+          <motion.div variants={fadeUp}>
           <ActivityHeader
             overdueCount={counts.byStatus.overdue}
             pendingCount={counts.byStatus.pending}
@@ -129,7 +144,9 @@ export default function ActivitiesPage() {
             onViewModeChange={setViewMode}
             onNewActivity={() => openDrawer("new-activity")}
           />
+          </motion.div>
 
+          <motion.div variants={fadeUp}>
           <ActivityFiltersBar
             filterTypes={filterTypes}
             filterResponsible={filterResponsible}
@@ -142,7 +159,9 @@ export default function ActivitiesPage() {
             onChangeDateEnd={setFilterDateEnd}
             onClearAll={clearAllFilters}
           />
+          </motion.div>
 
+          <motion.div variants={fadeUp}>
           {viewMode === "list" && (
             <ActivityListView activities={filteredActivities} />
           )}
@@ -155,14 +174,17 @@ export default function ActivitiesPage() {
           {viewMode === "month" && (
             <ActivityMonthView activities={filteredActivities} />
           )}
+          </motion.div>
         </div>
 
         {/* Side Metrics (desktop only) */}
+        <motion.div variants={fadeUp}>
         <ActivitySideMetrics
           counts={counts}
           weeklyCompletionRate={weeklyCompletionRate}
         />
+        </motion.div>
       </div>
-    </div>
+    </motion.div>
   );
 }

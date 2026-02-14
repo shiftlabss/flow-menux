@@ -2,8 +2,8 @@
 
 import { useState } from "react";
 import { Plus, MoreVertical, GripVertical, Trash2, Edit, AlertTriangle } from "lucide-react";
-import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
+import { InlineFeedback } from "@/components/ui/inline-feedback";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -33,22 +33,20 @@ export default function PipelineSettingsPage() {
   const [editingPipeline, setEditingPipeline] = useState<Pipeline | null>(null);
   const [deletingPipeline, setDeletingPipeline] = useState<Pipeline | null>(null);
   const [expandedPipeline, setExpandedPipeline] = useState<string | null>(null);
+  const [pipelineFeedback, setPipelineFeedback] = useState<{type: "success" | "error"; message: string} | null>(null);
 
   const handleDelete = () => {
     if (!deletingPipeline) return;
 
     if (deletingPipeline.cardCount > 0) {
-      toast.error("Não é possível excluir", {
-        description: `Existem ${deletingPipeline.cardCount} cards neste funil.`,
-      });
+      setPipelineFeedback({ type: "error", message: `Não é possível excluir. Existem ${deletingPipeline.cardCount} cards neste funil.` });
       setDeletingPipeline(null);
       return;
     }
 
     deletePipeline(deletingPipeline.id);
-    toast.success("Funil excluído", {
-      description: `O funil "${deletingPipeline.name}" foi removido.`,
-    });
+    setPipelineFeedback({ type: "success", message: `Funil excluído. O funil "${deletingPipeline.name}" foi removido.` });
+    setTimeout(() => setPipelineFeedback(null), 3000);
     setDeletingPipeline(null);
   };
 
@@ -75,6 +73,11 @@ export default function PipelineSettingsPage() {
           Novo Funil
         </Button>
       </div>
+
+      {/* Inline Feedback */}
+      {pipelineFeedback && (
+        <InlineFeedback type={pipelineFeedback.type} message={pipelineFeedback.message} onClose={() => setPipelineFeedback(null)} />
+      )}
 
       {/* Limit Warning */}
       {!canAddPipeline && (

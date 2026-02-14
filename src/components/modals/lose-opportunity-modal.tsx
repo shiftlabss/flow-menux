@@ -4,8 +4,8 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Loader2, XCircle } from "lucide-react";
 import { useState } from "react";
-import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
+import { InlineFeedback } from "@/components/ui/inline-feedback";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
@@ -45,6 +45,7 @@ export function LoseOpportunityModal() {
   const { loseOpportunity, getById } = useOpportunityStore();
   const { addNotification } = useNotificationStore();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [feedback, setFeedback] = useState<{type: "success" | "error", message: string} | null>(null);
   const isOpen = modalType === "lose-opportunity";
   const opportunityId = modalData?.opportunityId as string | undefined;
 
@@ -72,27 +73,17 @@ export function LoseOpportunityModal() {
           link: "/pipes",
         });
 
-        toast.error("Oportunidade marcada como Perdida", {
-          description: [
-            `Motivo: ${reasonLabels[data.reason] || data.reason}`,
-            data.competitor ? `Concorrente: ${data.competitor}` : null,
-            data.notes ? `Obs: ${data.notes}` : null,
-          ]
-            .filter(Boolean)
-            .join(" · "),
-          duration: 6000,
-        });
-      } else {
-        toast.error("Oportunidade marcada como Perdida", {
-          description: `Motivo: ${reasonLabels[data.reason] || data.reason}`,
-          duration: 6000,
-        });
       }
 
-      reset();
-      closeModal();
+      // Show inline feedback then auto-close
+      setFeedback({ type: "success", message: "Oportunidade marcada como Perdida." });
+      setTimeout(() => {
+        setFeedback(null);
+        reset();
+        closeModal();
+      }, 1500);
     } catch {
-      toast.error("Erro ao registrar perda. Tente novamente.");
+      setFeedback({ type: "error", message: "Erro ao registrar perda. Tente novamente." });
     } finally {
       setIsSubmitting(false);
     }
@@ -102,6 +93,7 @@ export function LoseOpportunityModal() {
     <Dialog
       open={isOpen}
       onOpenChange={() => {
+        setFeedback(null);
         reset();
         closeModal();
       }}
@@ -166,6 +158,14 @@ export function LoseOpportunityModal() {
               {...register("notes")}
             />
           </div>
+
+          {feedback && (
+            <InlineFeedback
+              type={feedback.type}
+              message={feedback.message}
+              onClose={() => setFeedback(null)}
+            />
+          )}
 
           <div className="flex justify-end gap-3 pt-2">
             <Button

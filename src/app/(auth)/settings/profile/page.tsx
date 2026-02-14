@@ -12,8 +12,8 @@ import {
   LogOut,
   Shield,
 } from "lucide-react";
-import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
+import { InlineFeedback } from "@/components/ui/inline-feedback";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { PhoneInput } from "@/components/ui/masked-inputs";
@@ -108,6 +108,10 @@ export default function ProfilePage() {
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+  const [profileFeedback, setProfileFeedback] = useState<{type: "success" | "error"; message: string} | null>(null);
+  const [avatarFeedback, setAvatarFeedback] = useState<{type: "success" | "warning"; message: string} | null>(null);
+  const [passwordError, setPasswordError] = useState<string | null>(null);
+  const [passwordFeedback, setPasswordFeedback] = useState<{type: "success" | "error"; message: string} | null>(null);
 
   const {
     register,
@@ -125,15 +129,13 @@ export default function ProfilePage() {
 
   async function onSubmit(data: ProfileFormData) {
     setIsSubmitting(true);
+    setProfileFeedback(null);
     try {
       await new Promise((resolve) => setTimeout(resolve, 600));
-      toast.success("Perfil atualizado!", {
-        description: "Suas informações pessoais foram salvas com sucesso.",
-      });
+      setProfileFeedback({ type: "success", message: "Perfil atualizado! Suas informações pessoais foram salvas com sucesso." });
+      setTimeout(() => setProfileFeedback(null), 3000);
     } catch {
-      toast.error("Erro ao salvar perfil", {
-        description: "Tente novamente em alguns instantes.",
-      });
+      setProfileFeedback({ type: "error", message: "Erro ao salvar perfil. Tente novamente em alguns instantes." });
     } finally {
       setIsSubmitting(false);
     }
@@ -178,17 +180,14 @@ export default function ProfilePage() {
                 const file = e.target.files?.[0];
                 if (file) {
                   if (file.size > 5 * 1024 * 1024) {
-                    toast.warning("Arquivo muito grande", {
-                      description: "A imagem deve ter no máximo 5MB.",
-                    });
+                    setAvatarFeedback({ type: "warning", message: "Arquivo muito grande. A imagem deve ter no máximo 5MB." });
                     return;
                   }
                   const reader = new FileReader();
                   reader.onloadend = () => {
                     setAvatarPreview(reader.result as string);
-                    toast.success("Avatar atualizado!", {
-                      description: "Sua foto de perfil foi atualizada.",
-                    });
+                    setAvatarFeedback({ type: "success", message: "Avatar atualizado! Sua foto de perfil foi atualizada." });
+                    setTimeout(() => setAvatarFeedback(null), 3000);
                   };
                   reader.readAsDataURL(file);
                 }
@@ -218,6 +217,11 @@ export default function ProfilePage() {
             </p>
           </div>
         </CardContent>
+        {avatarFeedback && (
+          <div className="px-6 pb-4">
+            <InlineFeedback type={avatarFeedback.type} message={avatarFeedback.message} onClose={() => setAvatarFeedback(null)} />
+          </div>
+        )}
       </Card>
 
       {/* Profile Form */}
@@ -279,6 +283,9 @@ export default function ProfilePage() {
                 Salvar alterações
               </Button>
             </div>
+            {profileFeedback && (
+              <InlineFeedback type={profileFeedback.type} message={profileFeedback.message} onClose={() => setProfileFeedback(null)} />
+            )}
           </form>
         </CardContent>
       </Card>
@@ -299,10 +306,13 @@ export default function ProfilePage() {
               <Input
                 type="password"
                 value={currentPassword}
-                onChange={(e) => setCurrentPassword(e.target.value)}
+                onChange={(e) => { setCurrentPassword(e.target.value); setPasswordError(null); }}
                 className="h-10 rounded-[15px] font-body text-sm"
                 placeholder="••••••••"
               />
+              {passwordError && !currentPassword && (
+                <p className="text-xs text-status-danger">{passwordError}</p>
+              )}
             </div>
             <div className="space-y-2">
               <Label className="font-body text-sm text-zinc-600">
@@ -311,10 +321,13 @@ export default function ProfilePage() {
               <Input
                 type="password"
                 value={newPassword}
-                onChange={(e) => setNewPassword(e.target.value)}
+                onChange={(e) => { setNewPassword(e.target.value); setPasswordError(null); }}
                 className="h-10 rounded-[15px] font-body text-sm"
                 placeholder="••••••••"
               />
+              {passwordError && currentPassword && (!newPassword || newPassword.length < 8) && (
+                <p className="text-xs text-status-danger">{passwordError}</p>
+              )}
             </div>
             <div className="space-y-2">
               <Label className="font-body text-sm text-zinc-600">
@@ -323,39 +336,46 @@ export default function ProfilePage() {
               <Input
                 type="password"
                 value={confirmPassword}
-                onChange={(e) => setConfirmPassword(e.target.value)}
+                onChange={(e) => { setConfirmPassword(e.target.value); setPasswordError(null); }}
                 className="h-10 rounded-[15px] font-body text-sm"
                 placeholder="••••••••"
               />
+              {passwordError && currentPassword && newPassword && newPassword.length >= 8 && newPassword !== confirmPassword && (
+                <p className="text-xs text-status-danger">{passwordError}</p>
+              )}
             </div>
             <div className="flex justify-end pt-2">
               <Button
                 variant="outline"
                 onClick={() => {
+                  setPasswordError(null);
+                  setPasswordFeedback(null);
                   if (!currentPassword) {
-                    toast.error("Erro", { description: "Senha atual é obrigatória." });
+                    setPasswordError("Senha atual é obrigatória.");
                     return;
                   }
                   if (!newPassword || newPassword.length < 8) {
-                    toast.error("Erro", { description: "Nova senha deve ter no mínimo 8 caracteres." });
+                    setPasswordError("Nova senha deve ter no mínimo 8 caracteres.");
                     return;
                   }
                   if (newPassword !== confirmPassword) {
-                    toast.error("Erro", { description: "As senhas não coincidem." });
+                    setPasswordError("As senhas não coincidem.");
                     return;
                   }
                   setCurrentPassword("");
                   setNewPassword("");
                   setConfirmPassword("");
-                  toast.success("Senha alterada!", {
-                    description: "Sua senha foi alterada com sucesso.",
-                  });
+                  setPasswordFeedback({ type: "success", message: "Senha alterada! Sua senha foi alterada com sucesso." });
+                  setTimeout(() => setPasswordFeedback(null), 3000);
                 }}
                 className="rounded-full font-heading text-sm"
               >
                 Alterar senha
               </Button>
             </div>
+            {passwordFeedback && (
+              <InlineFeedback type={passwordFeedback.type} message={passwordFeedback.message} onClose={() => setPasswordFeedback(null)} />
+            )}
           </div>
         </CardContent>
       </Card>
@@ -373,19 +393,18 @@ export default function ProfilePage() {
 
 function SessionsCard() {
   const [sessions, setSessions] = useState(mockSessions);
+  const [sessionFeedback, setSessionFeedback] = useState<{type: "success" | "error"; message: string} | null>(null);
 
   const handleEndSession = (sessionId: string) => {
     setSessions(sessions.filter((s) => s.id !== sessionId));
-    toast.success("Sessão encerrada!", {
-      description: "A sessão foi desconectada com sucesso.",
-    });
+    setSessionFeedback({ type: "success", message: "Sessão encerrada! A sessão foi desconectada com sucesso." });
+    setTimeout(() => setSessionFeedback(null), 3000);
   };
 
   const handleEndAllOtherSessions = () => {
     setSessions(sessions.filter((s) => s.isCurrent));
-    toast.success("Sessões encerradas!", {
-      description: "Todas as outras sessões foram desconectadas.",
-    });
+    setSessionFeedback({ type: "success", message: "Sessões encerradas! Todas as outras sessões foram desconectadas." });
+    setTimeout(() => setSessionFeedback(null), 3000);
   };
 
   const getSessionIcon = (icon: Session["icon"]) => {
@@ -472,6 +491,12 @@ function SessionsCard() {
             </Button>
           </div>
         )}
+
+        {sessionFeedback && (
+          <div className="mt-4">
+            <InlineFeedback type={sessionFeedback.type} message={sessionFeedback.message} onClose={() => setSessionFeedback(null)} />
+          </div>
+        )}
       </CardContent>
     </Card>
   );
@@ -480,6 +505,7 @@ function SessionsCard() {
 // ===== Notification Preferences Card =====
 
 function NotificationPreferencesCard() {
+  const [notifFeedback, setNotifFeedback] = useState<{type: "success" | "error"; message: string} | null>(null);
   const [emailPrefs, setEmailPrefs] = useState<Record<string, boolean>>({
     sla: true,
     activities: true,
@@ -574,15 +600,19 @@ function NotificationPreferencesCard() {
         <div className="mt-6 flex justify-end">
           <Button
             onClick={() => {
-              toast.success("Preferências salvas!", {
-                description: "Suas preferências de notificação foram atualizadas.",
-              });
+              setNotifFeedback({ type: "success", message: "Preferências salvas! Suas preferências de notificação foram atualizadas." });
+              setTimeout(() => setNotifFeedback(null), 3000);
             }}
             className="rounded-full bg-black font-heading text-sm text-white hover:bg-zinc-800"
           >
             Salvar preferências
           </Button>
         </div>
+        {notifFeedback && (
+          <div className="mt-4">
+            <InlineFeedback type={notifFeedback.type} message={notifFeedback.message} onClose={() => setNotifFeedback(null)} />
+          </div>
+        )}
       </CardContent>
     </Card>
   );

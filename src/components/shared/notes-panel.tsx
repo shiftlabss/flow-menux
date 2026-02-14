@@ -183,6 +183,7 @@ export function NotesPanel() {
   const [entries, setEntries] = useState<NoteEntry[]>(mockEntries);
   const [newEntryText, setNewEntryText] = useState("");
   const [isAdding, setIsAdding] = useState(false);
+  const [editingId, setEditingId] = useState<string | null>(null);
 
   const filteredEntries = entries.filter((entry) =>
     activeTab === "notes" ? entry.type === "note" : entry.type === "comment"
@@ -190,6 +191,19 @@ export function NotesPanel() {
 
   const handleAdd = useCallback(() => {
     if (!newEntryText.trim()) return;
+
+    if (editingId) {
+      // Update existing entry
+      setEntries((prev) =>
+        prev.map((e) =>
+          e.id === editingId ? { ...e, text: newEntryText.trim() } : e
+        )
+      );
+      setEditingId(null);
+      setNewEntryText("");
+      setIsAdding(false);
+      return;
+    }
 
     const newEntry: NoteEntry = {
       id: `entry-${Date.now()}`,
@@ -205,11 +219,15 @@ export function NotesPanel() {
     setEntries((prev) => [newEntry, ...prev]);
     setNewEntryText("");
     setIsAdding(false);
-  }, [newEntryText, activeTab]);
+  }, [newEntryText, activeTab, editingId]);
 
-  const handleEdit = useCallback((_id: string) => {
-    // TODO: implement edit functionality
-  }, []);
+  const handleEdit = useCallback((id: string) => {
+    const entry = entries.find((e) => e.id === id);
+    if (!entry) return;
+    setNewEntryText(entry.text);
+    setEditingId(id);
+    setIsAdding(true);
+  }, [entries]);
 
   const handleDelete = useCallback((id: string) => {
     setEntries((prev) => prev.filter((e) => e.id !== id));
@@ -330,6 +348,7 @@ export function NotesPanel() {
                 onClick={() => {
                   setIsAdding(false);
                   setNewEntryText("");
+                  setEditingId(null);
                 }}
                 className="rounded-full font-heading"
               >
@@ -341,7 +360,7 @@ export function NotesPanel() {
                 disabled={!newEntryText.trim()}
                 className="rounded-full bg-black font-heading text-white hover:bg-zinc-800"
               >
-                Adicionar
+                {editingId ? "Salvar" : "Adicionar"}
               </Button>
             </div>
           </div>

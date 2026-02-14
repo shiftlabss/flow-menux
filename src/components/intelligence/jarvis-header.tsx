@@ -13,8 +13,13 @@ import {
   MessageSquare
 } from "lucide-react";
 import { cn } from "@/lib/cn";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+  TooltipProvider,
+} from "@/components/ui/tooltip";
 import { useIntelligenceStore } from "@/stores/intelligence-store";
-import { useUIStore } from "@/stores/ui-store";
 
 export type JarvisMode = "focus" | "audit" | "reply" | "proposal";
 
@@ -72,7 +77,7 @@ export function JarvisHeader() {
         <div className="ml-auto flex items-center gap-0.5">
           <ActionButton onClick={toggleHistory} icon={Clock} title="Histórico" />
           <ActionButton onClick={startNewConversation} icon={MessageSquarePlus} title="Nova conversa" />
-          <ActionButton onClick={() => {}} icon={Settings} title="Configurações" />
+          <ActionButton disabled tooltip="Em breve" icon={Settings} title="Configurações" />
           <div className="mx-1 h-4 w-px bg-slate-200 dark:bg-slate-800" />
           <ActionButton onClick={close} icon={X} title="Fechar (Esc)" />
         </div>
@@ -110,19 +115,49 @@ export function JarvisHeader() {
   );
 }
 
-function ActionButton({ onClick, icon: Icon, title }: { onClick: () => void; icon: any; title: string }) {
-  return (
+function ActionButton({
+  onClick,
+  icon: Icon,
+  title,
+  disabled,
+  tooltip,
+}: {
+  onClick?: () => void;
+  icon: any;
+  title: string;
+  disabled?: boolean;
+  tooltip?: string;
+}) {
+  const button = (
     <button
-      onClick={onClick}
+      onClick={disabled ? undefined : onClick}
+      disabled={disabled}
       className={cn(
         "flex h-8 w-8 items-center justify-center rounded-lg transition-all duration-[120ms]",
-        "text-slate-400 hover:bg-slate-100 hover:text-slate-600",
-        "active:scale-95",
-        "dark:hover:bg-slate-800 dark:hover:text-slate-300"
+        disabled
+          ? "text-slate-300 cursor-not-allowed dark:text-slate-600"
+          : cn(
+              "text-slate-400 hover:bg-slate-100 hover:text-slate-600",
+              "active:scale-95",
+              "dark:hover:bg-slate-800 dark:hover:text-slate-300"
+            )
       )}
-      title={title}
+      title={tooltip ? undefined : title}
     >
       <Icon className="h-4 w-4" />
     </button>
   );
+
+  if (tooltip) {
+    return (
+      <TooltipProvider>
+        <Tooltip>
+          <TooltipTrigger asChild>{button}</TooltipTrigger>
+          <TooltipContent side="bottom">{tooltip}</TooltipContent>
+        </Tooltip>
+      </TooltipProvider>
+    );
+  }
+
+  return button;
 }

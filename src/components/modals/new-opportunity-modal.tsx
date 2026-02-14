@@ -4,8 +4,8 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Loader2 } from "lucide-react";
 import { useState } from "react";
-import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
+import { InlineFeedback } from "@/components/ui/inline-feedback";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { CurrencyInput } from "@/components/ui/masked-inputs";
@@ -42,6 +42,7 @@ export function NewOpportunityModal() {
   const { addOpportunity } = useOpportunityStore();
   const { addNotification } = useNotificationStore();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [feedback, setFeedback] = useState<{type: "success" | "error", message: string} | null>(null);
   const isOpen = drawerType === "new-opportunity";
 
   const {
@@ -82,16 +83,15 @@ export function NewOpportunityModal() {
         link: "/pipes",
       });
 
-      toast.success("Oportunidade criada!", {
-        description: `"${data.title}" (${formatCurrencyBRL(data.value)}) foi adicionada ao estágio Lead-In.`,
-      });
-
-      reset();
-      closeDrawer();
+      // Show inline feedback then auto-close
+      setFeedback({ type: "success", message: "Oportunidade criada com sucesso!" });
+      setTimeout(() => {
+        setFeedback(null);
+        reset();
+        closeDrawer();
+      }, 1500);
     } catch (error) {
-      toast.error("Erro ao criar oportunidade", {
-        description: "Tente novamente em alguns instantes.",
-      });
+      setFeedback({ type: "error", message: "Erro ao criar oportunidade. Tente novamente." });
     } finally {
       setIsSubmitting(false);
     }
@@ -101,6 +101,7 @@ export function NewOpportunityModal() {
     <Dialog
       open={isOpen}
       onOpenChange={() => {
+        setFeedback(null);
         reset();
         closeDrawer();
       }}
@@ -237,6 +238,14 @@ export function NewOpportunityModal() {
               {...register("notes")}
             />
           </div>
+
+          {feedback && (
+            <InlineFeedback
+              type={feedback.type}
+              message={feedback.message}
+              onClose={() => setFeedback(null)}
+            />
+          )}
 
           {/* Actions */}
           <div className="flex justify-end gap-3 pt-2">

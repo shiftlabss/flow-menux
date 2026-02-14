@@ -56,8 +56,26 @@ import {
   PIPELINE_STAGE_ORDER,
 } from "@/lib/business-rules";
 import { generateDynamicMockData } from "@/lib/mock-data";
+import { motion } from "framer-motion";
 import { PipelineManagerDrawer } from "@/components/pipeline/pipeline-manager-drawer";
 import { PipelineSwitcher } from "@/components/pipeline/pipeline-switcher";
+
+// ═══════════════════════════════════════════════════════════════════
+// Framer Motion Variants
+// ═══════════════════════════════════════════════════════════════════
+
+const staggerContainer = {
+  hidden: { opacity: 0 },
+  show: { opacity: 1, transition: { staggerChildren: 0.08, delayChildren: 0.1 } },
+};
+const fadeUp = {
+  hidden: { opacity: 0, y: 20 },
+  show: { opacity: 1, y: 0, transition: { duration: 0.45, ease: [0.25, 0.46, 0.45, 0.94] as const } },
+};
+const scaleIn = {
+  hidden: { opacity: 0, scale: 0.95 },
+  show: { opacity: 1, scale: 1, transition: { duration: 0.35, ease: [0.25, 0.46, 0.45, 0.94] as const } },
+};
 
 // ═══════════════════════════════════════════════════════════════════
 // Funnel Definitions
@@ -820,9 +838,9 @@ export default function PipesPage() {
         className="sr-only"
       />
 
-      <div className="flex h-[calc(100vh-64px)] flex-col overflow-hidden">
+      <motion.div initial="hidden" animate="show" variants={staggerContainer} className="flex h-[calc(100vh-64px)] flex-col overflow-hidden">
         {/* ── Header & Toolbar ─────────────────────────────────── */}
-        <div className="shrink-0 space-y-3 pb-4">
+        <motion.div variants={fadeUp} className="shrink-0 space-y-3 pb-4">
           <div className="flex flex-wrap items-start justify-between gap-3">
             <div className="min-w-0">
               <PipelineSwitcher
@@ -915,7 +933,7 @@ export default function PipesPage() {
               </Button>
             </div>
           </div>
-        </div>
+        </motion.div>
 
         {/* ── Board ────────────────────────────────────────────── */}
         <div
@@ -945,8 +963,9 @@ export default function PipesPage() {
               const hasSuccess = successFeedback?.stage === stageDef.id;
 
               return (
-                <div
+                <motion.div
                   key={stageDef.id}
+                  variants={scaleIn}
                   className={`group/col flex w-[85vw] shrink-0 flex-col rounded-[var(--radius-bento-card)] border transition-all duration-150 sm:w-[320px] xl:w-[340px] ${
                     isDropTarget
                       ? "border-brand bg-brand/5 ring-2 ring-brand/30"
@@ -1223,7 +1242,7 @@ export default function PipesPage() {
                       </div>
                     )}
                   </div>
-                </div>
+                </motion.div>
               );
             })}
           </div>
@@ -1234,7 +1253,7 @@ export default function PipesPage() {
           open={isManageDrawerOpen}
           onOpenChange={setIsManageDrawerOpen}
         />
-      </div>
+      </motion.div>
     </TooltipProvider>
   );
 }

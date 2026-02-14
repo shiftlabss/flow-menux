@@ -3,6 +3,7 @@
 import { AlertTriangle, Loader2 } from "lucide-react";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
+import { InlineFeedback } from "@/components/ui/inline-feedback";
 import {
   Dialog,
   DialogContent,
@@ -16,6 +17,7 @@ import { useUIStore } from "@/stores/ui-store";
 export function ConfirmDeactivateModal() {
   const { modalType, modalData, closeModal } = useUIStore();
   const [isDeactivating, setIsDeactivating] = useState(false);
+  const [feedback, setFeedback] = useState<{type: "error", message: string} | null>(null);
   const isOpen = modalType === "confirm-deactivate";
 
   const description =
@@ -23,7 +25,7 @@ export function ConfirmDeactivateModal() {
     "O usuário perderá acesso ao sistema. Você poderá reativá-lo posteriormente.";
 
   return (
-    <Dialog open={isOpen} onOpenChange={() => closeModal()}>
+    <Dialog open={isOpen} onOpenChange={() => { setFeedback(null); closeModal(); }}>
       <DialogContent className="max-w-[400px] rounded-[20px] p-8">
         <DialogHeader>
           <div className="flex items-center gap-3">
@@ -38,6 +40,14 @@ export function ConfirmDeactivateModal() {
             {description}
           </DialogDescription>
         </DialogHeader>
+
+        {feedback && (
+          <InlineFeedback
+            type={feedback.type}
+            message={feedback.message}
+            onClose={() => setFeedback(null)}
+          />
+        )}
 
         <DialogFooter className="mt-4">
           <Button
@@ -59,7 +69,7 @@ export function ConfirmDeactivateModal() {
                 }
                 closeModal();
               } catch (error) {
-                console.error("Error deactivating:", error);
+                setFeedback({ type: "error", message: "Erro ao desativar. Tente novamente." });
               } finally {
                 setIsDeactivating(false);
               }

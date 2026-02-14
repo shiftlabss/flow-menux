@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback, useMemo } from "react";
 import { useRouter } from "next/navigation";
+import { motion } from "framer-motion";
 import {
   TrendingUp,
   TrendingDown,
@@ -36,6 +37,33 @@ import { BentoCard } from "@/components/ui/bento-card";
 import { SkeletonBlock } from "@/components/ui/skeleton-block";
 import { InlineFeedback } from "@/components/ui/inline-feedback";
 import { cn } from "@/lib/utils";
+
+// ---------------------------------------------------------------------------
+// Animation Variants
+// ---------------------------------------------------------------------------
+
+const staggerContainer = {
+  hidden: { opacity: 0 },
+  show: {
+    opacity: 1,
+    transition: { staggerChildren: 0.08, delayChildren: 0.1 },
+  },
+};
+
+const fadeUp = {
+  hidden: { opacity: 0, y: 20 },
+  show: { opacity: 1, y: 0, transition: { duration: 0.45, ease: [0.25, 0.46, 0.45, 0.94] as const } },
+};
+
+const fadeIn = {
+  hidden: { opacity: 0 },
+  show: { opacity: 1, transition: { duration: 0.4 } },
+};
+
+const scaleIn = {
+  hidden: { opacity: 0, scale: 0.95 },
+  show: { opacity: 1, scale: 1, transition: { duration: 0.35, ease: [0.25, 0.46, 0.45, 0.94] as const } },
+};
 
 // ---------------------------------------------------------------------------
 // Types
@@ -295,9 +323,11 @@ function PipelineChart({ stages }: { stages: PipelineStage[] }) {
               </div>
               {/* Horizontal bar */}
               <div className="relative h-3 w-full overflow-hidden rounded-full bg-zinc-100">
-                <div
-                  className="absolute inset-y-0 left-0 rounded-full bg-brand transition-all duration-[var(--transition-bento-chart)] ease-out"
-                  style={{ width: `${pct}%` }}
+                <motion.div
+                  initial={{ width: 0 }}
+                  animate={{ width: `${pct}%` }}
+                  transition={{ duration: 0.8, ease: [0.25, 0.46, 0.45, 0.94], delay: 0.3 }}
+                  className="absolute inset-y-0 left-0 rounded-full bg-brand"
                 />
               </div>
             </div>
@@ -672,19 +702,25 @@ export default function DashboardPage() {
   const userRole = user?.role || "master";
 
   return (
-    <div className="bento-container mx-auto space-y-8">
+    <motion.div
+      initial="hidden"
+      animate="show"
+      variants={staggerContainer}
+      className="bento-container mx-auto space-y-8"
+    >
       {/* Page Header */}
-      <div>
+      <motion.div variants={fadeUp}>
         <h1 className="font-heading text-2xl font-bold text-black sm:text-3xl">Dashboard</h1>
         <p className="mt-1 font-body text-sm text-zinc-500">
           Visão geral do seu pipeline e atividades
         </p>
-      </div>
+      </motion.div>
 
       {/* Metric Cards - Bento Grid Responsivo */}
       {userRole === "cs" ? (
-        <div className="bento-grid grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
-          {computedCsHealthCards.map((card) => (
+        <motion.div variants={fadeUp} className="bento-grid grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
+          {computedCsHealthCards.map((card, i) => (
+            <motion.div key={card.label} variants={scaleIn} custom={i}>
             <BentoStatCard
               key={card.label}
               label={card.label}
@@ -710,10 +746,12 @@ export default function DashboardPage() {
                         : "down",
               }}
             />
+            </motion.div>
           ))}
-        </div>
+        </motion.div>
       ) : (
-        <div className="bento-grid grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
+        <motion.div variants={fadeUp} className="bento-grid grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
+          <motion.div variants={scaleIn}>
           <BentoStatCard
             label="Oportunidades Abertas"
             value={metrics.totalOpportunities.toString()}
@@ -721,6 +759,8 @@ export default function DashboardPage() {
             icon={<Target className="h-5 w-5" />}
             delta={{ value: 12, direction: "up" }}
           />
+          </motion.div>
+          <motion.div variants={scaleIn}>
           <BentoStatCard
             label="Valor Total no Pipeline"
             value={formatCurrency(metrics.totalValue)}
@@ -728,6 +768,8 @@ export default function DashboardPage() {
             icon={<DollarSign className="h-5 w-5" />}
             delta={{ value: 8, direction: "up" }}
           />
+          </motion.div>
+          <motion.div variants={scaleIn}>
           <BentoStatCard
             label="Taxa de Conversão"
             value={`${metrics.conversionRate}%`}
@@ -735,6 +777,8 @@ export default function DashboardPage() {
             icon={<Users className="h-5 w-5" />}
             delta={{ value: 5, direction: "up" }}
           />
+          </motion.div>
+          <motion.div variants={scaleIn}>
           <BentoStatCard
             label="Atividades Pendentes"
             value={metrics.activitiesDue.toString()}
@@ -742,13 +786,14 @@ export default function DashboardPage() {
             icon={<CalendarCheck className="h-5 w-5" />}
             delta={{ value: 3, direction: "down" }}
           />
-        </div>
+          </motion.div>
+        </motion.div>
       )}
 
       {/* Bento Layout Principal */}
-      <div className="bento-grid grid grid-cols-1 gap-6 lg:grid-cols-12">
+      <motion.div variants={fadeUp} className="bento-grid grid grid-cols-1 gap-6 lg:grid-cols-12">
         {/* Coluna Esquerda - 8 cols */}
-        <div className="space-y-6 lg:col-span-8">
+        <motion.div variants={fadeIn} className="space-y-6 lg:col-span-8">
           {/* Alertas Críticos - Full width em mobile, integrado no grid em desktop */}
           <div className="lg:hidden">
             <CriticalAlerts alerts={criticalAlerts} />
@@ -786,10 +831,10 @@ export default function DashboardPage() {
               }))}
             />
           )}
-        </div>
+        </motion.div>
 
         {/* Coluna Direita - 4 cols (tall cards) */}
-        <div className="space-y-6 lg:col-span-4">
+        <motion.div variants={fadeIn} className="space-y-6 lg:col-span-4">
           {/* Alertas Críticos - Visible apenas em desktop */}
           <div className="hidden lg:block">
             <CriticalAlerts alerts={criticalAlerts} />
@@ -797,8 +842,8 @@ export default function DashboardPage() {
 
           {/* Atividades de Hoje */}
           <TodayActivities activities={activities} onToggle={handleToggleActivity} />
-        </div>
-      </div>
-    </div>
+        </motion.div>
+      </motion.div>
+    </motion.div>
   );
 }

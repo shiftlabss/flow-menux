@@ -4,8 +4,8 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Loader2, UserPlus } from "lucide-react";
 import { useState } from "react";
-import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
+import { InlineFeedback } from "@/components/ui/inline-feedback";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
@@ -41,6 +41,7 @@ export function InviteUserModal() {
   const { modalType, closeModal } = useUIStore();
   const { addUser } = useUserStore();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [feedback, setFeedback] = useState<{type: "success" | "error", message: string} | null>(null);
   const isOpen = modalType === "invite-user";
 
   const {
@@ -66,15 +67,15 @@ export function InviteUserModal() {
         unitName: unitLabels[data.unitId] || "Matriz",
       });
 
-      toast.success("Convite enviado com sucesso!", {
-        description: `${data.email} foi convidado como ${roleLabels[data.role] || data.role} na unidade ${unitLabels[data.unitId] || data.unitId}.`,
-        duration: 5000,
-      });
-
-      reset();
-      closeModal();
+      // Show inline feedback then auto-close
+      setFeedback({ type: "success", message: "Convite enviado com sucesso!" });
+      setTimeout(() => {
+        setFeedback(null);
+        reset();
+        closeModal();
+      }, 1500);
     } catch {
-      toast.error("Erro ao enviar convite. Tente novamente.");
+      setFeedback({ type: "error", message: "Erro ao enviar convite. Tente novamente." });
     } finally {
       setIsSubmitting(false);
     }
@@ -84,6 +85,7 @@ export function InviteUserModal() {
     <Dialog
       open={isOpen}
       onOpenChange={() => {
+        setFeedback(null);
         reset();
         closeModal();
       }}
@@ -153,6 +155,14 @@ export function InviteUserModal() {
               </p>
             )}
           </div>
+
+          {feedback && (
+            <InlineFeedback
+              type={feedback.type}
+              message={feedback.message}
+              onClose={() => setFeedback(null)}
+            />
+          )}
 
           <div className="flex justify-end gap-3 pt-2">
             <Button

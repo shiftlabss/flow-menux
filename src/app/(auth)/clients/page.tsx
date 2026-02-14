@@ -11,8 +11,8 @@ import {
   Clock,
   GripVertical,
 } from "lucide-react";
-import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
+import { InlineFeedback } from "@/components/ui/inline-feedback";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
@@ -24,9 +24,25 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { motion } from "framer-motion";
 import type { Client, ClientStage, HealthScore } from "@/types";
 import { useUIStore } from "@/stores/ui-store";
 import { useClientStore } from "@/stores/client-store";
+
+// ===== Framer Motion Variants =====
+
+const staggerContainer = {
+  hidden: { opacity: 0 },
+  show: { opacity: 1, transition: { staggerChildren: 0.08, delayChildren: 0.1 } },
+};
+const fadeUp = {
+  hidden: { opacity: 0, y: 20 },
+  show: { opacity: 1, y: 0, transition: { duration: 0.45, ease: [0.25, 0.46, 0.45, 0.94] as const } },
+};
+const scaleIn = {
+  hidden: { opacity: 0, scale: 0.95 },
+  show: { opacity: 1, scale: 1, transition: { duration: 0.35, ease: [0.25, 0.46, 0.45, 0.94] as const } },
+};
 
 // ===== Funnel Definitions =====
 
@@ -331,6 +347,7 @@ export default function ClientsPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [healthFilter, setHealthFilter] = useState<HealthScore | "all">("all");
   const [responsibleFilter, setResponsibleFilter] = useState<string>("all");
+  const [dragFeedback, setDragFeedback] = useState<{ type: "success" | "error"; message: string } | null>(null);
 
   // Use store clients (merge with local if store is empty)
   const allClients = storeClients.length > 0 ? storeClients : localMockClients;
@@ -378,16 +395,16 @@ export default function ClientsPage() {
     const targetIndex = clientStageOrder.indexOf(targetStage);
 
     if (targetStage === "churn" && card.stage !== "retencao") {
-      toast.error("Apenas clientes em Retenção podem ser movidos para Churn.");
+      setDragFeedback({ type: "error", message: "Apenas clientes em Retenção podem ser movidos para Churn." });
+      setTimeout(() => setDragFeedback(null), 3000);
       return;
     }
 
     moveToStage(cardId, targetStage);
 
     const stageLabel = stageConfig[targetStage].label;
-    toast.success(`Cliente movido para ${stageLabel}`, {
-      description: `${card.companyName} foi movido para o estágio ${stageLabel}.`,
-    });
+    setDragFeedback({ type: "success", message: `${card.companyName} movido para ${stageLabel}.` });
+    setTimeout(() => setDragFeedback(null), 2000);
 
     draggedCardRef.current = null;
     dragOverStageRef.current = null;
@@ -424,9 +441,19 @@ export default function ClientsPage() {
   }, [activeFunnel, searchQuery, healthFilter, responsibleFilter]);
 
   return (
-    <div className="space-y-6">
+    <motion.div initial="hidden" animate="show" variants={staggerContainer} className="space-y-6">
+      {/* Drag feedback */}
+      {dragFeedback && (
+        <InlineFeedback
+          type={dragFeedback.type}
+          message={dragFeedback.message}
+          compact
+          onClose={() => setDragFeedback(null)}
+        />
+      )}
+
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <motion.div variants={fadeUp} className="flex items-center justify-between">
         <div>
           <h1 className="font-heading text-2xl font-bold text-black sm:text-3xl">
             Clientes
@@ -435,10 +462,10 @@ export default function ClientsPage() {
             Acompanhe seus clientes pelo funil de sucesso
           </p>
         </div>
-      </div>
+      </motion.div>
 
       {/* Funnel Toggle */}
-      <div className="flex items-center gap-1 rounded-full bg-zinc-100 p-1 w-fit">
+      <motion.div variants={fadeUp} className="flex items-center gap-1 rounded-full bg-zinc-100 p-1 w-fit">
         <button
           onClick={() => setActiveFunnel("onboarding")}
           className={`rounded-full px-5 py-2 font-heading text-sm font-medium transition-colors ${
@@ -459,10 +486,10 @@ export default function ClientsPage() {
         >
           Ativos
         </button>
-      </div>
+      </motion.div>
 
       {/* Search + Filters Bar */}
-      <div className="flex flex-wrap items-center gap-3">
+      <motion.div variants={fadeUp} className="flex flex-wrap items-center gap-3">
         {/* Search */}
         <div className="relative w-full max-w-xs">
           <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-zinc-400" />
@@ -534,10 +561,11 @@ export default function ClientsPage() {
             ))}
           </DropdownMenuContent>
         </DropdownMenu>
-      </div>
+      </motion.div>
 
       {/* Kanban Board */}
-      <div
+      <motion.div
+        variants={fadeUp}
         className="flex gap-3 overflow-x-auto pb-4"
         style={{ padding: "4px" }}
       >
@@ -547,8 +575,9 @@ export default function ClientsPage() {
           const totalMRR = cards.reduce((acc, c) => acc + c.monthlyRevenue, 0);
 
           return (
-            <div
+            <motion.div
               key={stage}
+              variants={scaleIn}
               className="flex w-[85vw] shrink-0 flex-col rounded-[15px] bg-zinc-50 transition-colors sm:w-[300px]"
               onDragOver={(e) => handleDragOver(e, stage)}
               onDrop={(e) => handleDrop(e, stage)}
@@ -601,11 +630,11 @@ export default function ClientsPage() {
                   )}
                 </div>
               </ScrollArea>
-            </div>
+            </motion.div>
           );
         })}
-      </div>
-    </div>
+      </motion.div>
+    </motion.div>
   );
 }
 

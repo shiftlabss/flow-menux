@@ -46,7 +46,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { toast } from "sonner";
+import { InlineFeedback } from "@/components/ui/inline-feedback";
 import { useUIStore } from "@/stores/ui-store";
 import { useUserStore } from "@/stores/user-store";
 import type { TeamUser } from "@/types";
@@ -161,6 +161,7 @@ export default function UsersPage() {
   const [roleFilter, setRoleFilter] = useState("todos");
   const [statusFilter, setStatusFilter] = useState<StatusFilter>("todos");
   const [currentPage, setCurrentPage] = useState(1);
+  const [userFeedback, setUserFeedback] = useState<{type: "success" | "error" | "info"; message: string} | null>(null);
 
   const { openModal } = useUIStore();
   const { users: storeUsers } = useUserStore();
@@ -274,6 +275,11 @@ export default function UsersPage() {
         </div>
       </div>
 
+      {/* Inline Feedback */}
+      {userFeedback && (
+        <InlineFeedback type={userFeedback.type} message={userFeedback.message} onClose={() => setUserFeedback(null)} />
+      )}
+
       {/* Users Table */}
       <Card className="rounded-[15px] border-zinc-200">
         <CardContent className="p-0">
@@ -359,7 +365,7 @@ export default function UsersPage() {
                         : "--"}
                     </TableCell>
                     <TableCell>
-                      <UserActionsMenu user={user} />
+                      <UserActionsMenu user={user} onFeedback={(fb) => { setUserFeedback(fb); if (fb.type === "success") setTimeout(() => setUserFeedback(null), 3000); }} />
                     </TableCell>
                   </TableRow>
                 );
@@ -417,13 +423,11 @@ export default function UsersPage() {
 
 // ===== User Actions Dropdown =====
 
-function UserActionsMenu({ user }: { user: TeamUser }) {
+function UserActionsMenu({ user, onFeedback }: { user: TeamUser; onFeedback: (fb: {type: "success" | "error" | "info"; message: string}) => void }) {
   const { updateUser, deactivateUser, activateUser } = useUserStore();
 
   const handleEdit = () => {
-    toast.info(`Edição de ${user.name}`, {
-      description: "Funcionalidade de edição completa disponível em breve.",
-    });
+    onFeedback({ type: "info", message: `Edição de ${user.name}: Funcionalidade de edição completa disponível em breve.` });
   };
 
   const handleChangeRole = () => {
@@ -434,45 +438,33 @@ function UserActionsMenu({ user }: { user: TeamUser }) {
     const roleLabels: Record<string, string> = { admin: "Admin", comercial: "Comercial", cs: "CS", leitura: "Leitura", master: "Master" };
 
     if (user.role === "master") {
-      toast.error("Não é possível alterar o papel do usuário Master.");
+      onFeedback({ type: "error", message: "Não é possível alterar o papel do usuário Master." });
       return;
     }
 
     updateUser(user.id, { role: nextRole });
-    toast.success(`Papel alterado para ${roleLabels[nextRole]}`, {
-      description: `${user.name} agora é ${roleLabels[nextRole]}.`,
-    });
+    onFeedback({ type: "success", message: `Papel alterado para ${roleLabels[nextRole]}. ${user.name} agora é ${roleLabels[nextRole]}.` });
   };
 
   const handleResetPassword = () => {
-    toast.success("Link de redefinição enviado!", {
-      description: `Um e-mail foi enviado para ${user.email} com instruções para redefinir a senha.`,
-    });
+    onFeedback({ type: "success", message: `Link de redefinição enviado! Um e-mail foi enviado para ${user.email} com instruções para redefinir a senha.` });
   };
 
   const handleTransferCards = () => {
-    toast.info("Transferência de cards", {
-      description: `Funcionalidade de transferência para ${user.name} disponível em breve.`,
-    });
+    onFeedback({ type: "info", message: `Transferência de cards: Funcionalidade de transferência para ${user.name} disponível em breve.` });
   };
 
   const handleMarkVacation = () => {
-    toast.success("Férias registradas!", {
-      description: `${user.name} foi marcado em férias.`,
-    });
+    onFeedback({ type: "success", message: `Férias registradas! ${user.name} foi marcado em férias.` });
   };
 
   const handleToggleStatus = () => {
     if (user.isActive) {
       deactivateUser(user.id);
-      toast.success(`${user.name} foi desativado`, {
-        description: "O usuário não poderá mais acessar o sistema.",
-      });
+      onFeedback({ type: "success", message: `${user.name} foi desativado. O usuário não poderá mais acessar o sistema.` });
     } else {
       activateUser(user.id);
-      toast.success(`${user.name} foi reativado`, {
-        description: "O usuário pode acessar o sistema novamente.",
-      });
+      onFeedback({ type: "success", message: `${user.name} foi reativado. O usuário pode acessar o sistema novamente.` });
     }
   };
 

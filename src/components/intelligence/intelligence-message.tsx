@@ -11,6 +11,7 @@ import { motion } from "framer-motion";
 import {
   Copy,
   Check,
+  X,
   Calendar,
   FileText,
   RefreshCw,
@@ -19,7 +20,6 @@ import {
   Mail,
   Phone,
 } from "lucide-react";
-import { toast } from "sonner";
 import { cn } from "@/lib/cn";
 import { Button } from "@/components/ui/button";
 import type {
@@ -61,6 +61,7 @@ function MessageContextBadge({ badge }: { badge: ContextBadge }) {
 
 function CopyableBlockComponent({ block }: { block: CopyableBlock }) {
   const [copied, setCopied] = useState(false);
+  const [copyError, setCopyError] = useState(false);
   const [editedContent, setEditedContent] = useState(block.content);
   const [isEditing, setIsEditing] = useState(false);
 
@@ -80,10 +81,10 @@ function CopyableBlockComponent({ block }: { block: CopyableBlock }) {
     try {
       await navigator.clipboard.writeText(editedContent);
       setCopied(true);
-      toast.success("Copiado!");
       setTimeout(() => setCopied(false), 2000);
     } catch {
-      toast.error("Erro ao copiar");
+      setCopyError(true);
+      setTimeout(() => setCopyError(false), 2000);
     }
   }, [editedContent]);
 
@@ -101,13 +102,20 @@ function CopyableBlockComponent({ block }: { block: CopyableBlock }) {
             "flex items-center gap-1 rounded-lg px-2 py-0.5 text-[11px] font-medium transition-all duration-[120ms]",
             copied
               ? "bg-green-50 text-green-600 dark:bg-green-900/30 dark:text-green-400"
-              : "text-slate-500 hover:bg-slate-50 dark:text-slate-400 dark:hover:bg-slate-700"
+              : copyError
+                ? "bg-red-50 text-red-600 dark:bg-red-900/30 dark:text-red-400"
+                : "text-slate-500 hover:bg-slate-50 dark:text-slate-400 dark:hover:bg-slate-700"
           )}
         >
           {copied ? (
             <>
               <Check className="h-3 w-3" />
               Copiado
+            </>
+          ) : copyError ? (
+            <>
+              <X className="h-3 w-3" />
+              Erro
             </>
           ) : (
             <>
@@ -187,17 +195,6 @@ function SuggestedActionButton({
 
     // Marcar como executada
     markActionExecuted(messageId, action.id);
-
-    // Feedback visual
-    toast.success(
-      action.type === "save-note"
-        ? "Nota adicionada à timeline!"
-        : action.type === "create-activity"
-          ? "Atividade criada!"
-          : action.type === "schedule-followup"
-            ? "Follow-up agendado!"
-            : "Ação executada!"
-    );
   };
 
   return (

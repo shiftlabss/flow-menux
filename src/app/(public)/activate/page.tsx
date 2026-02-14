@@ -14,13 +14,14 @@ import {
   AlertCircle,
 } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
+import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { PhoneInput } from "@/components/ui/masked-inputs";
 import { Card, CardContent } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
-import { toast } from "sonner";
+import { InlineFeedback } from "@/components/ui/inline-feedback";
 import {
   activateAccountSchema,
   type ActivateAccountFormData,
@@ -76,9 +77,13 @@ function RequirementsList({ password }: { password: string }) {
 function AvatarUpload({
   preview,
   onFileSelect,
+  onError,
+  error,
 }: {
   preview: string | null;
   onFileSelect: (file: File) => void;
+  onError: (message: string | null) => void;
+  error: string | null;
 }) {
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -91,15 +96,16 @@ function AvatarUpload({
     if (!file) return;
 
     if (!ACCEPTED_IMAGE_TYPES.includes(file.type)) {
-      toast.error("Erro ao enviar foto. Tente novamente.");
+      onError("Formato inválido. Use JPG, PNG ou WebP.");
       return;
     }
 
     if (file.size > MAX_FILE_SIZE) {
-      toast.error("Erro ao enviar foto. Tente novamente.");
+      onError("Arquivo muito grande. Máximo de 5MB.");
       return;
     }
 
+    onError(null);
     onFileSelect(file);
   }
 
@@ -130,6 +136,9 @@ function AvatarUpload({
       <span className="font-body text-xs text-zinc-400">
         Foto de perfil (opcional)
       </span>
+      {error && (
+        <p className="text-xs text-status-danger">{error}</p>
+      )}
     </div>
   );
 }
@@ -145,6 +154,8 @@ function ActivateAccountContent() {
   const [acceptedTerms, setAcceptedTerms] = useState(false);
   const [avatarFile, setAvatarFile] = useState<File | null>(null);
   const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
+  const [avatarError, setAvatarError] = useState<string | null>(null);
+  const [formError, setFormError] = useState<string | null>(null);
   const router = useRouter();
 
   const {
@@ -167,12 +178,14 @@ function ActivateAccountContent() {
 
   async function onSubmit(data: ActivateAccountFormData) {
     setIsSubmitting(true);
+    setFormError(null);
     try {
-      // TODO: Replace with actual API call
-      void data;
+      // Mock: em produção, substituir por chamada à API POST /api/auth/activate
+      console.log("Activating account:", { name: data.name, phone: data.phone, token, hasAvatar: !!avatarFile });
+      await new Promise(resolve => setTimeout(resolve, 800));
       setIsSuccess(true);
     } catch {
-      // Handle error
+      setFormError("Erro ao ativar conta. Tente novamente.");
     } finally {
       setIsSubmitting(false);
     }
@@ -190,6 +203,11 @@ function ActivateAccountContent() {
   // Token expired / invalid state
   if (!token) {
     return (
+      <motion.div
+        initial={{ opacity: 0, y: 30 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5, ease: [0.25, 0.46, 0.45, 0.94] as const }}
+      >
       <Card className="w-full max-w-[440px] rounded-[20px] border-zinc-200 shadow-xl">
         <CardContent className="p-10">
           <div className="text-center">
@@ -211,10 +229,16 @@ function ActivateAccountContent() {
           </div>
         </CardContent>
       </Card>
+      </motion.div>
     );
   }
 
   return (
+    <motion.div
+      initial={{ opacity: 0, y: 30 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.5, ease: [0.25, 0.46, 0.45, 0.94] as const }}
+    >
     <Card className="w-full max-w-[440px] rounded-[20px] border-zinc-200 shadow-xl">
       <CardContent className="p-10">
         {isSuccess ? (
@@ -251,6 +275,8 @@ function ActivateAccountContent() {
               <AvatarUpload
                 preview={avatarPreview}
                 onFileSelect={handleAvatarSelect}
+                onError={setAvatarError}
+                error={avatarError}
               />
             </div>
 
@@ -396,15 +422,23 @@ function ActivateAccountContent() {
                   className="cursor-pointer font-body text-sm text-zinc-600"
                 >
                   Li e aceito os{" "}
-                  <a className="text-brand underline" href="#">
+                  <a className="text-brand underline" href="/terms">
                     Termos de Uso
                   </a>{" "}
                   e a{" "}
-                  <a className="text-brand underline" href="#">
+                  <a className="text-brand underline" href="/privacy">
                     Política de Privacidade
                   </a>
                 </label>
               </div>
+
+              {formError && (
+                <InlineFeedback
+                  type="error"
+                  message={formError}
+                  onClose={() => setFormError(null)}
+                />
+              )}
 
               <Button
                 type="submit"
@@ -422,6 +456,7 @@ function ActivateAccountContent() {
         )}
       </CardContent>
     </Card>
+    </motion.div>
   );
 }
 

@@ -1756,6 +1756,7 @@ export default function LeadCardDrawer() {
   const [cidade, setCidade] = useState(mockLead.cidade);
   const [estado, setEstado] = useState(mockLead.estado);
   const [cepLoading, setCepLoading] = useState(false);
+  const [cepError, setCepError] = useState<string | null>(null);
   const [telefoneEmpresa] = useState(mockLead.telefoneEmpresa);
   const [emailEmpresa] = useState(mockLead.emailEmpresa);
   const [website, setWebsite] = useState(mockLead.website);
@@ -1810,6 +1811,7 @@ export default function LeadCardDrawer() {
   const handleCepChange = async (val: string) => {
     const masked = maskCep(val);
     setCep(masked);
+    setCepError(null);
 
     const newVal = val.replace(/\D/g, "").slice(0, 8);
 
@@ -1825,9 +1827,11 @@ export default function LeadCardDrawer() {
           setEstado(data.uf || "");
           if (data.complemento) setComplemento(data.complemento);
           trackEvent("cep_lookup_success", { cep: newVal });
+        } else {
+          setCepError("CEP não encontrado.");
         }
-      } catch (error) {
-        console.error("Erro ao buscar CEP:", error);
+      } catch {
+        setCepError("Erro ao buscar CEP. Verifique sua conexão.");
       } finally {
         setCepLoading(false);
       }
@@ -2282,6 +2286,9 @@ export default function LeadCardDrawer() {
                                         <Loader2 className="absolute right-2 top-1/2 h-3 w-3 -translate-y-1/2 animate-spin text-brand" />
                                       )}
                                     </div>
+                                    {cepError && (
+                                      <p className="mt-1 font-body text-[10px] text-status-danger">{cepError}</p>
+                                    )}
                                   </div>
                                   <div className="flex-1 min-w-0">
                                     <Label className="mb-1.5 block font-heading text-[10px] font-bold uppercase tracking-wider text-zinc-400">

@@ -6,6 +6,7 @@
 // ============================================================================
 
 import { useEffect, useCallback } from "react";
+import { useRouter, usePathname } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { Sparkles } from "lucide-react";
 import { cn } from "@/lib/cn";
@@ -14,7 +15,9 @@ import { useAuthStore } from "@/stores/auth-store";
 import { canAccessIntelligence } from "@/lib/intelligence-permissions";
 
 export function IntelligenceFAB() {
-  const { isOpen, toggle, proactiveSuggestions } = useIntelligenceStore();
+  const router = useRouter();
+  const pathname = usePathname();
+  const { proactiveSuggestions } = useIntelligenceStore();
   const user = useAuthStore((s) => s.user);
 
   // Verificar permissão — seção 9.1 e 11: perfil Leitura não vê o FAB
@@ -26,10 +29,10 @@ export function IntelligenceFAB() {
       if (!hasAccess) return;
       if ((e.ctrlKey || e.metaKey) && e.key === "i") {
         e.preventDefault();
-        toggle();
+        router.push("/intelligence");
       }
     },
-    [hasAccess, toggle]
+    [hasAccess, router]
   );
 
   useEffect(() => {
@@ -47,25 +50,22 @@ export function IntelligenceFAB() {
   const hasPendingSuggestions = pendingSuggestions.length > 0;
   const highPriority = pendingSuggestions.some((s) => s.priority === "high");
 
+  // Hide FAB on the intelligence page itself
+  if (pathname === "/intelligence") return null;
+
   return (
     <AnimatePresence>
-      {!isOpen && (
-        <motion.div
-          initial={{ scale: 0, opacity: 0 }}
-          animate={{ scale: 1, opacity: 1 }}
-          exit={{ scale: 0, opacity: 0 }}
-          transition={{ type: "spring", stiffness: 300, damping: 25 }}
-          className="fixed bottom-40 right-6 z-50 hidden md:block"
-        >
-          <button
-            onClick={toggle}
-            className={cn(
-              "group relative flex h-12 w-12 items-center justify-center rounded-full",
-              "bg-gradient-to-br from-blue-500 to-purple-600",
-              "text-white shadow-lg shadow-purple-500/25",
-              "transition-all duration-300",
-              "hover:shadow-xl hover:shadow-purple-500/40 hover:scale-105",
-              "active:scale-95",
+      <motion.div
+        initial={{ scale: 0, opacity: 0 }}
+        animate={{ scale: 1, opacity: 1 }}
+        exit={{ scale: 0, opacity: 0 }}
+        transition={{ type: "spring", stiffness: 300, damping: 25 }}
+        className="fixed bottom-6 right-6 z-50 md:block" // Changed bottom position slightly
+      >
+        <button
+          onClick={() => router.push("/intelligence")}
+          className={cn(
+              "group relative flex h-14 w-14 items-center justify-center rounded-full bg-linear-to-br from-indigo-600 to-violet-600 text-white shadow-lg shadow-indigo-500/25 transition-all hover:scale-105 hover:shadow-indigo-500/40 active:scale-95",
               "focus:outline-none focus:ring-2 focus:ring-purple-400 focus:ring-offset-2"
             )}
             aria-label="Abrir Menux Intelligence (Ctrl+I)"
@@ -105,8 +105,7 @@ export function IntelligenceFAB() {
               <span className="ml-1.5 text-slate-400">⌘I</span>
             </div>
           </div>
-        </motion.div>
-      )}
+      </motion.div>
     </AnimatePresence>
   );
 }

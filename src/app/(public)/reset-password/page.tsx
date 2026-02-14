@@ -14,10 +14,12 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
+import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent } from "@/components/ui/card";
+import { InlineFeedback } from "@/components/ui/inline-feedback";
 import {
   resetPasswordSchema,
   type ResetPasswordFormData,
@@ -75,6 +77,7 @@ function ResetPasswordContent() {
   const [showConfirm, setShowConfirm] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
+  const [formError, setFormError] = useState<string | null>(null);
 
   const {
     register,
@@ -90,12 +93,14 @@ function ResetPasswordContent() {
 
   async function onSubmit(data: ResetPasswordFormData) {
     setIsSubmitting(true);
+    setFormError(null);
     try {
-      // TODO: Replace with actual API call
-      void data;
+      // Mock: em produção, substituir por chamada à API POST /api/auth/reset-password
+      console.log("Resetting password for token:", token, "password length:", data.password.length);
+      await new Promise(resolve => setTimeout(resolve, 800));
       setIsSuccess(true);
     } catch {
-      // Handle error
+      setFormError("Erro ao redefinir senha. Tente novamente.");
     } finally {
       setIsSubmitting(false);
     }
@@ -113,6 +118,11 @@ function ResetPasswordContent() {
   // Token expired / invalid state
   if (!token) {
     return (
+      <motion.div
+        initial={{ opacity: 0, y: 30 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5, ease: [0.25, 0.46, 0.45, 0.94] as const }}
+      >
       <Card className="w-full max-w-[440px] rounded-[20px] border-zinc-200 shadow-xl">
         <CardContent className="p-10">
           <div className="text-center">
@@ -133,10 +143,16 @@ function ResetPasswordContent() {
           </div>
         </CardContent>
       </Card>
+      </motion.div>
     );
   }
 
   return (
+    <motion.div
+      initial={{ opacity: 0, y: 30 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.5, ease: [0.25, 0.46, 0.45, 0.94] as const }}
+    >
     <Card className="w-full max-w-[440px] rounded-[20px] border-zinc-200 shadow-xl">
       <CardContent className="p-10">
         {isSuccess ? (
@@ -258,6 +274,14 @@ function ResetPasswordContent() {
                 )}
               </div>
 
+              {formError && (
+                <InlineFeedback
+                  type="error"
+                  message={formError}
+                  onClose={() => setFormError(null)}
+                />
+              )}
+
               <Button
                 type="submit"
                 disabled={isSubmitting}
@@ -274,6 +298,7 @@ function ResetPasswordContent() {
         )}
       </CardContent>
     </Card>
+    </motion.div>
   );
 }
 

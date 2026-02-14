@@ -1,12 +1,12 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { GripVertical, Plus, Edit2, Trash2, X, Check } from "lucide-react";
 import { Reorder } from "framer-motion";
-import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
+import { InlineFeedback } from "@/components/ui/inline-feedback";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -30,8 +30,18 @@ export function StageManager({ pipeline }: StageManagerProps) {
   const [deletingStage, setDeletingStage] = useState<PipelineStageConfig | null>(null);
   const [isAdding, setIsAdding] = useState(false);
   const [newStageName, setNewStageName] = useState("");
+  const [editError, setEditError] = useState<string | null>(null);
+  const [addError, setAddError] = useState<string | null>(null);
+  const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
   const canAddStage = pipeline.stages.length < 10;
+
+  // Auto-clear success message after 2 seconds
+  useEffect(() => {
+    if (!successMessage) return;
+    const timer = setTimeout(() => setSuccessMessage(null), 2000);
+    return () => clearTimeout(timer);
+  }, [successMessage]);
 
   // Handle reorder
   const handleReorder = (newOrder: PipelineStageConfig[]) => {
@@ -42,42 +52,42 @@ export function StageManager({ pipeline }: StageManagerProps) {
   const handleStartEdit = (stage: PipelineStageConfig) => {
     setEditingStageId(stage.id);
     setEditingName(stage.name);
+    setEditError(null);
   };
 
   const handleSaveEdit = () => {
-    if (!editingStageId || !editingName.trim()) return;
+    if (!editingStageId || !editingName.trim()) {
+      setEditError("Nome da etapa é obrigatório.");
+      return;
+    }
 
     if (editingName.length > 30) {
-      toast.error("Nome muito longo", {
-        description: "O nome da etapa deve ter no máximo 30 caracteres.",
-      });
+      setEditError("O nome da etapa deve ter no máximo 30 caracteres.");
       return;
     }
 
     updateStage(pipeline.id, editingStageId, { name: editingName.trim() });
-    toast.success("Etapa atualizada");
+    setSuccessMessage("Etapa atualizada");
     setEditingStageId(null);
     setEditingName("");
+    setEditError(null);
   };
 
   const handleCancelEdit = () => {
     setEditingStageId(null);
     setEditingName("");
+    setEditError(null);
   };
 
   // Handle add
   const handleAddStage = () => {
     if (!newStageName.trim()) {
-      toast.error("Nome obrigatório", {
-        description: "Digite um nome para a etapa.",
-      });
+      setAddError("Digite um nome para a etapa.");
       return;
     }
 
     if (newStageName.length > 30) {
-      toast.error("Nome muito longo", {
-        description: "O nome da etapa deve ter no máximo 30 caracteres.",
-      });
+      setAddError("O nome da etapa deve ter no máximo 30 caracteres.");
       return;
     }
 
@@ -86,9 +96,9 @@ export function StageManager({ pipeline }: StageManagerProps) {
       name: newStageName.trim(),
       slaHours: 48,
     });
-    toast.success("Etapa adicionada");
     setNewStageName("");
     setIsAdding(false);
+    setAddError(null);
   };
 
   // Handle delete
@@ -96,7 +106,6 @@ export function StageManager({ pipeline }: StageManagerProps) {
     if (!deletingStage) return;
 
     deleteStage(pipeline.id, deletingStage.id);
-    toast.success("Etapa removida");
     setDeletingStage(null);
   };
 
@@ -108,7 +117,7 @@ export function StageManager({ pipeline }: StageManagerProps) {
         </h3>
         <Button
           size="sm"
-          onClick={() => setIsAdding(true)}
+          onClick={() => { setIsAdding(true); setAddError(null); }}
           disabled={!canAddStage || isAdding}
           className="rounded-full font-body text-xs"
         >
@@ -116,6 +125,16 @@ export function StageManager({ pipeline }: StageManagerProps) {
           Adicionar Etapa
         </Button>
       </div>
+
+      {/* Success feedback */}
+      {successMessage && (
+        <InlineFeedback
+          type="success"
+          message={successMessage}
+          compact
+          onClose={() => setSuccessMessage(null)}
+        />
+      )}
 
       {/* Stages List */}
       {pipeline.stages.length > 0 ? (
@@ -132,18 +151,23 @@ export function StageManager({ pipeline }: StageManagerProps) {
 
                 <div className="flex-1">
                   {editingStageId === stage.id ? (
-                    <Input
-                      value={editingName}
-                      onChange={(e) => setEditingName(e.target.value)}
-                      onKeyDown={(e) => {
-                        if (e.key === "Enter") handleSaveEdit();
-                        if (e.key === "Escape") handleCancelEdit();
-                      }}
-                      placeholder="Nome da etapa"
-                      className="h-8 rounded-[10px] font-body text-sm"
-                      maxLength={30}
-                      autoFocus
-                    />
+                    <div>
+                      <Input
+                        value={editingName}
+                        onChange={(e) => { setEditingName(e.target.value); setEditError(null); }}
+                        onKeyDown={(e) => {
+                          if (e.key === "Enter") handleSaveEdit();
+                          if (e.key === "Escape") handleCancelEdit();
+                        }}
+                        placeholder="Nome da etapa"
+                        className="h-8 rounded-[10px] font-body text-sm"
+                        maxLength={30}
+                        autoFocus
+                      />
+                      {editError && (
+                        <p className="mt-1 font-body text-xs text-status-danger">{editError}</p>
+                      )}
+                    </div>
                   ) : (
                     <div className="flex items-center gap-2">
                       <span className="font-body text-sm font-medium text-black">
@@ -211,43 +235,50 @@ export function StageManager({ pipeline }: StageManagerProps) {
 
       {/* Add New Stage Form */}
       {isAdding && (
-        <div className="flex items-center gap-3 rounded-[15px] border-2 border-brand bg-brand/5 p-3">
-          <Input
-            value={newStageName}
-            onChange={(e) => setNewStageName(e.target.value)}
-            onKeyDown={(e) => {
-              if (e.key === "Enter") handleAddStage();
-              if (e.key === "Escape") {
-                setIsAdding(false);
-                setNewStageName("");
-              }
-            }}
-            placeholder="Nome da nova etapa (máx. 30 caracteres)"
-            className="h-8 rounded-[10px] font-body text-sm"
-            maxLength={30}
-            autoFocus
-          />
-          <div className="flex items-center gap-1 shrink-0">
-            <Button
-              size="icon"
-              variant="ghost"
-              onClick={handleAddStage}
-              className="h-7 w-7 text-status-success hover:bg-status-success/10"
-            >
-              <Check className="h-3.5 w-3.5" />
-            </Button>
-            <Button
-              size="icon"
-              variant="ghost"
-              onClick={() => {
-                setIsAdding(false);
-                setNewStageName("");
+        <div className="space-y-1">
+          <div className="flex items-center gap-3 rounded-[15px] border-2 border-brand bg-brand/5 p-3">
+            <Input
+              value={newStageName}
+              onChange={(e) => { setNewStageName(e.target.value); setAddError(null); }}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") handleAddStage();
+                if (e.key === "Escape") {
+                  setIsAdding(false);
+                  setNewStageName("");
+                  setAddError(null);
+                }
               }}
-              className="h-7 w-7 text-zinc-500 hover:bg-zinc-100"
-            >
-              <X className="h-3.5 w-3.5" />
-            </Button>
+              placeholder="Nome da nova etapa (máx. 30 caracteres)"
+              className="h-8 rounded-[10px] font-body text-sm"
+              maxLength={30}
+              autoFocus
+            />
+            <div className="flex items-center gap-1 shrink-0">
+              <Button
+                size="icon"
+                variant="ghost"
+                onClick={handleAddStage}
+                className="h-7 w-7 text-status-success hover:bg-status-success/10"
+              >
+                <Check className="h-3.5 w-3.5" />
+              </Button>
+              <Button
+                size="icon"
+                variant="ghost"
+                onClick={() => {
+                  setIsAdding(false);
+                  setNewStageName("");
+                  setAddError(null);
+                }}
+                className="h-7 w-7 text-zinc-500 hover:bg-zinc-100"
+              >
+                <X className="h-3.5 w-3.5" />
+              </Button>
+            </div>
           </div>
+          {addError && (
+            <p className="px-3 font-body text-xs text-status-danger">{addError}</p>
+          )}
         </div>
       )}
 

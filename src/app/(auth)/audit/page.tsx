@@ -34,6 +34,20 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { motion } from "framer-motion";
+
+// ---------------------------------------------------------------------------
+// Framer Motion Variants
+// ---------------------------------------------------------------------------
+
+const staggerContainer = {
+  hidden: { opacity: 0 },
+  show: { opacity: 1, transition: { staggerChildren: 0.08, delayChildren: 0.1 } },
+};
+const fadeUp = {
+  hidden: { opacity: 0, y: 20 },
+  show: { opacity: 1, y: 0, transition: { duration: 0.45, ease: [0.25, 0.46, 0.45, 0.94] as const } },
+};
 
 // ---------------------------------------------------------------------------
 // Types
@@ -493,9 +507,9 @@ export default function AuditPage() {
     entityFilter !== "all" || userFilter !== "all" || dateFrom || dateTo;
 
   return (
-    <div className="space-y-6">
+    <motion.div initial="hidden" animate="show" variants={staggerContainer} className="space-y-6">
       {/* Page Header */}
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+      <motion.div variants={fadeUp} className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h1 className="font-heading text-2xl font-bold text-black sm:text-3xl">
             Log de Auditoria
@@ -510,10 +524,10 @@ export default function AuditPage() {
             Registros mantidos por 5 anos
           </span>
         </div>
-      </div>
+      </motion.div>
 
       {/* Filters Row */}
-      <div className="flex flex-wrap items-end gap-3 rounded-[15px] border border-zinc-200 bg-white p-4">
+      <motion.div variants={fadeUp} className="flex flex-wrap items-end gap-3 rounded-[15px] border border-zinc-200 bg-white p-4">
         <div className="flex items-center gap-2">
           <Filter className="h-4 w-4 text-zinc-400" />
           <span className="font-heading text-sm font-medium text-black">
@@ -593,10 +607,10 @@ export default function AuditPage() {
             Limpar filtros
           </Button>
         )}
-      </div>
+      </motion.div>
 
       {/* Audit Table */}
-      <div className="rounded-[15px] border border-zinc-200 bg-white">
+      <motion.div variants={fadeUp} className="rounded-[15px] border border-zinc-200 bg-white">
         <Table>
           <TableHeader>
             <TableRow className="border-b-zinc-200 hover:bg-transparent">
@@ -731,15 +745,15 @@ export default function AuditPage() {
             </div>
           </div>
         )}
-      </div>
+      </motion.div>
 
       {/* Retention notice */}
-      <div className="flex items-center justify-center gap-2 rounded-[15px] bg-zinc-50 py-3">
+      <motion.div variants={fadeUp} className="flex items-center justify-center gap-2 rounded-[15px] bg-zinc-50 py-3">
         <Shield className="h-4 w-4 text-zinc-400" />
         <span className="font-body text-sm text-zinc-500">
           Registros mantidos por 5 anos conforme política de retenção de dados
         </span>
-      </div>
-    </div>
+      </motion.div>
+    </motion.div>
   );
 }

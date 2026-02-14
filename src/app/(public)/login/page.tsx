@@ -35,6 +35,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
+import { motion } from "framer-motion";
 import { loginSchema, type LoginFormData } from "@/lib/schemas";
 import { useAuthStore } from "@/stores/auth-store";
 
@@ -213,7 +214,7 @@ export default function LoginPage() {
         return;
       }
 
-      // TODO: Replace with actual API call
+      // Mock: em produção, substituir por chamada à API POST /api/auth/login
       // On real API failure, call handleLoginFailure() instead of the mock below
 
       // Mock successful login
@@ -330,6 +331,11 @@ export default function LoginPage() {
   // JSX
   // ---------------------------------------------------------------------------
   return (
+    <motion.div
+      initial={{ opacity: 0, y: 30 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.5, ease: [0.25, 0.46, 0.45, 0.94] as const }}
+    >
     <Card className="w-full max-w-[440px] rounded-[20px] border-zinc-200 shadow-xl">
       <CardContent className="p-8">
         {/* Logo */}
@@ -446,5 +452,6 @@ export default function LoginPage() {
         </form>
       </CardContent>
     </Card>
+    </motion.div>
   );
 }

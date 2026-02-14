@@ -33,8 +33,8 @@ import {
   ThumbsUp,
   Flame,
 } from "lucide-react";
-import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
+import { InlineFeedback } from "@/components/ui/inline-feedback";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -758,6 +758,9 @@ export function ClientCardDrawer() {
     cargo: "",
   });
 
+  // Inline feedback
+  const [inlineFeedback, setInlineFeedback] = useState<{ type: "success" | "error" | "warning"; message: string } | null>(null);
+
   // Contact edit
   const [editingContactId, setEditingContactId] = useState<string | null>(null);
   const [editContact, setEditContact] = useState({
@@ -814,9 +817,6 @@ export function ClientCardDrawer() {
           c.id === editingContactId ? { ...c, ...editContact } : c
         )
       );
-      toast.success("Contato atualizado!", {
-        description: `Os dados de ${editContact.nome} foram salvos.`,
-      });
       setEditingContactId(null);
       setEditContact({ nome: "", email: "", telefone: "", cargo: "" });
     }
@@ -936,6 +936,16 @@ export function ClientCardDrawer() {
 
           {/* ── Body ────────────────────────────────────────────────── */}
           <div className="p-6">
+            {inlineFeedback && (
+              <div className="mb-4">
+                <InlineFeedback
+                  type={inlineFeedback.type}
+                  message={inlineFeedback.message}
+                  compact
+                  onClose={() => setInlineFeedback(null)}
+                />
+              </div>
+            )}
             <Tabs defaultValue="resumo">
               <TabsList className="w-full border-b border-zinc-200 bg-transparent p-0">
                 {[
@@ -1368,10 +1378,11 @@ export function ClientCardDrawer() {
       <ChurnModal
         open={showChurnModal}
         onClose={() => setShowChurnModal(false)}
-        onConfirm={(reason, notes) => {
+        onConfirm={(reason, churnNotes) => {
           setStage("churn");
-          toast.success("Churn registrado!", {
-            description: `Motivo: ${reason}.${notes ? ` Observacoes: ${notes}.` : ""} O cliente foi marcado como churn.`,
+          setInlineFeedback({
+            type: "success",
+            message: `Churn registrado! Motivo: ${reason}.${churnNotes ? ` Observacoes: ${churnNotes}.` : ""} O cliente foi marcado como churn.`,
           });
         }}
       />

@@ -4,8 +4,8 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Loader2, Trophy } from "lucide-react";
 import { useState } from "react";
-import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
+import { InlineFeedback } from "@/components/ui/inline-feedback";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { CurrencyInput, IntegerInput } from "@/components/ui/masked-inputs";
@@ -35,6 +35,7 @@ export function WinOpportunityModal() {
   const { addClient } = useClientStore();
   const { addNotification } = useNotificationStore();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [feedback, setFeedback] = useState<{type: "success" | "error", message: string} | null>(null);
   const isOpen = modalType === "win-opportunity";
   const opportunityId = modalData?.opportunityId as string | undefined;
 
@@ -87,21 +88,15 @@ export function WinOpportunityModal() {
         link: "/clients",
       });
 
-      // 4. Show toast
-      toast.success("Oportunidade marcada como Ganha!", {
-        description: [
-          `Contrato: ${formatCurrencyBRL(data.contractValue)} (${formatCurrencyBRL(data.monthlyValue)}/mês)`,
-          `Comissão projetada (${commission.percentage}%): ${formatCurrencyBRL(commission.commissionValue)}`,
-          `Início: ${new Date(data.contractStart).toLocaleDateString("pt-BR")} · Prazo: ${data.contractMonths} meses`,
-          `Próximo passo: cliente foi criado no pipeline de CS.`,
-        ].join(" · "),
-        duration: 8000,
-      });
-
-      reset();
-      closeModal();
+      // 4. Show inline feedback then auto-close
+      setFeedback({ type: "success", message: "Oportunidade marcada como Ganha!" });
+      setTimeout(() => {
+        setFeedback(null);
+        reset();
+        closeModal();
+      }, 1500);
     } catch {
-      toast.error("Erro ao registrar ganho. Tente novamente.");
+      setFeedback({ type: "error", message: "Erro ao registrar ganho. Tente novamente." });
     } finally {
       setIsSubmitting(false);
     }
@@ -111,6 +106,7 @@ export function WinOpportunityModal() {
     <Dialog
       open={isOpen}
       onOpenChange={() => {
+        setFeedback(null);
         reset();
         closeModal();
       }}
@@ -203,6 +199,14 @@ export function WinOpportunityModal() {
               {...register("notes")}
             />
           </div>
+
+          {feedback && (
+            <InlineFeedback
+              type={feedback.type}
+              message={feedback.message}
+              onClose={() => setFeedback(null)}
+            />
+          )}
 
           <div className="flex justify-end gap-3 pt-2">
             <Button

@@ -16,8 +16,8 @@ import {
   Users,
   Loader2,
 } from "lucide-react";
-import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
+import { InlineFeedback } from "@/components/ui/inline-feedback";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -52,8 +52,24 @@ import {
 } from "@/components/ui/select";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Textarea } from "@/components/ui/textarea";
+import { motion } from "framer-motion";
 import { exportToCSV, exportToPDF, exportToExcel } from "@/lib/export";
 import type { CommissionStatus } from "@/types";
+
+// ===== Framer Motion Variants =====
+
+const staggerContainer = {
+  hidden: { opacity: 0 },
+  show: { opacity: 1, transition: { staggerChildren: 0.08, delayChildren: 0.1 } },
+};
+const fadeUp = {
+  hidden: { opacity: 0, y: 20 },
+  show: { opacity: 1, y: 0, transition: { duration: 0.45, ease: [0.25, 0.46, 0.45, 0.94] as const } },
+};
+const scaleIn = {
+  hidden: { opacity: 0, scale: 0.95 },
+  show: { opacity: 1, scale: 1, transition: { duration: 0.35, ease: [0.25, 0.46, 0.45, 0.94] as const } },
+};
 
 // ===== Helpers =====
 
@@ -298,6 +314,11 @@ export default function FinancePage() {
   );
   const [contestReason, setContestReason] = useState("");
   const [isSubmittingContest, setIsSubmittingContest] = useState(false);
+  const [contestFeedback, setContestFeedback] = useState<{type: "success" | "error" | "info", message: string} | null>(null);
+  const [contestFieldError, setContestFieldError] = useState<string | null>(null);
+
+  // Export feedback
+  const [exportFeedback, setExportFeedback] = useState<{type: "success" | "error" | "info", message: string} | null>(null);
 
   // Local commission state (for status mutations)
   const [commissions, setCommissions] =
@@ -395,26 +416,33 @@ export default function FinancePage() {
   function openContestDialog(commissionId: string) {
     setContestCommissionId(commissionId);
     setContestReason("");
+    setContestFeedback(null);
+    setContestFieldError(null);
     setContestDialogOpen(true);
   }
 
   async function submitContestation() {
+    setContestFieldError(null);
+    setContestFeedback(null);
+
     if (!contestCommissionId || !contestReason.trim()) {
-      toast.error("Por favor, informe o motivo da contestação.");
+      setContestFieldError("Por favor, informe o motivo da contestação.");
       return;
     }
 
     setIsSubmittingContest(true);
 
     try {
-      // Simular delay de API
+      // Simulate API delay (replace with real API call in production)
       await new Promise((resolve) => setTimeout(resolve, 800));
 
-      // TODO: Substituir por chamada real de API
+      // POST /api/commissions/:id/contest { reason }
       // const response = await fetch(`/api/commissions/${contestCommissionId}/contest`, {
       //   method: "POST",
+      //   headers: { "Content-Type": "application/json" },
       //   body: JSON.stringify({ reason: contestReason }),
       // });
+      // if (!response.ok) throw new Error("Falha ao enviar contestação");
 
       setCommissions((prev) =>
         prev.map((c) =>
@@ -428,14 +456,15 @@ export default function FinancePage() {
         )
       );
 
-      toast.success("Contestação enviada com sucesso.");
-      setContestDialogOpen(false);
-      setContestCommissionId(null);
-      setContestReason("");
-    } catch (error) {
-      toast.error("Erro ao enviar contestação", {
-        description: "Tente novamente em alguns instantes.",
-      });
+      setContestFeedback({ type: "success", message: "Contestação enviada com sucesso." });
+      setTimeout(() => {
+        setContestDialogOpen(false);
+        setContestCommissionId(null);
+        setContestReason("");
+        setContestFeedback(null);
+      }, 1500);
+    } catch {
+      setContestFeedback({ type: "error", message: "Erro ao enviar contestação. Tente novamente em alguns instantes." });
     } finally {
       setIsSubmittingContest(false);
     }
@@ -461,21 +490,18 @@ export default function FinancePage() {
     switch (format) {
       case "csv":
         exportToCSV(exportData, filename);
-        toast.success("Exportação CSV concluída", {
-          description: `Arquivo ${filename}.csv baixado.`,
-        });
+        setExportFeedback({ type: "success", message: `Exportação CSV concluída. Arquivo ${filename}.csv baixado.` });
+        setTimeout(() => setExportFeedback(null), 3000);
         break;
       case "pdf":
         exportToPDF(exportData, filename);
-        toast("Exportação PDF", {
-          description: "Em produção será implementado com jspdf.",
-        });
+        setExportFeedback({ type: "info", message: "Exportação PDF/Excel será implementada em breve." });
+        setTimeout(() => setExportFeedback(null), 3000);
         break;
       case "excel":
         exportToExcel(exportData, filename);
-        toast("Exportação Excel", {
-          description: "Em produção será implementado com xlsx.",
-        });
+        setExportFeedback({ type: "info", message: "Exportação PDF/Excel será implementada em breve." });
+        setTimeout(() => setExportFeedback(null), 3000);
         break;
     }
   }
@@ -487,9 +513,9 @@ export default function FinancePage() {
   }
 
   return (
-    <div className="space-y-6">
+    <motion.div initial="hidden" animate="show" variants={staggerContainer} className="space-y-6">
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <motion.div variants={fadeUp} className="flex items-center justify-between">
         <div>
           <h1 className="font-heading text-2xl font-bold text-black sm:text-3xl">
             Financeiro
@@ -541,10 +567,22 @@ export default function FinancePage() {
             </DropdownMenuContent>
           </DropdownMenu>
         </div>
-      </div>
+      </motion.div>
+
+      {/* Export Feedback */}
+      {exportFeedback && (
+        <motion.div variants={fadeUp}>
+          <InlineFeedback
+            type={exportFeedback.type}
+            message={exportFeedback.message}
+            compact
+            onClose={() => setExportFeedback(null)}
+          />
+        </motion.div>
+      )}
 
       {/* Period Selector */}
-      <div className="flex items-center justify-center gap-4">
+      <motion.div variants={fadeUp} className="flex items-center justify-center gap-4">
         <Button
           variant="outline"
           size="icon"
@@ -564,10 +602,10 @@ export default function FinancePage() {
         >
           <ChevronRight className="h-4 w-4" />
         </Button>
-      </div>
+      </motion.div>
 
       {/* Summary Cards */}
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+      <motion.div variants={fadeUp} className="grid grid-cols-1 gap-4 sm:grid-cols-3">
         {/* Projetado */}
         <Card className="rounded-[15px] border-zinc-200 p-5">
           <CardContent className="p-0">
@@ -639,9 +677,10 @@ export default function FinancePage() {
             </div>
           </CardContent>
         </Card>
-      </div>
+      </motion.div>
 
       {/* Commissions Table */}
+      <motion.div variants={fadeUp}>
       <Card className="rounded-[15px] border-zinc-200">
         <CardHeader>
           <CardTitle className="font-heading text-lg font-semibold text-black">
@@ -731,9 +770,11 @@ export default function FinancePage() {
           </Tabs>
         </CardContent>
       </Card>
+      </motion.div>
 
       {/* Team Summary (admin/master view) */}
       {teamSummary.length > 0 && (
+        <motion.div variants={fadeUp}>
         <Card className="rounded-[15px] border-zinc-200">
           <CardHeader>
             <div className="flex items-center gap-2">
@@ -791,6 +832,7 @@ export default function FinancePage() {
             </div>
           </CardContent>
         </Card>
+        </motion.div>
       )}
 
       {/* Contestation Dialog */}
@@ -810,9 +852,23 @@ export default function FinancePage() {
               className="min-h-[100px] rounded-[15px] font-body text-sm"
               placeholder="Descreva o motivo da contestação..."
               value={contestReason}
-              onChange={(e) => setContestReason(e.target.value)}
+              onChange={(e) => {
+                setContestReason(e.target.value);
+                if (contestFieldError) setContestFieldError(null);
+              }}
             />
+            {contestFieldError && (
+              <p className="text-xs text-status-danger">{contestFieldError}</p>
+            )}
           </div>
+          {contestFeedback && (
+            <InlineFeedback
+              type={contestFeedback.type}
+              message={contestFeedback.message}
+              compact
+              onClose={() => setContestFeedback(null)}
+            />
+          )}
           <DialogFooter>
             <Button
               variant="outline"
@@ -835,7 +891,7 @@ export default function FinancePage() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
-    </div>
+    </motion.div>
   );
 }
 

@@ -4,8 +4,8 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Loader2 } from "lucide-react";
 import { useState, useEffect } from "react";
-import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
+import { InlineFeedback } from "@/components/ui/inline-feedback";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
@@ -38,6 +38,7 @@ export function NewActivityModal() {
   const { drawerType, drawerData, closeDrawer } = useUIStore();
   const { addActivity, updateActivity, getById } = useActivityStore();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [feedback, setFeedback] = useState<{type: "success" | "error", message: string} | null>(null);
   const isOpen = drawerType === "new-activity";
 
   // Check if we're in edit mode
@@ -85,9 +86,12 @@ export function NewActivityModal() {
           description: data.description || undefined,
         });
 
-        toast.success("Atividade atualizada!", {
-          description: `"${data.title}" foi atualizada com sucesso.`,
-        });
+        setFeedback({ type: "success", message: "Atividade atualizada com sucesso!" });
+        setTimeout(() => {
+          setFeedback(null);
+          reset();
+          closeDrawer();
+        }, 1500);
       } else {
         const clientId = drawerData?.clientId as string | undefined;
         const clientName = drawerData?.clientName as string | undefined;
@@ -109,17 +113,15 @@ export function NewActivityModal() {
           opportunityTitle,
         });
 
-        toast.success("Atividade criada!", {
-          description: `"${data.title}" foi agendada com sucesso.`,
-        });
+        setFeedback({ type: "success", message: "Atividade criada com sucesso!" });
+        setTimeout(() => {
+          setFeedback(null);
+          reset();
+          closeDrawer();
+        }, 1500);
       }
-
-      reset();
-      closeDrawer();
     } catch (error) {
-      toast.error(isEditMode ? "Erro ao atualizar atividade" : "Erro ao criar atividade", {
-        description: "Tente novamente em alguns instantes.",
-      });
+      setFeedback({ type: "error", message: "Erro ao salvar atividade. Tente novamente." });
     } finally {
       setIsSubmitting(false);
     }
@@ -129,6 +131,7 @@ export function NewActivityModal() {
     <Dialog
       open={isOpen}
       onOpenChange={() => {
+        setFeedback(null);
         reset();
         closeDrawer();
       }}
@@ -235,6 +238,14 @@ export function NewActivityModal() {
               {...register("description")}
             />
           </div>
+
+          {feedback && (
+            <InlineFeedback
+              type={feedback.type}
+              message={feedback.message}
+              onClose={() => setFeedback(null)}
+            />
+          )}
 
           <div className="flex justify-end gap-3 pt-2">
             <Button

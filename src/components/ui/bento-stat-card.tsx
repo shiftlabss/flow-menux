@@ -1,8 +1,107 @@
 import * as React from "react";
 import { cn } from "@/lib/utils";
 import { TrendingUp, TrendingDown } from "lucide-react";
+import { motion, useMotionValue, useTransform, animate } from "framer-motion";
 import { SkeletonBlock } from "./skeleton-block";
 import { InlineFeedback } from "./inline-feedback";
+
+// ---------------------------------------------------------------------------
+// Animated Counter Hook — rolls from 0 to target value
+// ---------------------------------------------------------------------------
+
+function useAnimatedCounter(target: number, duration = 1.2) {
+  const motionValue = useMotionValue(0);
+  const rounded = useTransform(motionValue, (v) => Math.round(v));
+  const [display, setDisplay] = React.useState(0);
+
+  React.useEffect(() => {
+    const unsubscribe = rounded.on("change", (v) => setDisplay(v));
+    return unsubscribe;
+  }, [rounded]);
+
+  React.useEffect(() => {
+    const controls = animate(motionValue, target, {
+      duration,
+      ease: [0.25, 0.46, 0.45, 0.94] as const,
+    });
+    return controls.stop;
+  }, [motionValue, target, duration]);
+
+  return display;
+}
+
+// Extract numeric value from a string like "R$ 125.000" or "42%" or "15"
+function extractNumericValue(value: string | number): {
+  numeric: number;
+  prefix: string;
+  suffix: string;
+  hasDecimal: boolean;
+} {
+  if (typeof value === "number") {
+    return { numeric: value, prefix: "", suffix: "", hasDecimal: !Number.isInteger(value) };
+  }
+
+  // Match patterns like "R$ 125.000", "42%", "15", "$1,234.56"
+  const match = value.match(/^([^0-9]*?)([\d.,]+)(.*)$/);
+  if (!match) {
+    return { numeric: 0, prefix: value, suffix: "", hasDecimal: false };
+  }
+
+  const prefix = match[1].trim();
+  const rawNum = match[2];
+  const suffix = match[3].trim();
+
+  // Detect Brazilian format (dots as thousands, comma as decimal) vs US format
+  const hasBrazilianFormat = rawNum.includes(".") && (rawNum.indexOf(",") > rawNum.lastIndexOf(".") || !rawNum.includes(","));
+  let cleanNum: string;
+  let hasDecimal: boolean;
+
+  if (rawNum.includes(",") && !rawNum.includes(".")) {
+    // Pure comma decimal: "1234,56"
+    cleanNum = rawNum.replace(",", ".");
+    hasDecimal = true;
+  } else if (hasBrazilianFormat && rawNum.includes(",")) {
+    // Brazilian: "1.234,56"
+    cleanNum = rawNum.replace(/\./g, "").replace(",", ".");
+    hasDecimal = true;
+  } else {
+    // US or integer with dots as thousands: "1,234" or "125.000"
+    cleanNum = rawNum.replace(/,/g, "");
+    hasDecimal = cleanNum.includes(".") && !Number.isInteger(parseFloat(cleanNum));
+  }
+
+  const numeric = parseFloat(cleanNum) || 0;
+  return { numeric, prefix: prefix ? prefix + " " : "", suffix, hasDecimal };
+}
+
+function AnimatedValue({
+  value,
+  className,
+}: {
+  value: string | number;
+  className?: string;
+}) {
+  const { numeric, prefix, suffix } = extractNumericValue(value);
+  const animated = useAnimatedCounter(numeric);
+
+  // Format the number back with locale
+  const formatted = React.useMemo(() => {
+    if (typeof value === "number") return animated.toLocaleString("pt-BR");
+
+    // Preserve original formatting style
+    const original = String(value);
+    if (original.includes("R$") || original.includes("$")) {
+      return animated.toLocaleString("pt-BR");
+    }
+    return animated.toLocaleString("pt-BR");
+  }, [animated, value]);
+
+  return (
+    <span className={className}>
+      {prefix}{formatted}{suffix}
+    </span>
+  );
+}
 
 export interface BentoStatCardProps {
   label: string;
@@ -125,7 +224,10 @@ const BentoStatCard = React.forwardRef<HTMLDivElement, BentoStatCardProps>(
 
           {/* Delta Badge */}
           {delta && (
-            <div
+            <motion.div
+              initial={{ opacity: 0, scale: 0.8 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 0.4, delay: 0.6, ease: [0.25, 0.46, 0.45, 0.94] as const }}
               className={cn(
                 "flex items-center gap-1 rounded-[var(--radius-bento-inner)]",
                 "px-2 py-0.5 font-body font-medium",
@@ -155,7 +257,7 @@ const BentoStatCard = React.forwardRef<HTMLDivElement, BentoStatCardProps>(
                 />
               )}
               {Math.abs(delta.value)}%
-            </div>
+            </motion.div>
           )}
         </div>
 
@@ -167,7 +269,7 @@ const BentoStatCard = React.forwardRef<HTMLDivElement, BentoStatCardProps>(
             size === "lg" && "mt-4"
           )}
         >
-          {/* Value */}
+          {/* Value — Animated Counter */}
           <p
             className={cn(
               "font-heading font-bold text-black",
@@ -176,7 +278,7 @@ const BentoStatCard = React.forwardRef<HTMLDivElement, BentoStatCardProps>(
               size === "lg" && "text-3xl"
             )}
           >
-            {value}
+            <AnimatedValue value={value} />
           </p>
 
           {/* Label */}

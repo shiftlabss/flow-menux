@@ -20,8 +20,26 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
-import { toast } from "sonner";
+import { InlineFeedback } from "@/components/ui/inline-feedback";
+import { motion } from "framer-motion";
 import { exportToCSV, exportToPDF, exportToExcel } from "@/lib/export";
+
+// ---------------------------------------------------------------------------
+// Framer Motion Variants
+// ---------------------------------------------------------------------------
+
+const staggerContainer = {
+  hidden: { opacity: 0 },
+  show: { opacity: 1, transition: { staggerChildren: 0.08, delayChildren: 0.1 } },
+};
+const fadeUp = {
+  hidden: { opacity: 0, y: 20 },
+  show: { opacity: 1, y: 0, transition: { duration: 0.45, ease: [0.25, 0.46, 0.45, 0.94] as const } },
+};
+const scaleIn = {
+  hidden: { opacity: 0, scale: 0.95 },
+  show: { opacity: 1, scale: 1, transition: { duration: 0.35, ease: [0.25, 0.46, 0.45, 0.94] as const } },
+};
 
 // ---------------------------------------------------------------------------
 // Types
@@ -326,6 +344,7 @@ function ReportViewer({
 }) {
   const [dateStart, setDateStart] = useState("2026-01-01");
   const [dateEnd, setDateEnd] = useState("2026-02-06");
+  const [exportFeedback, setExportFeedback] = useState<{type: "success" | "error" | "info", message: string} | null>(null);
   const maxBarValue = Math.max(...report.barChart.map((b) => b.value));
 
   function handleExport(type: "CSV" | "PDF" | "Excel") {
@@ -342,21 +361,18 @@ function ReportViewer({
     switch (type) {
       case "CSV":
         exportToCSV(exportData, filename);
-        toast.success("Exportação CSV concluída", {
-          description: `Arquivo ${filename}.csv baixado.`,
-        });
+        setExportFeedback({ type: "success", message: `Exportação CSV concluída. Arquivo ${filename}.csv baixado.` });
+        setTimeout(() => setExportFeedback(null), 3000);
         break;
       case "PDF":
         exportToPDF(exportData, filename);
-        toast("Exportação PDF", {
-          description: "Em produção será implementado com jspdf.",
-        });
+        setExportFeedback({ type: "info", message: "Exportação PDF/Excel será implementada em breve." });
+        setTimeout(() => setExportFeedback(null), 3000);
         break;
       case "Excel":
         exportToExcel(exportData, filename);
-        toast("Exportação Excel", {
-          description: "Em produção será implementado com xlsx.",
-        });
+        setExportFeedback({ type: "info", message: "Exportação PDF/Excel será implementada em breve." });
+        setTimeout(() => setExportFeedback(null), 3000);
         break;
     }
   }
@@ -416,6 +432,17 @@ function ReportViewer({
             </Button>
           </div>
         </div>
+        {/* Export Feedback */}
+        {exportFeedback && (
+          <div className="px-6">
+            <InlineFeedback
+              type={exportFeedback.type}
+              message={exportFeedback.message}
+              compact
+              onClose={() => setExportFeedback(null)}
+            />
+          </div>
+        )}
       </CardHeader>
 
       <CardContent className="space-y-6">
@@ -536,38 +563,41 @@ export default function ReportsPage() {
     : null;
 
   return (
-    <div className="space-y-8">
+    <motion.div initial="hidden" animate="show" variants={staggerContainer} className="space-y-8">
       {/* Page Header */}
-      <div>
+      <motion.div variants={fadeUp}>
         <h1 className="font-heading text-2xl font-bold text-black sm:text-3xl">
           Relatorios
         </h1>
         <p className="mt-1 font-body text-sm text-zinc-500">
           Gere relatorios detalhados e exporte os dados do seu CRM
         </p>
-      </div>
+      </motion.div>
 
       {/* Report Cards Grid */}
       {!activeReport && (
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {reportDefinitions.map((report) => (
+            <motion.div key={report.id} variants={scaleIn}>
             <ReportCard
-              key={report.id}
               report={report}
               onGenerate={setActiveReportId}
             />
+            </motion.div>
           ))}
         </div>
       )}
 
       {/* Report Viewer */}
       {activeReport && activeReportId && (
+        <motion.div variants={fadeUp}>
         <ReportViewer
           report={activeReport}
           reportId={activeReportId}
           onClose={() => setActiveReportId(null)}
         />
+        </motion.div>
       )}
-    </div>
+    </motion.div>
   );
 }

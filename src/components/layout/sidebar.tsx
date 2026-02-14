@@ -15,6 +15,7 @@ import {
   Target,
   BarChart3,
   ShieldCheck,
+  Sparkles,
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/cn";
@@ -245,6 +246,63 @@ export function Sidebar() {
             return <div key={item.href}>{linkContent}</div>;
           })}
         </nav>
+
+        {/* Intelligence Button */}
+        <div className="px-3 pb-3">
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Link
+                href="/intelligence"
+                className={cn(
+                  "group flex items-center gap-3 rounded-[15px] px-3 py-2.5 text-sm font-medium transition-all duration-200",
+                  pathname === "/intelligence"
+                    ? "group relative flex items-center gap-3 overflow-hidden rounded-xl bg-linear-to-r from-indigo-600 to-violet-600 px-3 py-2.5 text-white shadow-lg shadow-indigo-500/20 transition-all hover:shadow-indigo-500/30 dark:from-indigo-500 dark:to-violet-500"
+                    : "bg-white text-zinc-600 hover:bg-indigo-50 hover:text-indigo-600 border border-zinc-200 hover:border-indigo-100 hover:shadow-sm"
+                )}
+                onClick={() => {
+                  if (!isDesktop) setIsMobileOpen(false);
+                }}
+              >
+                <div className="relative shrink-0">
+                  <Sparkles
+                    className={cn(
+                      "h-5 w-5 transition-transform duration-300",
+                      pathname === "/intelligence" ? "text-white" : "text-indigo-500",
+                      "group-hover:scale-110"
+                    )}
+                  />
+                  {pathname === "/intelligence" && (
+                    <span className="absolute inset-0 animate-ping rounded-full bg-white opacity-30"></span>
+                  )}
+                </div>
+                <AnimatePresence>
+                  {sidebarExpanded && (
+                    <motion.span
+                      initial={{ opacity: 0, width: 0 }}
+                      animate={{ opacity: 1, width: "auto" }}
+                      exit={{ opacity: 0, width: 0 }}
+                      transition={{ duration: 0.15 }}
+                      className="overflow-hidden whitespace-nowrap font-heading font-semibold"
+                    >
+                      Intelligence
+                    </motion.span>
+                  )}
+                </AnimatePresence>
+                {sidebarExpanded && (
+                   <span className={cn(
+                       "ml-auto text-[10px] font-mono opacity-60",
+                       pathname === "/intelligence" ? "text-white" : "text-zinc-400"
+                   )}>
+                       Ctrl+I
+                   </span>
+                )}
+              </Link>
+            </TooltipTrigger>
+            <TooltipContent side="right">
+              <p>Menux Intelligence (Ctrl+I)</p>
+            </TooltipContent>
+          </Tooltip>
+        </div>
 
         {/* Collapse Toggle - only on desktop */}
         {isDesktop && (
