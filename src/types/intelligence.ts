@@ -3,7 +3,7 @@
 // Ref: docs/Menux Intelligence.md (v1.1)
 // ============================================================================
 
-import type { Opportunity, Client, Activity, Temperature } from "@/types";
+import type { Activity, Temperature } from "@/types";
 
 // ─── Slash Commands ────────────────────────────────────────────────────────
 

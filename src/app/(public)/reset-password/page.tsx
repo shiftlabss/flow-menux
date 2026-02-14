@@ -8,8 +8,6 @@ import {
   EyeOff,
   Loader2,
   CheckCircle,
-  CheckCircle2,
-  Circle,
   AlertCircle,
 } from "lucide-react";
 import Link from "next/link";
@@ -20,54 +18,12 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent } from "@/components/ui/card";
 import { InlineFeedback } from "@/components/ui/inline-feedback";
+import { RequirementsList } from "@/components/ui/password-requirements";
 import {
   resetPasswordSchema,
   type ResetPasswordFormData,
 } from "@/lib/schemas";
-
-function getPasswordStrength(password: string): {
-  score: number;
-  label: string;
-} {
-  let score = 0;
-  if (password.length >= 8) score += 25;
-  if (/[A-Z]/.test(password)) score += 25;
-  if (/[0-9]/.test(password)) score += 25;
-  if (/[^A-Za-z0-9]/.test(password)) score += 25;
-
-  if (score <= 25) return { score, label: "Fraca" };
-  if (score <= 50) return { score, label: "Razoável" };
-  if (score <= 75) return { score, label: "Boa" };
-  return { score, label: "Forte" };
-}
-
-function RequirementsList({ password }: { password: string }) {
-  const requirements = [
-    { label: "Mínimo de 8 caracteres", met: password.length >= 8 },
-    { label: "1 letra maiúscula", met: /[A-Z]/.test(password) },
-    { label: "1 número", met: /[0-9]/.test(password) },
-    { label: "1 caractere especial", met: /[^A-Za-z0-9]/.test(password) },
-  ];
-
-  return (
-    <ul className="mt-2 space-y-1.5">
-      {requirements.map((req) => (
-        <li key={req.label} className="flex items-center gap-2">
-          {req.met ? (
-            <CheckCircle2 className="h-4 w-4 text-status-success" />
-          ) : (
-            <Circle className="h-4 w-4 text-zinc-300" />
-          )}
-          <span
-            className={`font-body text-xs ${req.met ? "text-status-success" : "text-zinc-400"}`}
-          >
-            {req.label}
-          </span>
-        </li>
-      ))}
-    </ul>
-  );
-}
+import { getPasswordStrength } from "@/lib/password-utils";
 
 function ResetPasswordContent() {
   const searchParams = useSearchParams();
@@ -96,7 +52,6 @@ function ResetPasswordContent() {
     setFormError(null);
     try {
       // Mock: em produção, substituir por chamada à API POST /api/auth/reset-password
-      console.log("Resetting password for token:", token, "password length:", data.password.length);
       await new Promise(resolve => setTimeout(resolve, 800));
       setIsSuccess(true);
     } catch {

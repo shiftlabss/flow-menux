@@ -1,6 +1,6 @@
 import { create } from "zustand";
 import { devtools } from "zustand/middleware";
-import type { Client, ClientStage, HealthScore } from "@/types";
+import type { Client, ClientStage } from "@/types";
 import { mockClients } from "@/lib/mock-data";
 
 interface ClientState {

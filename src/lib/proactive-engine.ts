@@ -82,10 +82,6 @@ export interface ExecutionPanelData {
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
-function uid(): string {
-  return `pe-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`;
-}
-
 function daysBetween(dateA: string | Date, dateB: string | Date): number {
   const a = new Date(dateA);
   const b = new Date(dateB);
@@ -260,8 +256,7 @@ function analyzeStaleDeals(
 }
 
 function analyzeGoalRisk(
-  goals: Goal[],
-  userId: string
+  goals: Goal[]
 ): GeneratedSuggestion[] {
   const now = new Date();
 
@@ -480,7 +475,7 @@ export function generateAllSuggestions(
     ...analyzeSLAApproaching(opportunities, pipelines, userId, userRole),
     ...analyzeHotLeadsIdle(opportunities, activities, userId, userRole),
     ...analyzeStaleDeals(opportunities, userId, userRole),
-    ...analyzeGoalRisk(goals, userId),
+    ...analyzeGoalRisk(goals),
     ...analyzeContractExpiring(clients, userId, userRole),
     ...analyzeMissingFields(opportunities, userId, userRole),
     ...analyzeCrossSell(clients, userId, userRole),
@@ -654,7 +649,7 @@ export function computeTodaysPriorities(
 export function computeSmartInsights(
   input: ProactiveEngineInput
 ): SmartInsight[] {
-  const { opportunities, activities, goals, userId, userRole } = input;
+  const { opportunities, goals, userId, userRole } = input;
   const insights: SmartInsight[] = [];
   const now = new Date();
   const thirtyDaysAgo = new Date();

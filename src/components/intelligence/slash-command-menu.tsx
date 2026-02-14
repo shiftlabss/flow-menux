@@ -5,7 +5,7 @@
 // Ref: docs/Menux Intelligence.md — seção 3.2
 // ============================================================================
 
-import { useState, useMemo, useCallback, useEffect, useRef } from "react";
+import { useState, useMemo, useCallback, useEffect, useRef, startTransition } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/cn";
 import { useAuthStore } from "@/stores/auth-store";
@@ -46,8 +46,8 @@ export function SlashCommandMenu({
 
   // Comandos disponíveis para o perfil
   const available = useMemo(
-    () => getAvailableCommands(role, hasCard),
-    [role, hasCard]
+    () => getAvailableCommands(role),
+    [role]
   );
 
   // Filtrar por texto digitado
@@ -58,7 +58,9 @@ export function SlashCommandMenu({
 
   // Reset seleção quando filtro muda
   useEffect(() => {
-    setSelectedIndex(0);
+    startTransition(() => {
+      setSelectedIndex(0);
+    });
   }, [inputText]);
 
   // Navegação por teclado

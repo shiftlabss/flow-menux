@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, startTransition } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
@@ -34,10 +34,14 @@ function useMediaQuery(query: string): boolean {
 
   useEffect(() => {
     const mql = window.matchMedia(query);
-    setMatches(mql.matches);
+    startTransition(() => {
+      setMatches(mql.matches);
+    });
 
     function handleChange(e: MediaQueryListEvent) {
-      setMatches(e.matches);
+      startTransition(() => {
+        setMatches(e.matches);
+      });
     }
 
     mql.addEventListener("change", handleChange);
@@ -105,14 +109,16 @@ const navItems = [
 
 export function Sidebar() {
   const pathname = usePathname();
-  const { isExpanded, toggle, setExpanded } = useSidebarStore();
+  const { isExpanded, toggle } = useSidebarStore();
   const { permissions } = useAuthStore();
   const isDesktop = useMediaQuery("(min-width: 768px)");
   const [isMobileOpen, setIsMobileOpen] = useState(false);
 
   // Close mobile sidebar on route change
   useEffect(() => {
-    setIsMobileOpen(false);
+    startTransition(() => {
+      setIsMobileOpen(false);
+    });
   }, [pathname]);
 
   // On mobile, sidebar open/close is managed by isMobileOpen

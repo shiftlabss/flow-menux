@@ -404,6 +404,7 @@ export default function PipesPage() {
   );
   const opportunities = localOpportunities;
   const [draggingCardId, setDraggingCardId] = useState<string | null>(null);
+  const [draggingCardStage, setDraggingCardStage] = useState<PipelineStage | null>(null);
   const [dragOverStage, setDragOverStage] = useState<PipelineStage | null>(
     null
   );
@@ -573,6 +574,7 @@ export default function PipesPage() {
         return;
       }
       setDraggingCardId(opportunity.id);
+      setDraggingCardStage(opportunity.stage);
       dragCardRef.current = opportunity;
       e.dataTransfer.effectAllowed = "move";
       e.dataTransfer.setData("text/plain", opportunity.id);
@@ -630,6 +632,7 @@ export default function PipesPage() {
 
       if (card.stage === targetStage) {
         setDraggingCardId(null);
+        setDraggingCardStage(null);
         dragCardRef.current = null;
         return;
       }
@@ -646,6 +649,7 @@ export default function PipesPage() {
           message: `Preencha: ${missing.join(", ")}`,
         });
         setDraggingCardId(null);
+        setDraggingCardStage(null);
         dragCardRef.current = null;
         announce(`Erro: campos obrigatórios faltando — ${missing.join(", ")}`);
         setTimeout(() => setColumnError(null), 5000);
@@ -699,6 +703,7 @@ export default function PipesPage() {
       }
 
       setDraggingCardId(null);
+      setDraggingCardStage(null);
       dragCardRef.current = null;
     },
     [activeFunnel, announce]
@@ -706,6 +711,7 @@ export default function PipesPage() {
 
   const handleDragEnd = useCallback(() => {
     setDraggingCardId(null);
+    setDraggingCardStage(null);
     setDragOverStage(null);
     setDropIndicator(null);
     dragCardRef.current = null;
@@ -1114,7 +1120,7 @@ export default function PipesPage() {
                           const showPlaceholder =
                             draggingCardId &&
                             dropIndicator?.stage === stageDef.id &&
-                            dragCardRef.current?.stage !== stageDef.id;
+                            draggingCardStage !== stageDef.id;
 
                           const elements: React.ReactNode[] = [];
 

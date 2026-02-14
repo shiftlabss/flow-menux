@@ -7,13 +7,13 @@ export interface BentoTableColumn {
   key: string;
   label: string;
   align?: "left" | "center" | "right";
-  render?: (value: any, row: any) => React.ReactNode;
+  render?: (value: unknown, row: Record<string, unknown>) => React.ReactNode;
 }
 
 export interface BentoTableCardProps {
   title: string;
   columns: BentoTableColumn[];
-  rows: Record<string, any>[];
+  rows: Record<string, unknown>[];
   state?: "default" | "loading" | "error" | "empty";
   className?: string;
   errorMessage?: string;
@@ -195,7 +195,7 @@ const BentoTableCard = React.forwardRef<HTMLDivElement, BentoTableCardProps>(
                   >
                     {column.render
                       ? column.render(row[column.key], row)
-                      : row[column.key]}
+                      : String(row[column.key] ?? "")}
                   </div>
                 ))}
               </div>

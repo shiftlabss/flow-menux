@@ -4,7 +4,6 @@
 // ============================================================================
 
 import type {
-  SlashCommand,
   SlashCommandDefinition,
   UserRoleIntelligence,
 } from "@/types/intelligence";
@@ -172,7 +171,6 @@ export const SLASH_COMMANDS: SlashCommandDefinition[] = [
  */
 export function getAvailableCommands(
   role: UserRoleIntelligence,
-  hasCardContext: boolean
 ): SlashCommandDefinition[] {
   return SLASH_COMMANDS.filter((cmd) => {
     const roleAllowed = cmd.availableFor.includes(role);

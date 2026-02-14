@@ -9,10 +9,9 @@ import { Send, Sparkles, User, Command, X, AlertTriangle, Lightbulb, TrendingUp 
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { cn } from "@/lib/cn";
-import { useState, useRef, useEffect, useCallback, useMemo } from "react";
+import { useState, useRef, useEffect, useCallback, useMemo, startTransition } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useIntelligenceStore } from "@/stores/intelligence-store";
-import { useAuthStore } from "@/stores/auth-store";
 import { IntelligenceMessage } from "./intelligence-message";
 import { SlashCommandMenu } from "./slash-command-menu";
 import { ConversationHistory } from "./conversation-history";
@@ -40,8 +39,6 @@ export function JarvisFullConsole() {
     open: initConversation,
   } = useIntelligenceStore();
 
-  const user = useAuthStore((s) => s.user);
-
   // Initialize conversation with greeting on mount
   useEffect(() => {
     if (!greetingSent) {
@@ -65,11 +62,13 @@ export function JarvisFullConsole() {
 
   // Detect slash command input
   useEffect(() => {
-    if (inputValue.startsWith("/") && !pendingCommand) {
-      setShowSlashMenu(true);
-    } else if (!inputValue.startsWith("/")) {
-      setShowSlashMenu(false);
-    }
+    startTransition(() => {
+      if (inputValue.startsWith("/") && !pendingCommand) {
+        setShowSlashMenu(true);
+      } else if (!inputValue.startsWith("/")) {
+        setShowSlashMenu(false);
+      }
+    });
   }, [inputValue, pendingCommand]);
 
   // Handle send

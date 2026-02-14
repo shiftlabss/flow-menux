@@ -34,7 +34,6 @@ export default function ForgotPasswordPage() {
     setFormError(null);
     try {
       // Mock: em produção, substituir por chamada à API POST /api/auth/forgot-password
-      console.log("Requesting password reset for:", data.email);
       await new Promise(resolve => setTimeout(resolve, 800));
       setIsSent(true);
     } catch {

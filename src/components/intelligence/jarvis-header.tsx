@@ -23,7 +23,7 @@ import { useIntelligenceStore } from "@/stores/intelligence-store";
 
 export type JarvisMode = "focus" | "audit" | "reply" | "proposal";
 
-const MODES: { id: JarvisMode; label: string; icon: any }[] = [
+const MODES: { id: JarvisMode; label: string; icon: typeof Target }[] = [
   { id: "focus", label: "Foco Cliente", icon: Target },
   { id: "audit", label: "Auditoria", icon: Search },
   { id: "reply", label: "Responder", icon: MessageSquare },
@@ -123,7 +123,7 @@ function ActionButton({
   tooltip,
 }: {
   onClick?: () => void;
-  icon: any;
+  icon: typeof Target;
   title: string;
   disabled?: boolean;
   tooltip?: string;

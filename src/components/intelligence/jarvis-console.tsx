@@ -1,5 +1,6 @@
 "use client";
 
+import React from "react";
 import { motion } from "framer-motion";
 import { 
   Zap, 
@@ -16,6 +17,7 @@ import {
 import { cn } from "@/lib/cn";
 import { useIntelligenceStore } from "@/stores/intelligence-store";
 import type { JarvisMode } from "./jarvis-header";
+import type { CardContext } from "@/types/intelligence";
 
 interface JarvisConsoleProps {
   onAction: (action: string) => void;
@@ -129,7 +131,7 @@ function CommandSuggestions({ mode, onAction }: { mode: JarvisMode; onAction: (c
   );
 }
 
-function QuickActionsModule({ contextCard }: { contextCard: any }) {
+function QuickActionsModule({ contextCard }: { contextCard: CardContext }) {
    return (
     <section>
        <h4 className="text-[11px] font-semibold uppercase tracking-wider text-slate-400 mb-3 flex items-center gap-2">
@@ -148,7 +150,7 @@ function QuickActionsModule({ contextCard }: { contextCard: any }) {
    );
 }
 
-function QuickActionButton({ icon: Icon, label, color, bg }: any) {
+function QuickActionButton({ icon: Icon, label, color, bg }: { icon: React.ComponentType<{ className?: string }>; label: string; color: string; bg: string }) {
   return (
     <button className="flex-1 flex flex-col items-center gap-1.5 py-3 px-2 rounded-lg hover:bg-slate-50 transition-colors group dark:hover:bg-slate-800">
        <div className={cn("p-2 rounded-lg transition-transform group-hover:scale-110", bg, color)}>

@@ -47,7 +47,9 @@ export function ActivityMonthView({ activities }: MonthViewProps) {
       }
     }
     return map;
-  }, [activities, year, month]);
+    // Use monthOffset as dep since year/month are derived from it
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [activities, monthOffset]);
 
   const cells: (number | null)[] = [];
   for (let i = 0; i < firstDayOfWeek; i++) cells.push(null);

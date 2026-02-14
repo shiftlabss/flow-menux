@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, startTransition } from "react";
 import { cn } from "@/lib/cn";
 import { useSidebarStore } from "@/stores/sidebar-store";
 import { useAuthStore } from "@/stores/auth-store";
@@ -14,7 +14,9 @@ export function AppShell({ children }: { children: React.ReactNode }) {
 
   // Initialize auth store with Master role on mount (client-side only)
   useEffect(() => {
-    setMounted(true);
+    startTransition(() => {
+      setMounted(true);
+    });
     setUser(
       {
         id: "demo-user",

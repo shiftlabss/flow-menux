@@ -34,6 +34,7 @@ import {
 import { cn } from "@/lib/cn";
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import type { SlashCommand } from "@/types/intelligence";
 import { useIntelligenceStore } from "@/stores/intelligence-store";
 import { useOpportunityStore } from "@/stores/opportunity-store";
 import { useExecutionPanelData } from "@/hooks/use-execution-panel-data";
@@ -362,7 +363,7 @@ export function IntelligenceExecutionPanel() {
                           insight.actionCommand
                             ? () =>
                                 executeSlashCommand(
-                                  insight.actionCommand as any
+                                  insight.actionCommand as SlashCommand
                                 )
                             : undefined
                         }

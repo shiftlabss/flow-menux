@@ -1,6 +1,6 @@
 import { create } from "zustand";
 import { devtools } from "zustand/middleware";
-import type { Activity, ActivityType, ActivityStatus } from "@/types";
+import type { Activity, ActivityStatus } from "@/types";
 import { mockActivities } from "@/lib/mock-data";
 
 interface ActivityState {

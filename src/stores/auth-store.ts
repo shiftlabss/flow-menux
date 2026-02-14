@@ -120,7 +120,7 @@ export const useAuthStore = create<AuthState>((set) => ({
   isLoading: true,
   setUser: (user, token) => {
     // Set cookie so middleware allows protected routes
-    document.cookie = `flow-token=${token}; path=/; max-age=${30 * 24 * 60 * 60}`;
+    document.cookie = `flow-token=${token}; path=/; max-age=${30 * 24 * 60 * 60}; SameSite=Lax; Secure`;
     set({
       user,
       token,
@@ -131,7 +131,7 @@ export const useAuthStore = create<AuthState>((set) => ({
   },
   logout: () => {
     // Remove the auth cookie
-    document.cookie = "flow-token=; path=/; max-age=0";
+    document.cookie = "flow-token=; path=/; max-age=0; SameSite=Lax; Secure";
     set({
       user: null,
       token: null,

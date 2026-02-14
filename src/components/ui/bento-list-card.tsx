@@ -3,7 +3,7 @@ import { cn } from "@/lib/utils";
 import { SkeletonBlock } from "./skeleton-block";
 import { InlineFeedback } from "./inline-feedback";
 
-export interface BentoListCardProps<T = any> {
+export interface BentoListCardProps<T = unknown> {
   title: string;
   items: T[];
   renderItem: (item: T, index: number) => React.ReactNode;
@@ -21,7 +21,7 @@ export interface BentoListCardProps<T = any> {
   actions?: React.ReactNode;
 }
 
-function BentoListCardInner<T = any>(
+function BentoListCardInner<T = unknown>(
   {
     title,
     items,
@@ -187,7 +187,7 @@ function BentoListCardInner<T = any>(
 }
 
 // Usar React.forwardRef com genérico
-const BentoListCard = React.forwardRef(BentoListCardInner) as <T = any>(
+const BentoListCard = React.forwardRef(BentoListCardInner) as <T = unknown>(
   props: BentoListCardProps<T> & { ref?: React.ForwardedRef<HTMLDivElement> }
 ) => ReturnType<typeof BentoListCardInner>;
 

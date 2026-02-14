@@ -1,12 +1,11 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, startTransition } from "react";
 import {
   CheckCircle2,
   Circle,
   X,
   ChevronDown,
-  ChevronUp,
   User,
   Kanban,
   CalendarCheck,
@@ -108,8 +107,10 @@ export function OnboardingChecklist() {
 
   useEffect(() => {
     const dismissed = localStorage.getItem(CHECKLIST_DISMISSED_KEY);
-    setIsDismissed(dismissed === "true");
-    setCompletedItems(loadCompletedItems());
+    startTransition(() => {
+      setIsDismissed(dismissed === "true");
+      setCompletedItems(loadCompletedItems());
+    });
   }, []);
 
   const completedCount = completedItems.size;

@@ -294,7 +294,7 @@ export function StageManager({ pipeline }: StageManagerProps) {
         <AlertDialogContent className="rounded-[20px]">
           <AlertDialogHeader>
             <AlertDialogTitle className="font-heading text-xl">
-              Excluir etapa "{deletingStage?.name}"?
+              Excluir etapa &quot;{deletingStage?.name}&quot;?
             </AlertDialogTitle>
             <AlertDialogDescription className="font-body text-sm text-zinc-600">
               Esta ação não pode ser desfeita. Todos os cards nesta etapa precisam ser movidos antes.

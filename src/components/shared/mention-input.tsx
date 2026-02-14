@@ -5,6 +5,7 @@ import {
   useRef,
   useCallback,
   useEffect,
+  startTransition,
   type KeyboardEvent,
 } from "react";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
@@ -185,7 +186,9 @@ export function MentionInput({ value, onChange, placeholder }: MentionInputProps
 
   // Reset selection when filtered members change
   useEffect(() => {
-    setSelectedIndex(0);
+    startTransition(() => {
+      setSelectedIndex(0);
+    });
   }, [mentionQuery]);
 
   // Render value with highlighted mentions

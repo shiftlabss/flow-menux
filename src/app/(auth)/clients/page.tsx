@@ -438,7 +438,7 @@ export default function ClientsPage() {
 
       return true;
     });
-  }, [activeFunnel, searchQuery, healthFilter, responsibleFilter]);
+  }, [activeFunnel, searchQuery, healthFilter, responsibleFilter, allClients]);
 
   return (
     <motion.div initial="hidden" animate="show" variants={staggerContainer} className="space-y-6">

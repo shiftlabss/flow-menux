@@ -81,6 +81,7 @@ const SkeletonBlock = React.forwardRef<HTMLDivElement, SkeletonBlockProps>(
 
     // Skeleton para charts (barras horizontais)
     if (type === "chart") {
+      const barWidths = [72, 55, 88, 63, 45, 80];
       return (
         <div ref={ref} className={cn("space-y-4", className)} {...props}>
           {Array.from({ length: lines || 6 }).map((_, i) => (
@@ -97,7 +98,7 @@ const SkeletonBlock = React.forwardRef<HTMLDivElement, SkeletonBlockProps>(
               <div className="h-3 w-full overflow-hidden rounded-full bg-zinc-100">
                 <div
                   className="h-full animate-pulse rounded-full bg-zinc-200"
-                  style={{ width: `${Math.random() * 40 + 40}%` }}
+                  style={{ width: `${barWidths[i % barWidths.length]}%` }}
                 />
               </div>
             </div>

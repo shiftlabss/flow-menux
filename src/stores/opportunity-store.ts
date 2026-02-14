@@ -1,6 +1,6 @@
 import { create } from "zustand";
 import { devtools } from "zustand/middleware";
-import type { Opportunity, PipelineStage, Temperature, OpportunityStatus } from "@/types";
+import type { Opportunity, PipelineStage, OpportunityStatus } from "@/types";
 import { mockOpportunities } from "@/lib/mock-data";
 import { calculateSlaDeadline } from "@/lib/business-rules";
 

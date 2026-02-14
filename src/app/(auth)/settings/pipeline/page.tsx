@@ -194,7 +194,7 @@ export default function PipelineSettingsPage() {
         <AlertDialogContent className="max-w-[calc(100%-2rem)] rounded-[20px] sm:max-w-lg">
           <AlertDialogHeader>
             <AlertDialogTitle className="font-heading text-xl">
-              Excluir funil "{deletingPipeline?.name}"?
+              Excluir funil &quot;{deletingPipeline?.name}&quot;?
             </AlertDialogTitle>
             <AlertDialogDescription className="font-body text-sm text-zinc-600">
               {deletingPipeline && deletingPipeline.cardCount > 0 ? (

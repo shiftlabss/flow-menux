@@ -97,20 +97,20 @@ export function OnboardingTour() {
     }
   }, []);
 
-  const handleNext = useCallback(() => {
-    if (currentStep < tourSteps.length - 1) {
-      setCurrentStep((prev) => prev + 1);
-    } else {
-      handleClose();
-    }
-  }, [currentStep]);
-
   const handleClose = useCallback(() => {
     if (dontShowAgain) {
       localStorage.setItem(TOUR_COMPLETED_KEY, "true");
     }
     setIsVisible(false);
   }, [dontShowAgain]);
+
+  const handleNext = useCallback(() => {
+    if (currentStep < tourSteps.length - 1) {
+      setCurrentStep((prev) => prev + 1);
+    } else {
+      handleClose();
+    }
+  }, [currentStep, handleClose]);
 
   const handleSkip = useCallback(() => {
     setIsVisible(false);

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, startTransition } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -60,8 +60,10 @@ export function PipelineFormModal({ open, onOpenChange, pipeline }: PipelineForm
 
   // Reset form when pipeline changes
   useEffect(() => {
-    setNameError(null);
-    setFeedback(null);
+    startTransition(() => {
+      setNameError(null);
+      setFeedback(null);
+    });
     if (pipeline) {
       reset({
         name: pipeline.name,
@@ -173,7 +175,7 @@ export function PipelineFormModal({ open, onOpenChange, pipeline }: PipelineForm
               )}
               {pipeline?.isDefault && (
                 <p className="font-body text-xs text-zinc-500">
-                  O funil padrão "Leads" não pode ter seu nome alterado.
+                  O funil padrão &quot;Leads&quot; não pode ter seu nome alterado.
                 </p>
               )}
               <p className="font-body text-xs text-zinc-400">

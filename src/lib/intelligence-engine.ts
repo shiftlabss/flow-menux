@@ -6,7 +6,6 @@
 
 import type {
   Message,
-  MessageContentType,
   SlashCommand,
   CardContext,
   VendorContext,
@@ -859,7 +858,6 @@ function generateCoachingInsights(): Message {
   const input = getEngineInput();
   const insights = computeSmartInsights(input);
   const quickWins = computeQuickWins(input);
-  const now_ = new Date();
   const thirtyDaysAgo = new Date();
   thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
 
@@ -1009,7 +1007,6 @@ function generateAgenda(): Message {
     sections.push("**Sugestao de prioridade:**");
     for (let i = 0; i < Math.min(priorities.length, 5); i++) {
       const p = priorities[i];
-      const icon = p.severity === "critical" ? "1️⃣" : p.severity === "warning" ? "2️⃣" : "3️⃣";
       sections.push(`  ${i === 0 ? "1️⃣" : i === 1 ? "2️⃣" : i === 2 ? "3️⃣" : i === 3 ? "4️⃣" : "5️⃣"} **${p.title}** — ${p.subtitle}`);
     }
     sections.push("");

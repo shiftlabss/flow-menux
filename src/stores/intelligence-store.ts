@@ -11,10 +11,9 @@ import type {
   CardContext,
   ClientPickerItem,
   ClientPickerFilters,
-  ProactiveSuggestion,
   SlashCommand,
   ActiveScreen,
-  JarvisMode,
+  UserRoleIntelligence,
 } from "@/types/intelligence";
 import { INTELLIGENCE_LIMITS } from "@/types/intelligence";
 import {
@@ -26,7 +25,6 @@ import {
 import { useAuthStore } from "@/stores/auth-store";
 import { useOpportunityStore } from "@/stores/opportunity-store";
 import { useActivityStore } from "@/stores/activity-store";
-import { usePipelineStore } from "@/stores/pipeline-store";
 import { computePipelineContext } from "@/lib/proactive-engine";
 
 // ─── Helpers ──────────────────────────────────────────────────────────────
@@ -61,7 +59,7 @@ function getVendorContext() {
   return {
     id: user?.id ?? "unknown",
     name: user?.name ?? "Vendedor",
-    role: (user?.role ?? "comercial") as any,
+    role: (user?.role ?? "comercial") as UserRoleIntelligence,
     assignedCardCount: userOpps.filter((o) => o.status === "open").length,
     conversionRate,
   };

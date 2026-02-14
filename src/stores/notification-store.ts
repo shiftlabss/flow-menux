@@ -1,6 +1,6 @@
 import { create } from "zustand";
 import { devtools } from "zustand/middleware";
-import type { Notification, NotificationType } from "@/types";
+import type { Notification } from "@/types";
 import { mockNotifications } from "@/lib/mock-data";
 
 interface NotificationState {

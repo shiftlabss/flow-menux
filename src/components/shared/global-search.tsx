@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState, startTransition } from "react";
 import { useRouter } from "next/navigation";
 import {
   LayoutDashboard,
@@ -305,7 +305,9 @@ export function GlobalSearch() {
   // Reset query when dialog closes
   useEffect(() => {
     if (!isSearchOpen) {
-      setQuery("");
+      startTransition(() => {
+        setQuery("");
+      });
     }
   }, [isSearchOpen]);
 
