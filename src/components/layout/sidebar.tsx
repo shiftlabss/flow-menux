@@ -288,18 +288,11 @@ export function Sidebar() {
                     </motion.span>
                   )}
                 </AnimatePresence>
-                {sidebarExpanded && (
-                   <span className={cn(
-                       "ml-auto text-[10px] font-mono opacity-60",
-                       pathname === "/intelligence" ? "text-white" : "text-zinc-400"
-                   )}>
-                       Ctrl+I
-                   </span>
-                )}
+
               </Link>
             </TooltipTrigger>
             <TooltipContent side="right">
-              <p>Menux Intelligence (Ctrl+I)</p>
+              <p>Menux Intelligence</p>
             </TooltipContent>
           </Tooltip>
         </div>

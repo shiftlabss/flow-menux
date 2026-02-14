@@ -68,8 +68,8 @@ export function IntelligenceFAB() {
               "group relative flex h-14 w-14 items-center justify-center rounded-full bg-linear-to-br from-indigo-600 to-violet-600 text-white shadow-lg shadow-indigo-500/25 transition-all hover:scale-105 hover:shadow-indigo-500/40 active:scale-95",
               "focus:outline-none focus:ring-2 focus:ring-purple-400 focus:ring-offset-2"
             )}
-            aria-label="Abrir Menux Intelligence (Ctrl+I)"
-            title="Menux Intelligence (Ctrl+I)"
+            aria-label="Abrir Menux Intelligence"
+            title="Menux Intelligence"
           >
             {/* Pulse animation ring */}
             <span className="absolute inset-0 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 animate-ping opacity-20" />
@@ -104,7 +104,6 @@ export function IntelligenceFAB() {
           <div className="pointer-events-none absolute -left-[140px] top-1/2 -translate-y-1/2 opacity-0 transition-opacity group-hover:opacity-100">
             <div className="rounded-lg bg-slate-900 px-3 py-1.5 text-xs font-medium text-white shadow-lg whitespace-nowrap">
               Menux Intelligence
-              <span className="ml-1.5 text-slate-400">⌘I</span>
             </div>
           </div>
       </motion.div>

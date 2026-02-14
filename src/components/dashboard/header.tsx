@@ -124,7 +124,6 @@ export function DashboardHeader() {
         >
             <Sparkles className="h-3.5 w-3.5" />
             Intelligence
-            <span className="hidden opacity-50 sm:inline text-xs font-normal">Ctrl+I</span>
         </Button>
       </div>
     </header>
