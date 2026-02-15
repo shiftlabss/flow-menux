@@ -1,7 +1,7 @@
 "use client";
 
 /**
- * Login Page - Flow CRM
+ * Login Page - Flow CRM (Premium Redesign)
  *
  * Session rules (implemented server-side / middleware):
  * - "Lembrar-me" checked: session lasts 30 days
@@ -27,13 +27,16 @@ import {
   ShieldAlert,
   Lock,
   Timer,
+  Zap,
+  Brain,
+  Target,
 } from "lucide-react";
+import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Card, CardContent } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
 import { motion } from "framer-motion";
 import { loginSchema, type LoginFormData } from "@/lib/schemas";
@@ -47,14 +50,12 @@ const LOCKOUT_15MIN_THRESHOLD = 5;
 const LOCKOUT_1H_THRESHOLD = 10;
 const PERMANENT_BLOCK_THRESHOLD = 15;
 
-const LOCKOUT_15MIN_MS = 15 * 60 * 1000; // 15 minutes
-const LOCKOUT_1H_MS = 60 * 60 * 1000; // 1 hour
+const LOCKOUT_15MIN_MS = 15 * 60 * 1000;
+const LOCKOUT_1H_MS = 60 * 60 * 1000;
 
 // ---------------------------------------------------------------------------
 // Helpers
 // ---------------------------------------------------------------------------
-
-/** Return a human-readable countdown string from remaining milliseconds. */
 function formatCountdown(ms: number): string {
   if (ms <= 0) return "00:00";
   const totalSeconds = Math.ceil(ms / 1000);
@@ -68,9 +69,6 @@ function formatCountdown(ms: number): string {
   return `${String(minutes).padStart(2, "0")}:${String(seconds).padStart(2, "0")}`;
 }
 
-// ---------------------------------------------------------------------------
-// Lockout tier type
-// ---------------------------------------------------------------------------
 type LockoutTier = "none" | "captcha" | "lockout15" | "lockout1h" | "blocked";
 
 function getLockoutTier(errors: number): LockoutTier {
@@ -80,6 +78,15 @@ function getLockoutTier(errors: number): LockoutTier {
   if (errors >= CAPTCHA_THRESHOLD) return "captcha";
   return "none";
 }
+
+// ---------------------------------------------------------------------------
+// Branding bullets
+// ---------------------------------------------------------------------------
+const brandingBullets = [
+  { icon: Zap, text: "Raio X do funil em tempo real" },
+  { icon: Brain, text: "Jarvis Comercial com Intelligence" },
+  { icon: Target, text: "Atividades e SLAs com foco no que importa" },
+];
 
 // ---------------------------------------------------------------------------
 // Component
@@ -92,7 +99,6 @@ export default function LoginPage() {
   const [captchaResolved, setCaptchaResolved] = useState(false);
   const [loginError, setLoginError] = useState<string | null>(null);
 
-  // Lockout timer state
   const [lockoutEnd, setLockoutEnd] = useState<number | null>(null);
   const [remainingMs, setRemainingMs] = useState(0);
 
@@ -103,27 +109,29 @@ export default function LoginPage() {
     register,
     handleSubmit,
     formState: { errors },
+    watch,
   } = useForm<LoginFormData>({
     resolver: zodResolver(loginSchema),
+    mode: "onBlur",
   });
 
-  // Derived lockout tier based on current error count
+  const emailValue = watch("email");
+  const passwordValue = watch("password");
+  const hasValues = !!emailValue && !!passwordValue;
+
   const tier = getLockoutTier(errorCount);
 
-  // Whether fields + button should be fully disabled (lockout or permanent block)
   const isTimerActive = lockoutEnd !== null && remainingMs > 0;
   const isFieldsDisabled =
     tier === "blocked" || tier === "lockout15" || tier === "lockout1h";
-  const isDisabledByLockout = isFieldsDisabled && (isTimerActive || tier === "blocked");
+  const isDisabledByLockout =
+    isFieldsDisabled && (isTimerActive || tier === "blocked");
 
-  // Button should be disabled when:
-  //  - submitting
-  //  - any active lockout / permanent block
-  //  - captcha tier active but not resolved
   const isButtonDisabled =
     isSubmitting ||
     isDisabledByLockout ||
-    (tier === "captcha" && !captchaResolved);
+    (tier === "captcha" && !captchaResolved) ||
+    !hasValues;
 
   // ---------------------------------------------------------------------------
   // Countdown timer effect
@@ -140,7 +148,6 @@ export default function LoginPage() {
       if (diff <= 0) {
         setRemainingMs(0);
         setLockoutEnd(null);
-        // Reset error count when timer expires so the user can try again
         setErrorCount(0);
         setCaptchaResolved(false);
         setLoginError(null);
@@ -154,15 +161,12 @@ export default function LoginPage() {
     return () => clearInterval(interval);
   }, [lockoutEnd]);
 
-  // ---------------------------------------------------------------------------
-  // Start a lockout timer when the tier changes to a timed lockout
-  // ---------------------------------------------------------------------------
   const startLockout = useCallback((durationMs: number) => {
     setLockoutEnd(Date.now() + durationMs);
   }, []);
 
   // ---------------------------------------------------------------------------
-  // Handle login failure – increment error count and apply tier logic
+  // Handle login failure
   // ---------------------------------------------------------------------------
   function handleLoginFailure() {
     const newCount = errorCount + 1;
@@ -184,16 +188,18 @@ export default function LoginPage() {
         startLockout(LOCKOUT_1H_MS);
         break;
       case "lockout15":
-        setLoginError(
-          "Muitas tentativas. Tente novamente em 15 minutos."
-        );
+        setLoginError("Muitas tentativas. Tente novamente em 15 minutos.");
         startLockout(LOCKOUT_15MIN_MS);
         break;
       case "captcha":
-        setLoginError("Credenciais inválidas. Resolva o CAPTCHA para continuar.");
+        setLoginError(
+          "Credenciais inválidas. Resolva o CAPTCHA para continuar."
+        );
         break;
       default:
-        setLoginError("E-mail ou senha incorretos.");
+        setLoginError(
+          "E-mail ou senha incorretos. Verifique e tente novamente."
+        );
         break;
     }
   }
@@ -208,16 +214,11 @@ export default function LoginPage() {
     setLoginError(null);
 
     try {
-      // Simulate failed login for testing
       if (data.email === "fail@test.com") {
         handleLoginFailure();
         return;
       }
 
-      // Mock: em produção, substituir por chamada à API POST /api/auth/login
-      // On real API failure, call handleLoginFailure() instead of the mock below
-
-      // Mock successful login
       setUser(
         {
           id: "1",
@@ -239,17 +240,19 @@ export default function LoginPage() {
   }
 
   // ---------------------------------------------------------------------------
-  // Render helpers
+  // Alert / Error rendering
   // ---------------------------------------------------------------------------
-
-  /** Warning/error banner depending on current tier */
   function renderAlert() {
     if (!loginError) return null;
 
-    // Permanent block – status-danger style
     if (tier === "blocked") {
       return (
-        <div className="flex flex-col gap-2 rounded-[10px] bg-status-danger-light px-4 py-3">
+        <motion.div
+          initial={{ opacity: 0, y: -4 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.12 }}
+          className="flex flex-col gap-2 rounded-[10px] bg-status-danger-light px-4 py-3"
+        >
           <div className="flex items-center gap-2">
             <ShieldAlert className="h-4 w-4 shrink-0 text-status-danger" />
             <p className="font-body text-sm font-medium text-status-danger">
@@ -262,50 +265,75 @@ export default function LoginPage() {
           >
             Fale com o suporte
           </Link>
-        </div>
+        </motion.div>
       );
     }
 
-    // 1-hour lockout – status-danger style with countdown
     if (tier === "lockout1h" && isTimerActive) {
       return (
-        <div className="flex flex-col gap-1 rounded-[10px] bg-status-danger-light px-4 py-3">
+        <motion.div
+          initial={{ opacity: 0, y: -4 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.12 }}
+          className="flex flex-col gap-1 rounded-[10px] bg-status-danger-light px-4 py-3"
+        >
           <div className="flex items-center gap-2">
             <Lock className="h-4 w-4 shrink-0 text-status-danger" />
             <p className="font-body text-sm font-medium text-status-danger">
               Conta temporariamente bloqueada. Tente novamente em{" "}
-              <span className="font-semibold">{formatCountdown(remainingMs)}</span>.
+              <span className="font-semibold">
+                {formatCountdown(remainingMs)}
+              </span>
+              .
             </p>
           </div>
-        </div>
+        </motion.div>
       );
     }
 
-    // 15-min lockout – status-warning style with countdown
     if (tier === "lockout15" && isTimerActive) {
       return (
-        <div className="flex flex-col gap-1 rounded-[10px] bg-status-warning-light px-4 py-3">
+        <motion.div
+          initial={{ opacity: 0, y: -4 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.12 }}
+          className="flex flex-col gap-1 rounded-[10px] bg-status-warning-light px-4 py-3"
+        >
           <div className="flex items-center gap-2">
             <Timer className="h-4 w-4 shrink-0 text-status-warning" />
             <p className="font-body text-sm font-medium text-status-warning">
               Muitas tentativas. Tente novamente em{" "}
-              <span className="font-semibold">{formatCountdown(remainingMs)}</span>.
+              <span className="font-semibold">
+                {formatCountdown(remainingMs)}
+              </span>
+              .
             </p>
           </div>
-        </div>
+        </motion.div>
       );
     }
 
-    // Generic error / captcha tier
     return (
-      <div className="flex items-center gap-2 rounded-[10px] bg-status-warning-light px-4 py-3">
-        <AlertTriangle className="h-4 w-4 shrink-0 text-status-warning" />
-        <p className="font-body text-sm text-status-warning">{loginError}</p>
-      </div>
+      <motion.div
+        initial={{ opacity: 0, y: -4 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.12 }}
+        className="flex flex-col gap-1.5 rounded-[10px] bg-status-danger-light px-4 py-3"
+      >
+        <div className="flex items-center gap-2">
+          <AlertTriangle className="h-4 w-4 shrink-0 text-status-danger" />
+          <p className="font-body text-sm text-status-danger">{loginError}</p>
+        </div>
+        <Link
+          href="/forgot-password"
+          className="font-body text-xs font-medium text-status-danger hover:underline"
+        >
+          Esqueci minha senha
+        </Link>
+      </motion.div>
     );
   }
 
-  /** Mock CAPTCHA checkbox – shown at tier >= captcha and below lockout tiers */
   function renderCaptcha() {
     if (tier !== "captcha") return null;
 
@@ -332,126 +360,267 @@ export default function LoginPage() {
   // ---------------------------------------------------------------------------
   return (
     <motion.div
-      initial={{ opacity: 0, y: 30 }}
+      initial={{ opacity: 0, y: 6 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.5, ease: [0.25, 0.46, 0.45, 0.94] as const }}
+      transition={{ duration: 0.16, ease: [0.25, 0.46, 0.45, 0.94] }}
+      className="flex min-h-screen"
     >
-    <Card className="w-full max-w-[440px] rounded-[20px] border-zinc-200 shadow-xl">
-      <CardContent className="p-8">
-        {/* Logo */}
-        <div className="mb-8 text-center">
-          <h1 className="font-heading text-3xl font-bold text-black">Flow</h1>
-          <p className="mt-1 font-body text-sm text-zinc-500">
-            Entre na sua conta
-          </p>
-        </div>
+      {/* ================================================================= */}
+      {/* LEFT COLUMN — Branding & Context (desktop only, 55%)              */}
+      {/* ================================================================= */}
+      <motion.div
+        initial={{ opacity: 0, y: 6 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.18, ease: [0.25, 0.46, 0.45, 0.94] }}
+        className="hidden lg:flex lg:w-[55%] relative overflow-hidden"
+      >
+        {/* Premium mesh background */}
+        <div className="absolute inset-0 premium-mesh" />
 
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-          {/* Email */}
-          <div className="space-y-2">
-            <Label htmlFor="email" className="font-body text-sm text-zinc-600">
-              E-mail
-            </Label>
-            <Input
-              id="email"
-              type="email"
-              placeholder="seu@email.com"
-              disabled={isDisabledByLockout}
-              className="h-12 rounded-[15px] font-body text-sm"
-              {...register("email")}
+        {/* Content container — pushed right with ml-auto */}
+        <div className="relative z-10 flex flex-col justify-center px-16 xl:px-20 py-16 w-full max-w-[600px] ml-auto">
+          {/* Logo */}
+          <div className="mb-12">
+            <Image
+              src="/flow-logo.svg"
+              alt="Flow by Menux"
+              width={120}
+              height={33}
+              priority
+              className="drop-shadow-[0_1px_0_rgba(255,255,255,0.8)]"
             />
-            {errors.email && (
-              <p className="text-xs text-status-danger">
-                {errors.email.message}
-              </p>
-            )}
           </div>
 
-          {/* Password – Enter key submits the form (default <form> behaviour) */}
-          <div className="space-y-2">
-            <Label
-              htmlFor="password"
-              className="font-body text-sm text-zinc-600"
-            >
-              Senha
-            </Label>
-            <div className="relative">
-              <Input
-                id="password"
-                type={showPassword ? "text" : "password"}
-                placeholder="••••••••"
-                disabled={isDisabledByLockout}
-                className="h-12 rounded-[15px] pr-12 font-body text-sm"
-                {...register("password")}
-              />
-              {/* Toggle password visibility */}
-              <Button
-                type="button"
-                variant="ghost"
-                size="icon"
-                className="absolute right-2 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-zinc-600"
-                onClick={() => setShowPassword(!showPassword)}
+          {/* Headline */}
+          <div className="mb-10">
+            <h2 className="font-heading text-3xl font-bold text-brand-ink leading-tight mb-3">
+              Bem-vindo ao Flow
+            </h2>
+            <p className="font-body text-base text-zinc-500 leading-relaxed max-w-[440px]">
+              Gestão premium de pipeline e execução comercial
+            </p>
+          </div>
+
+          {/* Bullets */}
+          <div className="space-y-5 mb-16">
+            {brandingBullets.map((bullet, index) => (
+              <motion.div
+                key={index}
+                initial={{ opacity: 0, y: 6 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{
+                  duration: 0.18,
+                  ease: [0.25, 0.46, 0.45, 0.94],
+                  delay: 0.06 * (index + 1),
+                }}
+                className="flex items-center gap-3"
               >
-                {showPassword ? (
-                  <EyeOff className="h-4 w-4" />
-                ) : (
-                  <Eye className="h-4 w-4" />
-                )}
-              </Button>
-            </div>
-            {errors.password && (
-              <p className="text-xs text-status-danger">
-                {errors.password.message}
+                <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-[10px] bg-brand-light">
+                  <bullet.icon className="h-[18px] w-[18px] text-brand opacity-80" />
+                </div>
+                <span className="font-body text-[15px] text-zinc-600">
+                  {bullet.text}
+                </span>
+              </motion.div>
+            ))}
+          </div>
+
+          {/* Footer hint */}
+          <div className="mt-auto">
+            <p className="font-body text-xs text-zinc-400">
+              Use seu e-mail corporativo para acessar
+            </p>
+          </div>
+        </div>
+      </motion.div>
+
+      {/* ================================================================= */}
+      {/* RIGHT COLUMN — Login Card (45% desktop, full mobile)              */}
+      {/* ================================================================= */}
+      <div className="flex w-full lg:w-[45%] items-center justify-center px-4 py-8 sm:px-6 lg:px-10">
+        <motion.div
+          initial={{ opacity: 0, y: 6 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{
+            duration: 0.18,
+            ease: [0.25, 0.46, 0.45, 0.94],
+            delay: 0.06,
+          }}
+          className="w-full max-w-[480px]"
+        >
+          {/* Card */}
+          <div className="rounded-[20px] border border-zinc-200/80 bg-white p-7 sm:p-8 shadow-premium-soft">
+            {/* Card Header */}
+            <div className="mb-7">
+              {/* Mobile-only logo */}
+              <div className="mb-4 lg:hidden">
+                <Image
+                  src="/flow-logo.svg"
+                  alt="Flow by Menux"
+                  width={100}
+                  height={27}
+                  priority
+                />
+              </div>
+              <h2 className="font-heading text-2xl font-bold text-brand-ink">
+                Entrar
+              </h2>
+              <p className="mt-1 font-body text-sm text-zinc-500">
+                Acesse sua conta para continuar
               </p>
-            )}
-          </div>
+            </div>
 
-          {/* Remember Me */}
-          <div className="flex items-center gap-2">
-            <Checkbox
-              id="rememberMe"
-              checked={rememberMe}
-              onCheckedChange={(checked) => setRememberMe(checked === true)}
-            />
-            <label
-              htmlFor="rememberMe"
-              className="cursor-pointer font-body text-sm text-zinc-600"
+            <form
+              onSubmit={handleSubmit(onSubmit)}
+              className="space-y-3.5"
+              noValidate
             >
-              Lembrar-me
-            </label>
+              {/* Email */}
+              <div className="space-y-1.5">
+                <Label
+                  htmlFor="email"
+                  className="font-body text-[13px] font-medium text-zinc-600"
+                >
+                  E-mail
+                </Label>
+                <Input
+                  id="email"
+                  type="email"
+                  placeholder="seu@email.com"
+                  autoComplete="email"
+                  disabled={isDisabledByLockout}
+                  className="h-[46px] rounded-[15px] font-body text-sm transition-[border-color,box-shadow] duration-[140ms] ease-out focus:border-brand/40 focus:shadow-[0_0_0_3px_rgba(29,78,216,0.08)]"
+                  {...register("email")}
+                />
+                {errors.email && (
+                  <motion.p
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ duration: 0.12 }}
+                    className="font-body text-xs text-status-danger"
+                  >
+                    {errors.email.message}
+                  </motion.p>
+                )}
+              </div>
+
+              {/* Password */}
+              <div className="space-y-1.5">
+                <Label
+                  htmlFor="password"
+                  className="font-body text-[13px] font-medium text-zinc-600"
+                >
+                  Senha
+                </Label>
+                <div className="relative">
+                  <Input
+                    id="password"
+                    type={showPassword ? "text" : "password"}
+                    placeholder="••••••••"
+                    autoComplete="current-password"
+                    disabled={isDisabledByLockout}
+                    className="h-[46px] rounded-[15px] pr-12 font-body text-sm transition-[border-color,box-shadow] duration-[140ms] ease-out focus:border-brand/40 focus:shadow-[0_0_0_3px_rgba(29,78,216,0.08)]"
+                    {...register("password")}
+                  />
+                  <button
+                    type="button"
+                    className="absolute right-3 top-1/2 -translate-y-1/2 p-1 text-zinc-400 opacity-70 transition-opacity duration-[140ms] hover:opacity-100 focus-visible:opacity-100"
+                    onClick={() => setShowPassword(!showPassword)}
+                    tabIndex={-1}
+                    aria-label={
+                      showPassword ? "Ocultar senha" : "Mostrar senha"
+                    }
+                  >
+                    {showPassword ? (
+                      <EyeOff className="h-[18px] w-[18px]" />
+                    ) : (
+                      <Eye className="h-[18px] w-[18px]" />
+                    )}
+                  </button>
+                </div>
+                {errors.password && (
+                  <motion.p
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ duration: 0.12 }}
+                    className="font-body text-xs text-status-danger"
+                  >
+                    {errors.password.message}
+                  </motion.p>
+                )}
+              </div>
+
+              {/* Remember me + Forgot password on same line */}
+              <div className="flex items-center justify-between pt-0.5">
+                <div className="flex items-center gap-2">
+                  <Checkbox
+                    id="rememberMe"
+                    checked={rememberMe}
+                    onCheckedChange={(checked) =>
+                      setRememberMe(checked === true)
+                    }
+                  />
+                  <label
+                    htmlFor="rememberMe"
+                    className="cursor-pointer font-body text-sm text-zinc-600"
+                  >
+                    Lembrar-me
+                  </label>
+                </div>
+                <Link
+                  href="/forgot-password"
+                  className="font-body text-sm text-brand hover:underline"
+                >
+                  Esqueci minha senha
+                </Link>
+              </div>
+
+              {/* Alert / Error */}
+              {renderAlert()}
+
+              {/* CAPTCHA */}
+              {renderCaptcha()}
+
+              {/* Submit Button */}
+              <div className="pt-1">
+                <Button
+                  type="submit"
+                  disabled={isButtonDisabled}
+                  className="h-12 w-full rounded-full bg-black font-heading text-base font-semibold text-white transition-[transform,box-shadow] duration-[140ms] ease-out hover:shadow-[0_4px_12px_-2px_rgba(0,0,0,0.2)] hover:-translate-y-0.5 active:scale-[0.98] active:duration-[90ms] disabled:pointer-events-none disabled:opacity-50"
+                >
+                  {isSubmitting ? (
+                    <span className="flex items-center gap-2">
+                      <Loader2 className="h-5 w-5 animate-spin" />
+                      <span>Entrando…</span>
+                    </span>
+                  ) : (
+                    "Entrar"
+                  )}
+                </Button>
+              </div>
+            </form>
+
+            {/* Footer */}
+            <div className="mt-6 text-center">
+              <p className="font-body text-xs text-zinc-400">
+                Precisa de ajuda?{" "}
+                <Link
+                  href="/support"
+                  className="font-medium text-zinc-500 hover:text-brand hover:underline"
+                >
+                  Falar com suporte
+                </Link>
+              </p>
+            </div>
           </div>
 
-          {/* Forgot Password Link */}
-          <div className="text-right">
-            <Link
-              href="/forgot-password"
-              className="font-body text-sm text-brand hover:underline"
-            >
-              Esqueci minha senha
-            </Link>
-          </div>
-
-          {/* Alert / Error Banner */}
-          {renderAlert()}
-
-          {/* Mock CAPTCHA (tier >= 3 errors, below timed lockout) */}
-          {renderCaptcha()}
-
-          {/* Submit Button */}
-          <Button
-            type="submit"
-            disabled={isButtonDisabled}
-            className="h-12 w-full rounded-full bg-black font-heading text-base font-semibold text-white hover:bg-zinc-800"
-          >
-            {isSubmitting ? (
-              <Loader2 className="h-5 w-5 animate-spin" />
-            ) : (
-              "Entrar"
-            )}
-          </Button>
-        </form>
-      </CardContent>
-    </Card>
+          {/* Powered by */}
+          <p className="mt-6 text-center font-body text-xs text-zinc-400">
+            Desenvolvido por{" "}
+            <span className="font-medium text-zinc-500">@menux</span>
+          </p>
+        </motion.div>
+      </div>
     </motion.div>
   );
 }

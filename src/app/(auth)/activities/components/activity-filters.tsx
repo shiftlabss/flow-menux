@@ -46,7 +46,7 @@ export function ActivityFiltersBar({
     filterDateEnd !== "";
 
   return (
-    <div className="space-y-2">
+    <div className="space-y-2 rounded-[18px] border border-zinc-200/70 bg-white/70 p-3 shadow-sm">
       {/* Type Chips + Drawer Trigger */}
       <div className="flex items-center gap-2">
         <div className="flex flex-1 flex-wrap items-center gap-1.5">
@@ -77,13 +77,13 @@ export function ActivityFiltersBar({
             <Button
               variant="outline"
               size="sm"
-              className="shrink-0 rounded-full font-heading text-xs"
+              className="shrink-0 rounded-full border-zinc-200 bg-white font-heading text-xs hover:bg-zinc-100"
             >
               <SlidersHorizontal className="mr-1.5 h-3.5 w-3.5" />
               Filtros
             </Button>
           </SheetTrigger>
-          <SheetContent side="right" className="w-[300px]">
+          <SheetContent side="right" className="w-[300px] premium-panel">
             <SheetHeader>
               <SheetTitle className="font-heading">Filtros</SheetTitle>
             </SheetHeader>

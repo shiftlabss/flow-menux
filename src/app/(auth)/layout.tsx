@@ -3,6 +3,7 @@ import { GlobalDrawers } from "@/components/shared/global-drawers";
 import { GlobalSearch } from "@/components/shared/global-search";
 import { MobileBottomNav } from "@/components/shared/mobile-bottom-nav";
 import { IntelligenceProvider } from "@/components/intelligence/intelligence-provider";
+import { RouteTransition } from "@/components/layout/route-transition";
 
 export default function AuthLayout({
   children,
@@ -11,7 +12,7 @@ export default function AuthLayout({
 }) {
   return (
     <AppShell>
-      {children}
+      <RouteTransition>{children}</RouteTransition>
       <GlobalDrawers />
       <GlobalSearch />
       <MobileBottomNav />

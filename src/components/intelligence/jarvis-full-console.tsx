@@ -5,7 +5,7 @@
 // Connected to Zustand store for real message flow
 // ============================================================================
 
-import { Send, Sparkles, User, Command, X, AlertTriangle, Lightbulb, TrendingUp } from "lucide-react";
+import { Send, Sparkles, Command, X, AlertTriangle, Lightbulb, TrendingUp } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { cn } from "@/lib/cn";
@@ -33,7 +33,6 @@ export function JarvisFullConsole() {
     contextCard,
     remainingQueries,
     viewingHistoryConversation,
-    isHistoryOpen,
     sendMessage,
     executeSlashCommand,
     open: initConversation,
@@ -48,9 +47,10 @@ export function JarvisFullConsole() {
 
   // Auto-scroll to bottom on new messages
   useEffect(() => {
-    setTimeout(() => {
+    const frame = requestAnimationFrame(() => {
       scrollEndRef.current?.scrollIntoView({ behavior: "smooth" });
-    }, 100);
+    });
+    return () => cancelAnimationFrame(frame);
   }, [messages, isTyping]);
 
   // Display messages: either active conversation or history
@@ -142,7 +142,7 @@ export function JarvisFullConsole() {
       : "Digite uma mensagem ou /comando...";
 
   return (
-    <div className="flex h-full flex-col bg-slate-50 relative">
+    <div className="premium-grain relative flex h-full flex-col bg-linear-to-b from-slate-50 via-slate-50 to-slate-100/85">
       {/* History Panel (overlay) */}
       <ConversationHistory />
 
@@ -150,19 +150,26 @@ export function JarvisFullConsole() {
       <ClientPickerModal />
 
       {/* Read-only history banner */}
-      {isReadOnly && (
-        <div className="flex items-center justify-between bg-amber-50 border-b border-amber-200 px-4 py-2">
-          <p className="text-xs font-medium text-amber-700">
-            Visualizando conversa do historico (somente leitura)
-          </p>
-          <button
-            onClick={() => useIntelligenceStore.getState().exitHistoryView()}
-            className="text-xs font-semibold text-amber-700 hover:text-amber-900 underline"
+      <AnimatePresence>
+        {isReadOnly && (
+          <motion.div
+            initial={{ opacity: 0, y: -8 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -8 }}
+            className="flex items-center justify-between border-b border-amber-200 bg-amber-50 px-4 py-2"
           >
-            Voltar para conversa ativa
-          </button>
-        </div>
-      )}
+            <p className="text-xs font-medium text-amber-700">
+              Visualizando conversa do historico (somente leitura)
+            </p>
+            <button
+              onClick={() => useIntelligenceStore.getState().exitHistoryView()}
+              className="text-xs font-semibold text-amber-700 underline hover:text-amber-900"
+            >
+              Voltar para conversa ativa
+            </button>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* Banner Proativo — sugestão de maior prioridade */}
       <ProactiveBanner />
@@ -195,13 +202,13 @@ export function JarvisFullConsole() {
           {/* Typing Indicator */}
           {isTyping && (
             <div className="flex gap-3 mt-2">
-              <div className="h-8 w-8 shrink-0 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white shadow-sm mt-1 ring-2 ring-white">
+              <div className="mt-1 flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-linear-to-br from-brand to-cyan-600 text-white shadow-sm ring-2 ring-white">
                 <Sparkles className="h-4 w-4" />
               </div>
               <div className="flex items-center gap-1.5 h-10 bg-white rounded-2xl rounded-tl-sm px-4 shadow-sm border border-zinc-100/50">
-                <span className="w-2 h-2 bg-zinc-400 rounded-full animate-bounce [animation-delay:-0.3s]" />
-                <span className="w-2 h-2 bg-zinc-400 rounded-full animate-bounce [animation-delay:-0.15s]" />
-                <span className="w-2 h-2 bg-zinc-400 rounded-full animate-bounce" />
+                <span className="premium-glow-dot h-2 w-2 rounded-full bg-zinc-400 animate-bounce [animation-delay:-0.3s]" />
+                <span className="premium-glow-dot h-2 w-2 rounded-full bg-zinc-400 animate-bounce [animation-delay:-0.15s]" />
+                <span className="premium-glow-dot h-2 w-2 rounded-full bg-zinc-400 animate-bounce" />
               </div>
             </div>
           )}
@@ -212,7 +219,7 @@ export function JarvisFullConsole() {
           {/* Empty state */}
           {displayMessages.length === 0 && !isTyping && (
             <div className="flex flex-col items-center justify-center py-20 text-center">
-              <div className="h-16 w-16 rounded-2xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white shadow-lg mb-4">
+              <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-linear-to-br from-brand to-cyan-600 text-white shadow-lg">
                 <Sparkles className="h-8 w-8" />
               </div>
               <h3 className="font-heading text-lg font-bold text-zinc-800 mb-1">
@@ -229,7 +236,12 @@ export function JarvisFullConsole() {
 
       {/* Composer Area */}
       {!isReadOnly && (
-        <div className="p-4 pt-2 bg-slate-50/80 backdrop-blur-sm">
+        <motion.div
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.28, ease: [0.22, 0.61, 0.36, 1] }}
+          className="bg-slate-50/80 p-4 pt-2 backdrop-blur-sm"
+        >
           <div className="max-w-3xl mx-auto relative">
             {/* Slash Command Menu */}
             <SlashCommandMenu
@@ -245,7 +257,7 @@ export function JarvisFullConsole() {
             {/* Pending command badge */}
             {pendingCommand && (
               <div className="flex items-center gap-2 mb-2 px-2">
-                <span className="inline-flex items-center gap-1.5 rounded-full border border-indigo-200 bg-indigo-50 px-3 py-1 text-xs font-medium text-indigo-700">
+                <span className="inline-flex items-center gap-1.5 rounded-full border border-brand/25 bg-brand/10 px-3 py-1 text-xs font-medium text-brand-strong">
                   <Command className="h-3 w-3" />
                   {pendingCommand.command}
                 </span>
@@ -253,6 +265,7 @@ export function JarvisFullConsole() {
                   onClick={() => {
                     setPendingCommand(null);
                     setInputValue("");
+                    setShowSlashMenu(false);
                   }}
                   className="text-[10px] text-zinc-400 hover:text-zinc-600"
                 >
@@ -279,8 +292,8 @@ export function JarvisFullConsole() {
 
             <div
               className={cn(
-                "relative flex items-end gap-2 rounded-[26px] bg-white shadow-xl shadow-zinc-200/50 border transition-all duration-200 p-2",
-                "focus-within:ring-2 focus-within:ring-indigo-100 focus-within:border-indigo-200 border-zinc-200"
+                "premium-shine relative flex items-end gap-2 rounded-[26px] border border-zinc-200 bg-white p-2 shadow-xl shadow-zinc-200/50 transition-all duration-200",
+                "focus-within:border-brand/30 focus-within:ring-2 focus-within:ring-brand/15"
               )}
             >
               <div className="flex-1 py-3 min-h-[44px]">
@@ -288,7 +301,13 @@ export function JarvisFullConsole() {
                   ref={inputRef}
                   type="text"
                   value={inputValue}
-                  onChange={(e) => setInputValue(e.target.value)}
+                  onChange={(e) => {
+                    const nextValue = e.target.value;
+                    setInputValue(nextValue);
+                    if (!pendingCommand) {
+                      setShowSlashMenu(nextValue.startsWith("/"));
+                    }
+                  }}
                   onKeyDown={handleKeyDown}
                   placeholder={placeholder}
                   maxLength={INTELLIGENCE_LIMITS.MAX_USER_MESSAGE_LENGTH}
@@ -303,7 +322,7 @@ export function JarvisFullConsole() {
                   className={cn(
                     "h-10 w-10 rounded-full shadow-md transition-all duration-200",
                     inputValue
-                      ? "bg-indigo-600 hover:bg-indigo-700 text-white shadow-indigo-200"
+                      ? "bg-brand text-white shadow-brand/20 hover:bg-brand-strong"
                       : "bg-zinc-100 text-zinc-400 hover:bg-zinc-200"
                   )}
                   disabled={!inputValue.trim() || isTyping}
@@ -339,7 +358,7 @@ export function JarvisFullConsole() {
               </p>
             </div>
           </div>
-        </div>
+        </motion.div>
       )}
     </div>
   );
@@ -388,9 +407,11 @@ function ProactiveBanner() {
   return (
     <AnimatePresence>
       <motion.div
+        key={topSuggestion.id}
         initial={{ opacity: 0, y: -10 }}
-        animate={{ opacity: 1, y: 0 }}
-        exit={{ opacity: 0, y: -10 }}
+        animate={{ opacity: 1, y: 0, scale: 1 }}
+        exit={{ opacity: 0, y: -10, scale: 0.98 }}
+        transition={{ duration: 0.24, ease: [0.22, 0.61, 0.36, 1] }}
         className={cn(
           "flex items-center gap-3 border-b px-4 py-2.5",
           config.bg

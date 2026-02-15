@@ -4,6 +4,7 @@ import { TrendingUp, TrendingDown } from "lucide-react";
 import { motion, useMotionValue, useTransform, animate } from "framer-motion";
 import { SkeletonBlock } from "./skeleton-block";
 import { InlineFeedback } from "./inline-feedback";
+import { transition } from "@/lib/motion";
 
 // ---------------------------------------------------------------------------
 // Animated Counter Hook — rolls from 0 to target value
@@ -144,7 +145,7 @@ const BentoStatCard = React.forwardRef<HTMLDivElement, BentoStatCardProps>(
           className={cn(
             "rounded-[var(--radius-bento-card)]",
             "border border-[var(--border-bento-default)]",
-            "bg-white p-5",
+            "premium-panel p-5",
             "shadow-[var(--shadow-bento-sm)]",
             className
           )}
@@ -163,7 +164,7 @@ const BentoStatCard = React.forwardRef<HTMLDivElement, BentoStatCardProps>(
           className={cn(
             "rounded-[var(--radius-bento-card)]",
             "border border-[var(--border-bento-error)]",
-            "bg-white p-5",
+            "premium-panel p-5",
             "shadow-[var(--shadow-bento-sm)]",
             className
           )}
@@ -189,17 +190,12 @@ const BentoStatCard = React.forwardRef<HTMLDivElement, BentoStatCardProps>(
         ref={ref}
         className={cn(
           // Base
-          "group rounded-[var(--radius-bento-card)]",
+          "group rounded-[var(--radius-bento-card)] premium-panel premium-lift premium-shine",
           "border border-[var(--border-bento-default)]",
-          
-          // Glass vs Solid
-          className?.includes("backdrop-blur") 
-            ? "bg-white/80 backdrop-blur-md" 
-            : "bg-white",
 
           "shadow-[var(--shadow-bento-sm)]",
-          "transition-all duration-[var(--transition-bento)]", // Changed to transition-all for smoother hover
-          "hover:shadow-[var(--shadow-bento-sm-hover)] hover:-translate-y-1", // Added lift effect
+          "transition-all duration-[var(--transition-bento)]",
+          "hover:shadow-[var(--shadow-bento-sm-hover)]",
 
           // Padding variável por size
           size === "sm" && "p-4",
@@ -217,7 +213,7 @@ const BentoStatCard = React.forwardRef<HTMLDivElement, BentoStatCardProps>(
             <div
               className={cn(
                 "flex items-center justify-center rounded-[var(--radius-bento-inner)]",
-                "bg-brand-light text-brand",
+                "bg-brand-light text-brand-strong",
                 size === "sm" && "h-8 w-8",
                 size === "md" && "h-10 w-10",
                 size === "lg" && "h-12 w-12"
@@ -232,7 +228,7 @@ const BentoStatCard = React.forwardRef<HTMLDivElement, BentoStatCardProps>(
             <motion.div
               initial={{ opacity: 0, scale: 0.8 }}
               animate={{ opacity: 1, scale: 1 }}
-              transition={{ duration: 0.4, delay: 0.6, ease: [0.25, 0.46, 0.45, 0.94] as const }}
+              transition={{ ...transition.panel, delay: 0.15 }}
               className={cn(
                 "flex items-center gap-1 rounded-[var(--radius-bento-inner)]",
                 "px-2 py-0.5 font-body font-medium",

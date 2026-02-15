@@ -30,7 +30,9 @@ import { useAuthStore } from "@/stores/auth-store";
 
 // Simple useMediaQuery hook
 function useMediaQuery(query: string): boolean {
-  const [matches, setMatches] = useState(false);
+  const [matches, setMatches] = useState(() =>
+    typeof window !== "undefined" ? window.matchMedia(query).matches : false
+  );
 
   useEffect(() => {
     const mql = window.matchMedia(query);
@@ -138,7 +140,6 @@ export function Sidebar() {
       // This is handled via the header's toggle call
     }
   }, [isDesktop]);
-
   const filteredItems = navItems.filter((item) => {
     if (!item.permission) return true;
     if (!permissions) return false;
@@ -146,7 +147,6 @@ export function Sidebar() {
   });
 
   const sidebarExpanded = isDesktop ? isExpanded : true;
-  const sidebarVisible = isDesktop || isMobileOpen;
 
   // On mobile, listen for the sidebar store toggle to open overlay
   useEffect(() => {
@@ -179,7 +179,7 @@ export function Sidebar() {
       {/* Sidebar */}
       <aside
         className={cn(
-          "fixed left-0 top-16 z-40 flex h-[calc(100vh-64px)] flex-col border-r border-zinc-200 bg-white transition-[width,transform] duration-200 ease-[cubic-bezier(0.4,0,0.2,1)]",
+          "fixed left-0 top-0 z-40 flex h-screen flex-col border-r border-zinc-200/70 bg-white/90 backdrop-blur-xl transition-[width,transform] duration-200 ease-[cubic-bezier(0.4,0,0.2,1)]",
           isDesktop
             ? isExpanded
               ? "w-60"
@@ -203,10 +203,10 @@ export function Sidebar() {
                   if (!isDesktop) setIsMobileOpen(false);
                 }}
                 className={cn(
-                  "flex items-center gap-3 rounded-[15px] px-3 py-2.5 text-sm font-medium transition-colors duration-100",
+                  "premium-shine flex items-center gap-3 rounded-[15px] px-3 py-2.5 text-sm font-medium transition-colors duration-100",
                   isActive
-                    ? "bg-zinc-100 text-black"
-                    : "text-zinc-600 hover:bg-zinc-50 hover:text-black"
+                    ? "bg-brand/10 text-brand-strong ring-1 ring-brand/15"
+                    : "text-zinc-600 hover:bg-zinc-100/80 hover:text-black"
                 )}
               >
                 <div className="relative shrink-0">
@@ -260,10 +260,10 @@ export function Sidebar() {
               <Link
                 href="/intelligence"
                 className={cn(
-                  "group flex items-center gap-3 rounded-[15px] px-3 py-2.5 text-sm font-medium transition-all duration-200",
+                  "premium-shine group flex items-center gap-3 rounded-[15px] px-3 py-2.5 text-sm font-medium transition-all duration-200",
                   pathname === "/intelligence"
-                    ? "group relative flex items-center gap-3 overflow-hidden rounded-xl bg-linear-to-r from-indigo-600 to-violet-600 px-3 py-2.5 text-white shadow-lg shadow-indigo-500/20 transition-all hover:shadow-indigo-500/30 dark:from-indigo-500 dark:to-violet-500"
-                    : "bg-white text-zinc-600 hover:bg-indigo-50 hover:text-indigo-600 border border-zinc-200 hover:border-indigo-100 hover:shadow-sm"
+                    ? "group relative flex items-center gap-3 overflow-hidden rounded-xl bg-linear-to-r from-brand to-cyan-600 px-3 py-2.5 text-white shadow-lg shadow-brand/20 transition-all hover:shadow-brand/30"
+                    : "border border-zinc-200 bg-white/85 text-zinc-600 hover:border-brand/20 hover:bg-brand/5 hover:text-brand-strong hover:shadow-sm"
                 )}
                 onClick={() => {
                   if (!isDesktop) setIsMobileOpen(false);
@@ -273,7 +273,7 @@ export function Sidebar() {
                   <Sparkles
                     className={cn(
                       "h-5 w-5 transition-transform duration-300",
-                      pathname === "/intelligence" ? "text-white" : "text-indigo-500",
+                      pathname === "/intelligence" ? "text-white" : "text-brand",
                       "group-hover:scale-110"
                     )}
                   />
@@ -311,7 +311,7 @@ export function Sidebar() {
               size="icon"
               onClick={toggle}
               className={cn(
-                "h-9 w-9 text-zinc-400 hover:text-zinc-600",
+                "h-9 w-9 rounded-full text-zinc-400 hover:bg-zinc-100 hover:text-zinc-700",
                 isExpanded && "ml-auto"
               )}
             >

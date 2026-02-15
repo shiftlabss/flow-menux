@@ -1,11 +1,10 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { 
-  Sparkles, 
-  Users, 
-  Clock, 
-  MessageSquarePlus, 
+import {
+  Sparkles,
+  Clock,
+  MessageSquarePlus,
   X,
   Settings,
   Target,
@@ -13,6 +12,7 @@ import {
   MessageSquare
 } from "lucide-react";
 import { cn } from "@/lib/cn";
+import type { ComponentType } from "react";
 import {
   Tooltip,
   TooltipContent,
@@ -31,9 +31,8 @@ const MODES: { id: JarvisMode; label: string; icon: typeof Target }[] = [
 ];
 
 export function JarvisHeader() {
-  const { 
+  const {
     close,
-    openClientPicker,
     toggleHistory,
     startNewConversation,
     jarvisMode,
@@ -54,14 +53,14 @@ export function JarvisHeader() {
         {/* Left: Identity */}
         <div className="flex items-center gap-3">
           <div className="relative">
-             <span className="flex h-8 w-8 items-center justify-center rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 shadow-sm shadow-purple-500/20">
-               <Sparkles className="h-4 w-4 text-white" />
-             </span>
-             {/* Status Dot */}
-             <span className={cn(
-               "absolute -bottom-0.5 -right-0.5 h-2.5 w-2.5 rounded-full border-2 border-white dark:border-slate-950",
-               isTyping ? "bg-amber-400 animate-pulse" : "bg-emerald-500"
-             )} />
+            <span className="flex h-8 w-8 items-center justify-center rounded-xl bg-linear-to-br from-brand to-cyan-600 shadow-sm shadow-brand/20">
+              <Sparkles className="h-4 w-4 text-white" />
+            </span>
+            {/* Status Dot */}
+            <span className={cn(
+              "absolute -bottom-0.5 -right-0.5 h-2.5 w-2.5 rounded-full border-2 border-white dark:border-slate-950",
+              isTyping ? "bg-amber-400 animate-pulse" : "bg-emerald-500"
+            )} />
           </div>
           <div className="flex flex-col">
             <span className="font-heading text-[13px] font-semibold leading-tight text-slate-800 dark:text-slate-200">
@@ -93,12 +92,12 @@ export function JarvisHeader() {
               onClick={() => setJarvisMode(mode.id)}
               className={cn(
                 "relative flex items-center gap-1.5 rounded-full px-3 py-1.5 transition-all duration-200",
-                isActive 
-                  ? "bg-slate-100 text-slate-900 shadow-sm dark:bg-slate-800 dark:text-slate-100" 
+                isActive
+                  ? "bg-slate-100 text-slate-900 shadow-sm dark:bg-slate-800 dark:text-slate-100"
                   : "text-slate-500 hover:bg-slate-50 hover:text-slate-700 dark:text-slate-400 dark:hover:bg-slate-900 dark:hover:text-slate-300"
               )}
             >
-              <mode.icon className={cn("h-3.5 w-3.5", isActive ? "text-indigo-500" : "text-slate-400")} />
+              <mode.icon className={cn("h-3.5 w-3.5", isActive ? "text-brand" : "text-slate-400")} />
               <span className="text-[11px] font-medium whitespace-nowrap">{mode.label}</span>
               {isActive && (
                 <motion.div
@@ -137,10 +136,10 @@ function ActionButton({
         disabled
           ? "text-slate-300 cursor-not-allowed dark:text-slate-600"
           : cn(
-              "text-slate-400 hover:bg-slate-100 hover:text-slate-600",
-              "active:scale-95",
-              "dark:hover:bg-slate-800 dark:hover:text-slate-300"
-            )
+            "text-slate-400 hover:bg-slate-100 hover:text-slate-600",
+            "active:scale-95",
+            "dark:hover:bg-slate-800 dark:hover:text-slate-300"
+          )
       )}
       title={tooltip ? undefined : title}
     >

@@ -11,7 +11,7 @@ import {
   MoreHorizontal,
   DollarSign,
   Settings,
-  HelpCircle,
+  Sparkles,
   LogOut,
 } from "lucide-react";
 import {
@@ -26,20 +26,26 @@ import { cn } from "@/lib/utils";
 interface NavItem {
   label: string;
   href: string;
+  matchPrefix?: string;
   icon: React.ComponentType<{ className?: string }>;
 }
 
 const mainNavItems: NavItem[] = [
   { label: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
-  { label: "Atividades", href: "/atividades", icon: CalendarCheck },
-  { label: "Pipeline", href: "/pipeline", icon: Kanban },
-  { label: "Clientes", href: "/clientes", icon: Users },
+  { label: "Atividades", href: "/activities", icon: CalendarCheck },
+  { label: "Pipeline", href: "/pipes", icon: Kanban },
+  { label: "Clientes", href: "/clients", icon: Users },
 ];
 
 const moreNavItems: NavItem[] = [
-  { label: "Financeiro", href: "/financeiro", icon: DollarSign },
-  { label: "Configurações", href: "/configuracoes", icon: Settings },
-  { label: "Ajuda", href: "/ajuda", icon: HelpCircle },
+  { label: "Financeiro", href: "/finance", icon: DollarSign },
+  {
+    label: "Configurações",
+    href: "/settings/general",
+    matchPrefix: "/settings",
+    icon: Settings,
+  },
+  { label: "Intelligence", href: "/intelligence", icon: Sparkles },
 ];
 
 // ── Mobile Bottom Nav ──────────────────────────────────────────────
@@ -47,26 +53,32 @@ export function MobileBottomNav() {
   const pathname = usePathname();
   const [isMoreOpen, setIsMoreOpen] = useState(false);
 
-  const isActive = (href: string) => pathname.startsWith(href);
+  const isActive = (item: NavItem) => {
+    const target = item.matchPrefix ?? item.href;
+    return pathname.startsWith(target);
+  };
 
-  const isMoreActive = moreNavItems.some((item) => isActive(item.href));
+  const isMoreActive = moreNavItems.some((item) => isActive(item));
 
   return (
     <>
       {/* Bottom nav bar - visible only on mobile (below md breakpoint) */}
-      <nav className="fixed bottom-0 left-0 right-0 z-50 h-16 bg-white border-t border-zinc-200 md:hidden">
+      <nav className="premium-grain fixed bottom-0 left-0 right-0 z-50 h-16 border-t border-zinc-200/75 bg-white/90 backdrop-blur-xl md:hidden">
+        <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-linear-to-r from-transparent via-brand/35 to-transparent" />
         <div className="flex items-center justify-around h-full px-2">
           {mainNavItems.map((item) => {
             const Icon = item.icon;
-            const active = isActive(item.href);
+            const active = isActive(item);
 
             return (
               <Link
                 key={item.href}
                 href={item.href}
                 className={cn(
-                  "flex flex-col items-center justify-center gap-1 flex-1 h-full transition-colors",
-                  active ? "text-brand" : "text-zinc-400 hover:text-zinc-600"
+                  "premium-shine flex h-full flex-1 flex-col items-center justify-center gap-1 rounded-xl transition-colors",
+                  active
+                    ? "bg-brand/10 text-brand-strong"
+                    : "text-zinc-400 hover:text-zinc-600"
                 )}
               >
                 <Icon className="size-5" />
@@ -82,9 +94,9 @@ export function MobileBottomNav() {
             type="button"
             onClick={() => setIsMoreOpen(true)}
             className={cn(
-              "flex flex-col items-center justify-center gap-1 flex-1 h-full transition-colors",
+              "premium-shine flex h-full flex-1 flex-col items-center justify-center gap-1 rounded-xl transition-colors",
               isMoreActive
-                ? "text-brand"
+                ? "bg-brand/10 text-brand-strong"
                 : "text-zinc-400 hover:text-zinc-600"
             )}
           >
@@ -96,7 +108,7 @@ export function MobileBottomNav() {
 
       {/* "Mais" Sheet */}
       <Sheet open={isMoreOpen} onOpenChange={setIsMoreOpen}>
-        <SheetContent side="bottom" className="rounded-t-[15px]">
+        <SheetContent side="bottom" className="rounded-t-[15px] premium-panel">
           <SheetHeader>
             <SheetTitle className="font-heading">Mais opções</SheetTitle>
           </SheetHeader>
@@ -104,7 +116,7 @@ export function MobileBottomNav() {
           <div className="flex flex-col gap-1 py-2">
             {moreNavItems.map((item) => {
               const Icon = item.icon;
-              const active = isActive(item.href);
+              const active = isActive(item);
 
               return (
                 <Link

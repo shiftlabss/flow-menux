@@ -1,5 +1,7 @@
 import * as React from "react";
+import { motion } from "framer-motion";
 import { cn } from "@/lib/utils";
+import { premiumPressMotion } from "@/lib/motion";
 
 export interface BentoCardProps {
   title?: string;
@@ -12,6 +14,7 @@ export interface BentoCardProps {
   noPadding?: boolean;
   elevated?: boolean;
   hoverable?: boolean;
+  shine?: boolean;
 }
 
 const BentoCard = React.forwardRef<HTMLDivElement, BentoCardProps>(
@@ -27,38 +30,78 @@ const BentoCard = React.forwardRef<HTMLDivElement, BentoCardProps>(
       noPadding = false,
       elevated = false,
       hoverable = false,
+      shine = true,
       ...props
     },
     ref
   ) => {
     const hasHeader = title || description || actions;
+    const sizeClass =
+      size === "sm"
+        ? "min-h-[140px]"
+        : size === "lg"
+          ? "min-h-[260px]"
+          : size === "tall"
+            ? "min-h-[340px]"
+            : size === "wide"
+              ? "min-h-[200px]"
+              : "min-h-[180px]";
 
     return (
-      <div
+      <motion.div
         ref={ref}
+        whileHover={hoverable ? premiumPressMotion.whileHover : undefined}
+        whileTap={hoverable ? premiumPressMotion.whileTap : undefined}
+        transition={
+          hoverable
+            ? { duration: 0.22, ease: [0.22, 0.61, 0.36, 1] }
+            : undefined
+        }
         className={cn(
           // Base styles
-          "relative overflow-hidden bg-white",
+          "group/card relative overflow-hidden",
+          "bento-card-base premium-panel",
           "rounded-[var(--radius-bento-card)]",
           "border border-[var(--border-bento-default)]",
+          "focus-within:ring-2 focus-within:ring-brand/20",
 
           // Shadow elevation
-          elevated
-            ? "shadow-[var(--shadow-bento-md)]"
-            : "shadow-[var(--shadow-bento-sm)]",
+          elevated && "bento-card-elevated",
+          !elevated && "shadow-[var(--shadow-bento-sm)]",
 
           // Hover state
-          hoverable && elevated && "hover:shadow-[var(--shadow-bento-md-hover)]",
-          hoverable && !elevated && "hover:shadow-[var(--shadow-bento-sm-hover)]",
-          hoverable && "transition-shadow duration-[var(--transition-bento)]",
+          hoverable && elevated && "bento-card-elevated-hover",
+          hoverable && !elevated && "bento-card-hover",
+          hoverable && "premium-lift",
+          hoverable && shine && "premium-shine",
+
+          // Size
+          sizeClass,
 
           // State-specific styles
           state === "error" && "border-[var(--border-bento-error)]",
+          state === "loading" && "pointer-events-none opacity-80",
 
           className
         )}
         {...props}
       >
+        {shine && (
+          <>
+            <div
+              aria-hidden
+              className="pointer-events-none absolute inset-0 opacity-0 transition-opacity duration-300 ease-out group-hover/card:opacity-100"
+            >
+              <div className="absolute -top-16 right-[-12%] h-40 w-40 rounded-full bg-brand/15 blur-3xl" />
+              <div className="absolute -bottom-16 left-[-10%] h-36 w-36 rounded-full bg-cyan-300/15 blur-3xl" />
+            </div>
+            <div
+              aria-hidden
+              className="pointer-events-none absolute inset-x-0 top-0 h-px bg-linear-to-r from-transparent via-white/90 to-transparent opacity-70"
+            />
+          </>
+        )}
+
         {/* Header */}
         {hasHeader && (
           <div
@@ -87,7 +130,7 @@ const BentoCard = React.forwardRef<HTMLDivElement, BentoCardProps>(
         <div className={cn(!noPadding && (hasHeader ? "px-6 pb-6" : "p-6"))}>
           {children}
         </div>
-      </div>
+      </motion.div>
     );
   }
 );

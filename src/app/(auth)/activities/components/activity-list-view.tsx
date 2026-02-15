@@ -6,8 +6,6 @@ import type { Activity } from "@/types";
 import { useUIStore } from "@/stores/ui-store";
 import { groupActivities } from "./helpers";
 import { ActivityGroup } from "./activity-group";
-import { CompletionPopover } from "./completion-popover";
-import { PostponePopover } from "./postpone-popover";
 
 interface ActivityListViewProps {
   activities: Activity[];
@@ -52,7 +50,7 @@ export function ActivityListView({ activities }: ActivityListViewProps) {
     }, 1200);
   }, []);
 
-  const handlePostponed = useCallback((_id: string) => {
+  const handlePostponed = useCallback(() => {
     // Activity moves to correct group automatically via store update
   }, []);
 
@@ -73,8 +71,8 @@ export function ActivityListView({ activities }: ActivityListViewProps) {
 
   if (isEmpty) {
     return (
-      <div className="flex flex-col items-center justify-center py-16">
-        <CheckCircle2 className="h-12 w-12 text-zinc-200" />
+      <div className="flex flex-col items-center justify-center rounded-[18px] border border-zinc-200/80 bg-white/80 py-16 shadow-sm">
+        <CheckCircle2 className="h-12 w-12 text-brand/35" />
         <p className="mt-3 font-body text-sm text-zinc-500">
           Nenhuma atividade encontrada
         </p>

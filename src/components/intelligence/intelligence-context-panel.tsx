@@ -5,19 +5,19 @@
 // Connected to store + opportunity data for real client selection
 // ============================================================================
 
-import { Search, ChevronDown, Clock, Star, Flame, X, Users } from "lucide-react";
+import { Search, Clock, X, Users } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useState, useMemo } from "react";
 import { cn } from "@/lib/cn";
+import { motion } from "framer-motion";
 import { useIntelligenceStore } from "@/stores/intelligence-store";
 import { useOpportunityStore } from "@/stores/opportunity-store";
 import { useAuthStore } from "@/stores/auth-store";
 import type { ClientPickerItem } from "@/types/intelligence";
 import type { Temperature } from "@/types";
-import { formatCurrencyBRL } from "@/lib/business-rules";
 
 const stageLabels: Record<string, string> = {
   "lead-in": "Lead In",
@@ -105,7 +105,7 @@ export function IntelligenceContextPanel() {
       "bg-blue-100 text-blue-600",
       "bg-emerald-100 text-emerald-600",
       "bg-amber-100 text-amber-600",
-      "bg-purple-100 text-purple-600",
+      "bg-indigo-100 text-indigo-600",
       "bg-rose-100 text-rose-600",
       "bg-cyan-100 text-cyan-600",
     ];
@@ -113,7 +113,7 @@ export function IntelligenceContextPanel() {
   };
 
   return (
-    <div className="flex h-full flex-col bg-white">
+    <div className="premium-grain flex h-full flex-col bg-white">
       {/* Search Block */}
       <div className="p-4 border-b border-zinc-100 shrink-0">
         <div className="relative">
@@ -140,10 +140,14 @@ export function IntelligenceContextPanel() {
         <div className="flex flex-col p-2 gap-6 pb-20">
           {/* Selected Client Card */}
           {contextCard && (
-            <div className="mx-2 mt-2 rounded-xl border border-indigo-100 bg-indigo-50/50 p-4 shadow-sm">
+            <motion.div
+              initial={{ opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="mx-2 mt-2 rounded-xl border border-brand/20 bg-brand/10 p-4 shadow-sm"
+            >
               <div className="flex justify-between items-start mb-3">
                 <div className="flex items-center gap-3">
-                  <div className="h-10 w-10 rounded-full bg-indigo-600 flex items-center justify-center text-white font-bold text-sm">
+                  <div className="flex h-10 w-10 items-center justify-center rounded-full bg-brand text-sm font-bold text-white">
                     {initials(contextCard.cardName)}
                   </div>
                   <div>
@@ -212,7 +216,7 @@ export function IntelligenceContextPanel() {
                   🔍 Analisar
                 </Button>
               </div>
-            </div>
+            </motion.div>
           )}
 
           {/* Search Results */}
@@ -255,19 +259,21 @@ export function IntelligenceContextPanel() {
                   </div>
                   <div className="space-y-1">
                     {priorities.map((item) => (
-                      <button
+                      <motion.button
                         key={item.id}
                         onClick={() => handleSelectItem(item)}
+                        whileHover={{ y: -1, scale: 1.005 }}
+                        whileTap={{ y: 0, scale: 0.992 }}
                         className={cn(
                           "w-full text-left flex items-start gap-3 p-2.5 rounded-lg transition-all group",
                           contextCard?.cardId === item.entityId
-                            ? "bg-indigo-50 border-indigo-100 shadow-sm ring-1 ring-indigo-200"
+                            ? "border-brand/20 bg-brand/10 shadow-sm ring-1 ring-brand/20"
                             : "hover:bg-zinc-50 border border-transparent"
                         )}
                       >
                         <div className="mt-0.5 h-2 w-2 rounded-full bg-orange-500 shadow-orange-200 shrink-0" />
                         <div className="flex-1 min-w-0">
-                          <p className="font-medium text-sm text-zinc-800 leading-none mb-1 group-hover:text-indigo-900">
+                          <p className="mb-1 text-sm leading-none font-medium text-zinc-800 group-hover:text-brand-strong">
                             {item.companyName}
                           </p>
                           <p className="text-xs text-zinc-500 line-clamp-1">
@@ -280,7 +286,7 @@ export function IntelligenceContextPanel() {
                             </div>
                           )}
                         </div>
-                      </button>
+                      </motion.button>
                     ))}
                   </div>
                 </div>
@@ -325,7 +331,7 @@ export function IntelligenceContextPanel() {
                 <div className="px-2">
                   <button
                     onClick={openClientPicker}
-                    className="flex items-center gap-2 text-xs font-medium text-indigo-600 hover:text-indigo-800 p-2 w-full transition-colors"
+                    className="flex w-full items-center gap-2 p-2 text-xs font-medium text-brand hover:text-brand-strong transition-colors"
                   >
                     <Users className="h-3.5 w-3.5" />
                     Ver todos os clientes ({allItems.length})
@@ -354,12 +360,14 @@ function ClientRow({
   onClick: () => void;
 }) {
   return (
-    <button
+    <motion.button
       onClick={onClick}
+      whileHover={{ y: -1, scale: 1.008 }}
+      whileTap={{ y: 0, scale: 0.992 }}
       className={cn(
         "w-full text-left flex items-center gap-3 p-2 rounded-lg transition-all group",
         isSelected
-          ? "bg-indigo-50 border-indigo-100 shadow-sm ring-1 ring-indigo-200"
+          ? "border-brand/20 bg-brand/10 shadow-sm ring-1 ring-brand/20"
           : "hover:bg-zinc-50 border border-transparent"
       )}
     >
@@ -372,14 +380,14 @@ function ClientRow({
         {initials}
       </div>
       <div className="flex-1 min-w-0">
-        <p className="font-medium text-sm text-zinc-800 truncate group-hover:text-indigo-900">
+        <p className="truncate text-sm font-medium text-zinc-800 group-hover:text-brand-strong">
           {item.companyName}
         </p>
         <p className="text-xs text-zinc-500 truncate flex items-center gap-1">
           {temperatureEmoji(item.temperature)} {item.stageLabel}
         </p>
       </div>
-    </button>
+    </motion.button>
   );
 }
 

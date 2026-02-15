@@ -310,18 +310,18 @@ export function GlobalSearch() {
       });
     }
   }, [isSearchOpen]);
-
   // Cmd+K / Ctrl+K shortcut
   useEffect(() => {
     function onKeyDown(e: KeyboardEvent) {
       if ((e.metaKey || e.ctrlKey) && e.key === "k") {
         e.preventDefault();
-        setSearchOpen(!isSearchOpen);
+        const currentOpen = useUIStore.getState().isSearchOpen;
+        setSearchOpen(!currentOpen);
       }
     }
     document.addEventListener("keydown", onKeyDown);
     return () => document.removeEventListener("keydown", onKeyDown);
-  }, [isSearchOpen, setSearchOpen]);
+  }, [setSearchOpen]);
 
   // Filter mock results based on debounced query
   const hasSearchQuery = debouncedQuery.trim().length >= MIN_QUERY_LENGTH;
@@ -395,7 +395,10 @@ export function GlobalSearch() {
   return (
     <CommandDialog
       open={isSearchOpen}
-      onOpenChange={setSearchOpen}
+      onOpenChange={(open) => {
+        setSearchOpen(open);
+        if (!open) setQuery("");
+      }}
       title="Busca Global"
       description="Busque por páginas, oportunidades e clientes"
       showCloseButton={false}

@@ -70,7 +70,7 @@ export function ActivityHeader({
         <div className="flex items-center gap-2">
           {/* View Toggle */}
           <div
-            className="flex items-center rounded-full border border-zinc-200 bg-zinc-50 p-0.5"
+            className="flex items-center rounded-full border border-zinc-200 bg-zinc-50/80 p-0.5 shadow-sm"
             role="tablist"
             aria-label="Modo de visualizacao"
           >
@@ -82,7 +82,7 @@ export function ActivityHeader({
                 onClick={() => onViewModeChange(key)}
                 className={`flex items-center gap-1.5 rounded-full px-3 py-1.5 font-heading text-xs font-medium transition-colors ${
                   viewMode === key
-                    ? "bg-black text-white"
+                    ? "bg-brand text-white shadow-sm"
                     : "text-zinc-500 hover:text-zinc-700"
                 }`}
               >
@@ -95,7 +95,7 @@ export function ActivityHeader({
 
           {/* New Activity */}
           <Button
-            className="rounded-full bg-black font-heading text-sm text-white hover:bg-zinc-800"
+            className="rounded-full bg-brand font-heading text-sm text-white shadow-sm hover:bg-brand-strong"
             onClick={onNewActivity}
           >
             <Plus className="mr-2 h-4 w-4" />

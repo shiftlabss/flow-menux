@@ -65,14 +65,14 @@ export function IntelligenceFAB() {
         <button
           onClick={() => router.push("/intelligence")}
           className={cn(
-              "group relative flex h-14 w-14 items-center justify-center rounded-full bg-linear-to-br from-indigo-600 to-violet-600 text-white shadow-lg shadow-indigo-500/25 transition-all hover:scale-105 hover:shadow-indigo-500/40 active:scale-95",
-              "focus:outline-none focus:ring-2 focus:ring-purple-400 focus:ring-offset-2"
+              "group relative flex h-14 w-14 items-center justify-center rounded-full bg-linear-to-br from-brand to-cyan-600 text-white shadow-lg shadow-brand/25 transition-all hover:scale-105 hover:shadow-brand/40 active:scale-95",
+              "focus:outline-none focus:ring-2 focus:ring-brand/45 focus:ring-offset-2"
             )}
             aria-label="Abrir Menux Intelligence"
             title="Menux Intelligence"
           >
             {/* Pulse animation ring */}
-            <span className="absolute inset-0 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 animate-ping opacity-20" />
+            <span className="absolute inset-0 animate-ping rounded-full bg-linear-to-br from-brand to-cyan-500 opacity-20" />
 
             {/* Icon */}
             <Sparkles className="relative z-10 h-5 w-5 transition-transform group-hover:rotate-12" />

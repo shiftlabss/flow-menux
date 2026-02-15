@@ -31,7 +31,7 @@ export function ActivitySideMetrics({
   return (
     <div className="sticky top-6 hidden w-[280px] shrink-0 space-y-4 lg:block">
       {/* Total */}
-      <Card className="rounded-[var(--radius-bento-card)] border-zinc-200 shadow-[var(--shadow-bento-sm)]">
+      <Card className="premium-panel rounded-[var(--radius-bento-card)] border-zinc-200/70 shadow-[var(--shadow-bento-sm)]">
         <CardContent className="p-5">
           <p className="font-body text-xs uppercase tracking-wider text-zinc-400">
             Total de Atividades
@@ -43,7 +43,7 @@ export function ActivitySideMetrics({
       </Card>
 
       {/* By Status */}
-      <Card className="rounded-[var(--radius-bento-card)] border-zinc-200 shadow-[var(--shadow-bento-sm)]">
+      <Card className="premium-panel rounded-[var(--radius-bento-card)] border-zinc-200/70 shadow-[var(--shadow-bento-sm)]">
         <CardContent className="p-5">
           <p className="mb-3 font-heading text-xs font-semibold uppercase tracking-wider text-zinc-400">
             Por Status
@@ -105,7 +105,7 @@ export function ActivitySideMetrics({
       </Card>
 
       {/* Weekly Completion Rate */}
-      <Card className="rounded-[var(--radius-bento-card)] border-zinc-200 shadow-[var(--shadow-bento-sm)]">
+      <Card className="premium-panel rounded-[var(--radius-bento-card)] border-zinc-200/70 shadow-[var(--shadow-bento-sm)]">
         <CardContent className="p-5">
           <p className="font-body text-xs uppercase tracking-wider text-zinc-400">
             Conclusao Semanal
@@ -132,7 +132,7 @@ export function ActivitySideMetrics({
       </Card>
 
       {/* By Type */}
-      <Card className="rounded-[var(--radius-bento-card)] border-zinc-200 shadow-[var(--shadow-bento-sm)]">
+      <Card className="premium-panel rounded-[var(--radius-bento-card)] border-zinc-200/70 shadow-[var(--shadow-bento-sm)]">
         <CardContent className="p-5">
           <p className="mb-3 font-heading text-xs font-semibold uppercase tracking-wider text-zinc-400">
             Por Tipo

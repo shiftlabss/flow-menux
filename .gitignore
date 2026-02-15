@@ -2,6 +2,7 @@
 
 # dependencies
 /node_modules
+**/node_modules
 /.pnp
 .pnp.*
 .yarn/*
@@ -15,6 +16,7 @@
 
 # next.js
 /.next/
+**/.next/
 /out/
 
 # production
@@ -25,12 +27,21 @@
 *.pem
 *.bak
 *.bak[0-9]*
+menux-flow-recovery/
+temp_build_env/
+tmp_node_modules/
+test_dir/
+test.txt
+server.log
 
 # debug
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 .pnpm-debug.log*
+.npm_cache_clean/
+**/.npm_cache_clean/
+.npm_cache/
 
 # env files (can opt-in for committing if needed)
 .env*

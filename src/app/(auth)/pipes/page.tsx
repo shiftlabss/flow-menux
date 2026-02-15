@@ -56,26 +56,11 @@ import {
   PIPELINE_STAGE_ORDER,
 } from "@/lib/business-rules";
 import { generateDynamicMockData } from "@/lib/mock-data";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
+import { useRouter, useSearchParams } from "next/navigation";
 import { PipelineManagerDrawer } from "@/components/pipeline/pipeline-manager-drawer";
 import { PipelineSwitcher } from "@/components/pipeline/pipeline-switcher";
-
-// ═══════════════════════════════════════════════════════════════════
-// Framer Motion Variants
-// ═══════════════════════════════════════════════════════════════════
-
-const staggerContainer = {
-  hidden: { opacity: 0 },
-  show: { opacity: 1, transition: { staggerChildren: 0.08, delayChildren: 0.1 } },
-};
-const fadeUp = {
-  hidden: { opacity: 0, y: 20 },
-  show: { opacity: 1, y: 0, transition: { duration: 0.45, ease: [0.25, 0.46, 0.45, 0.94] as const } },
-};
-const scaleIn = {
-  hidden: { opacity: 0, scale: 0.95 },
-  show: { opacity: 1, scale: 1, transition: { duration: 0.35, ease: [0.25, 0.46, 0.45, 0.94] as const } },
-};
+import { screenContainer, sectionEnter, listItemReveal } from "@/lib/motion";
 
 // ═══════════════════════════════════════════════════════════════════
 // Funnel Definitions
@@ -282,7 +267,7 @@ function validateStageTransition(
 // ═══════════════════════════════════════════════════════════════════
 
 const stageColorPalette = [
-  { id: "default", label: "Padrão", bg: "bg-brand", hex: "#6d28d9" },
+  { id: "default", label: "Padrão", bg: "bg-brand", hex: "#1d4ed8" },
   { id: "blue", label: "Azul", bg: "bg-blue-500", hex: "#3b82f6" },
   { id: "cyan", label: "Ciano", bg: "bg-cyan-500", hex: "#06b6d4" },
   { id: "green", label: "Verde", bg: "bg-emerald-500", hex: "#10b981" },
@@ -307,7 +292,7 @@ function loadStageCustomizations(): Record<string, StageCustomization> {
     const raw = localStorage.getItem(STAGE_CUSTOM_STORAGE_KEY);
     return raw ? JSON.parse(raw) : {};
   } catch {
-    try { localStorage.removeItem(STAGE_CUSTOM_STORAGE_KEY); } catch {}
+    try { localStorage.removeItem(STAGE_CUSTOM_STORAGE_KEY); } catch { }
     return {};
   }
 }
@@ -397,6 +382,8 @@ function PipelineSkeleton({ stageCount }: { stageCount: number }) {
 export default function PipesPage() {
   const { openDrawer, openModal } = useUIStore();
   const { user } = useAuthStore();
+  const router = useRouter();
+  const searchParams = useSearchParams();
   const currentUserId = user?.id ?? "1";
   const [selectedFunnel, setSelectedFunnel] = useState("comercial");
   const [localOpportunities, setLocalOpportunities] = useState<Opportunity[]>(
@@ -460,6 +447,31 @@ export default function PipesPage() {
     [activeFunnel]
   );
 
+  const stageFilter = useMemo(() => {
+    const raw = searchParams.get("stage");
+    if (!raw) return null;
+    const candidate = raw as PipelineStage;
+    return activeStageIds.includes(candidate) ? candidate : null;
+  }, [searchParams, activeStageIds]);
+
+  const visibleStages = useMemo(
+    () =>
+      stageFilter
+        ? activeFunnel.stages.filter((stage) => stage.id === stageFilter)
+        : activeFunnel.stages,
+    [activeFunnel, stageFilter]
+  );
+
+  const effectiveStageIds = useMemo(
+    () => (stageFilter ? [stageFilter] : activeStageIds),
+    [stageFilter, activeStageIds]
+  );
+
+  const stageFilterLabel = useMemo(() => {
+    if (!stageFilter) return null;
+    return activeFunnel.stages.find((stage) => stage.id === stageFilter)?.label ?? null;
+  }, [stageFilter, activeFunnel]);
+
   // #5 FIX: Simulate loading (will be replaced by real data fetching)
   useEffect(() => {
     const timer = setTimeout(() => setIsLoading(false), 600);
@@ -487,7 +499,7 @@ export default function PipesPage() {
       fechamento: [],
     };
     for (const opp of opportunities) {
-      if (!activeStageIds.includes(opp.stage)) continue;
+      if (!effectiveStageIds.includes(opp.stage)) continue;
 
       // #16 FIX: Filter own cards only
       if (showOnlyMine && opp.responsibleId !== currentUserId) continue;
@@ -513,12 +525,12 @@ export default function PipesPage() {
       });
     }
     return grouped;
-  }, [opportunities, activeStageIds, showOnlyMine, normalizedSearch, currentUserId]);
+  }, [opportunities, effectiveStageIds, showOnlyMine, normalizedSearch, currentUserId]);
 
   // #7 FIX: Separate counts for own vs total
   const { myCount, myTotal, boardCount, boardTotal } = useMemo(() => {
     const active = opportunities.filter((o) =>
-      activeStageIds.includes(o.stage)
+      effectiveStageIds.includes(o.stage)
     );
     const mine = active.filter((o) => o.responsibleId === currentUserId);
     return {
@@ -527,16 +539,16 @@ export default function PipesPage() {
       boardCount: active.length,
       boardTotal: active.reduce((acc, o) => acc + o.value, 0),
     };
-  }, [opportunities, activeStageIds, currentUserId]);
+  }, [opportunities, effectiveStageIds, currentUserId]);
 
   // #15 FIX: Compute dynamic temperatures
   const averageDealValue = useMemo(() => {
     const active = opportunities.filter((o) =>
-      activeStageIds.includes(o.stage)
+      effectiveStageIds.includes(o.stage)
     );
     if (active.length === 0) return 10000;
     return active.reduce((acc, o) => acc + o.value, 0) / active.length;
-  }, [opportunities, activeStageIds]);
+  }, [opportunities, effectiveStageIds]);
 
   const getTemp = useCallback(
     (opp: Opportunity) => {
@@ -684,11 +696,11 @@ export default function PipesPage() {
         prev.map((o) =>
           o.id === card.id
             ? {
-                ...o,
-                stage: targetStage,
-                updatedAt: new Date().toISOString(),
-                slaDeadline: newSlaDeadline,
-              }
+              ...o,
+              stage: targetStage,
+              updatedAt: new Date().toISOString(),
+              slaDeadline: newSlaDeadline,
+            }
             : o
         )
       );
@@ -830,7 +842,7 @@ export default function PipesPage() {
 
   // #5 FIX: Show skeleton while loading
   if (isLoading) {
-    return <PipelineSkeleton stageCount={activeFunnel.stages.length} />;
+    return <PipelineSkeleton stageCount={visibleStages.length} />;
   }
 
   return (
@@ -844,15 +856,15 @@ export default function PipesPage() {
         className="sr-only"
       />
 
-      <motion.div initial="hidden" animate="show" variants={staggerContainer} className="flex h-[calc(100vh-64px)] flex-col overflow-hidden">
+      <motion.div initial="hidden" animate="show" variants={screenContainer} className="premium-ambient premium-grain flex h-[calc(100vh-64px)] flex-col overflow-hidden rounded-[20px] border border-zinc-200/75 bg-white/68 p-4 shadow-[var(--shadow-premium-soft)] backdrop-blur-sm md:p-5">
         {/* ── Header & Toolbar ─────────────────────────────────── */}
-        <motion.div variants={fadeUp} className="shrink-0 space-y-3 pb-4">
+        <motion.div variants={sectionEnter} className="shrink-0 space-y-3 pb-4">
           <div className="flex flex-wrap items-start justify-between gap-3">
             <div className="min-w-0">
               <PipelineSwitcher
                 selectedPipeline={activeFunnel}
                 availablePipelines={funnels}
-                hasActiveFilters={showOnlyMine || searchQuery.length > 0}
+                hasActiveFilters={showOnlyMine || searchQuery.length > 0 || !!stageFilter}
                 isAdmin={true}
                 showOnlyMine={showOnlyMine}
                 onToggleShowOnlyMine={() => setShowOnlyMine((prev) => !prev)}
@@ -876,27 +888,50 @@ export default function PipesPage() {
             </div>
 
             <div className="flex flex-wrap items-center gap-2">
-              {/* #17 FIX: Search toggle + inline input */}
-              {isSearchOpen && (
-                <div className="relative">
-                  <Search className="absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-zinc-400" />
-                  <Input
-                    ref={searchInputRef}
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    placeholder="Buscar cards..."
-                    className="h-9 w-[200px] rounded-full pl-8 pr-8 font-body text-sm"
-                  />
-                  {searchQuery && (
-                    <button
-                      onClick={() => setSearchQuery("")}
-                      className="absolute right-2.5 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-zinc-600"
-                    >
-                      <X className="h-3.5 w-3.5" />
-                    </button>
-                  )}
+              {stageFilter && stageFilterLabel && (
+                <div className="flex items-center gap-1 rounded-full border border-brand/25 bg-brand/10 px-2.5 py-1.5">
+                  <span className="text-[11px] font-medium text-brand-strong">
+                    Etapa: {stageFilterLabel}
+                  </span>
+                  <button
+                    onClick={() => router.replace("/pipes")}
+                    className="text-brand/70 transition-colors hover:text-brand"
+                    aria-label="Limpar filtro de etapa"
+                  >
+                    <X className="h-3 w-3" />
+                  </button>
                 </div>
               )}
+
+              {/* #17 FIX: Search toggle + inline input */}
+              <AnimatePresence>
+                {isSearchOpen && (
+                  <motion.div
+                    initial={{ opacity: 0, x: 14, scale: 0.98 }}
+                    animate={{ opacity: 1, x: 0, scale: 1 }}
+                    exit={{ opacity: 0, x: 10, scale: 0.98 }}
+                    transition={{ duration: 0.2, ease: [0.22, 0.61, 0.36, 1] }}
+                    className="relative"
+                  >
+                    <Search className="absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-zinc-400" />
+                    <Input
+                      ref={searchInputRef}
+                      value={searchQuery}
+                      onChange={(e) => setSearchQuery(e.target.value)}
+                      placeholder="Buscar cards..."
+                      className="h-9 w-[220px] rounded-full pl-8 pr-8 font-body text-sm"
+                    />
+                    {searchQuery && (
+                      <button
+                        onClick={() => setSearchQuery("")}
+                        className="absolute right-2.5 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-zinc-600"
+                      >
+                        <X className="h-3.5 w-3.5" />
+                      </button>
+                    )}
+                  </motion.div>
+                )}
+              </AnimatePresence>
 
               <Tooltip>
                 <TooltipTrigger asChild>
@@ -951,10 +986,10 @@ export default function PipesPage() {
           {/* Board scroll container */}
           <div
             ref={boardRef}
-            className="flex flex-1 gap-3 overflow-x-auto scroll-smooth px-7 pb-2"
+            className="flex flex-1 gap-4 overflow-x-auto scroll-smooth px-3 pb-2"
             style={{ scrollSnapType: "x proximity" }}
           >
-            {activeFunnel.stages.map((stageDef) => {
+            {visibleStages.map((stageDef, index) => {
               const cards = opportunitiesByStage[stageDef.id] || [];
               const totalValue = cards.reduce((acc, o) => acc + o.value, 0);
               const isDropTarget = dragOverStage === stageDef.id;
@@ -971,12 +1006,12 @@ export default function PipesPage() {
               return (
                 <motion.div
                   key={stageDef.id}
-                  variants={scaleIn}
-                  className={`group/col flex w-[85vw] shrink-0 flex-col rounded-[var(--radius-bento-card)] border transition-all duration-150 sm:w-[320px] xl:w-[340px] ${
-                    isDropTarget
-                      ? "border-brand bg-brand/5 ring-2 ring-brand/30"
-                      : "border-transparent bg-zinc-50/80"
-                  }`}
+                  custom={index}
+                  variants={listItemReveal}
+                  className={`group/col flex w-[85vw] shrink-0 flex-col rounded-[var(--radius-bento-card)] border transition-all duration-150 sm:w-[320px] xl:w-[340px] ${isDropTarget
+                    ? "border-brand bg-brand/5 ring-2 ring-brand/30 shadow-[0_0_0_1px_rgba(37,99,235,0.2)]"
+                    : "border-zinc-200/70 bg-white/80"
+                    }`}
                   style={{ scrollSnapAlign: "start" }}
                   onDragOver={(e) => handleDragOver(e, stageDef.id)}
                   onDragLeave={handleDragLeave}
@@ -1015,11 +1050,10 @@ export default function PipesPage() {
                                     onClick={() =>
                                       setStageColor(stageDef.id, color.id)
                                     }
-                                    className={`flex h-6 w-6 items-center justify-center rounded-full transition-all ${color.bg} ${
-                                      isActive
-                                        ? "ring-2 ring-zinc-900 ring-offset-2"
-                                        : "hover:ring-2 hover:ring-zinc-300 hover:ring-offset-1"
-                                    }`}
+                                    className={`flex h-6 w-6 items-center justify-center rounded-full transition-all ${color.bg} ${isActive
+                                      ? "ring-2 ring-zinc-900 ring-offset-2"
+                                      : "hover:ring-2 hover:ring-zinc-300 hover:ring-offset-1"
+                                      }`}
                                     title={color.label}
                                     aria-label={color.label}
                                   >
@@ -1055,7 +1089,7 @@ export default function PipesPage() {
                               startRename(
                                 stageDef.id,
                                 stageCustomizations[stageDef.id]?.label ||
-                                  stageDef.label
+                                stageDef.label
                               )
                             }
                             className="truncate font-heading text-[13px] font-semibold text-black hover:text-brand transition-colors"
@@ -1080,11 +1114,10 @@ export default function PipesPage() {
                     {/* Inline error / regression feedback */}
                     {error && (
                       <div
-                        className={`mt-2 flex items-start gap-1.5 rounded-[var(--radius-bento-inner)] px-2.5 py-2 ${
-                          isRegressionWarning
-                            ? "bg-[var(--feedback-warning-bg)] text-[var(--feedback-warning-text)]"
-                            : "bg-[var(--feedback-error-bg)] text-[var(--feedback-error-text)]"
-                        }`}
+                        className={`mt-2 flex items-start gap-1.5 rounded-[var(--radius-bento-inner)] px-2.5 py-2 ${isRegressionWarning
+                          ? "bg-[var(--feedback-warning-bg)] text-[var(--feedback-warning-text)]"
+                          : "bg-[var(--feedback-error-bg)] text-[var(--feedback-error-text)]"
+                          }`}
                         role="alert"
                       >
                         {isRegressionWarning ? (
@@ -1153,11 +1186,10 @@ export default function PipesPage() {
                                 <div
                                   key={opportunity.id}
                                   data-card-index={idx}
-                                  className={`transition-transform duration-200 ${
-                                    draggingCardId === opportunity.id
-                                      ? "scale-[0.97] opacity-40"
-                                      : ""
-                                  }`}
+                                  className={`transition-transform duration-200 ${draggingCardId === opportunity.id
+                                    ? "scale-[0.97] opacity-40"
+                                    : ""
+                                    }`}
                                 >
                                   <DealCardBento
                                     opportunity={opportunity}
